@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rent Book – UI Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Kannada:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f4f6f8; --card:#fff; --ink:#1b2430; --muted:#5b6675; --line:#d9dfe6;
+    --primary:#1d4ed8; --primary-ink:#fff; --danger:#b42318;
+    --st-pending:#475569;  --st-pending-bg:#e8edf3;
+    --st-completed:#14683a; --st-completed-bg:#d9f5e4;
+    --st-lateCompleted:#0f6b6b; --st-lateCompleted-bg:#d3f3f1;
+    --st-partial:#8a5a00; --st-partial-bg:#fdeec2;
+    --st-partialOverdue:#a14200; --st-partialOverdue-bg:#ffe0c7;
+    --st-overdue:#b42318; --st-overdue-bg:#fde0dd;
+    --st-backlog:#6b21a8; --st-backlog-bg:#ecdcfa;
+    --st-backlogCleared:#1e5aa8; --st-backlogCleared-bg:#dbe9fb;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;font-family:'Noto Sans','Noto Sans Kannada',system-ui,sans-serif;font-size:18px;color:var(--ink);background:#dfe4ea;min-height:100vh;display:flex;gap:32px;justify-content:center;align-items:flex-start;padding:24px}
+  .side{width:260px;font-size:15px;color:#33404f;background:#fff;border-radius:16px;padding:16px;position:sticky;top:24px}
+  .side h2{margin:0 0 8px;font-size:17px}
+  .side label{display:block;margin:12px 0 4px;font-weight:600}
+  .side input{width:100%;padding:8px;font-size:15px;border:1px solid var(--line);border-radius:8px}
+  .side button{margin-top:12px;padding:8px 12px;font-size:14px;border-radius:8px;border:1px solid var(--line);background:#f4f6f8;cursor:pointer}
+  .side p{margin:10px 0 0;line-height:1.4}
+
+  .phone{position:relative;width:390px;height:800px;border:10px solid #111;border-radius:42px;overflow:hidden;display:flex;flex-direction:column;background:var(--bg);box-shadow:0 20px 50px rgba(0,0,0,.25)}
+  header.top{display:flex;align-items:center;gap:8px;padding:10px 12px;background:#fff;border-bottom:1px solid var(--line);min-height:68px}
+  header.top .title{flex:1;font-size:21px;font-weight:700;line-height:1.2;user-select:none}
+  .icon-btn{min-width:48px;min-height:48px;border-radius:14px;border:2px solid var(--line);background:#fff;font-size:18px;font-weight:700;color:var(--ink);cursor:pointer;padding:0 10px;font-family:inherit}
+  .icon-btn.lang{background:#eef3ff;border-color:#b9ccff;color:var(--primary)}
+  .icon-btn.back{font-size:20px}
+  main.screen{flex:1;overflow-y:auto;padding:16px 16px 28px}
+  nav.bottom{display:flex;background:#fff;border-top:1px solid var(--line)}
+  nav.bottom button{flex:1;min-height:64px;border:0;background:#fff;font-family:inherit;font-size:15px;font-weight:600;color:var(--muted);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+  nav.bottom button .ic{font-size:24px}
+  nav.bottom button.on{color:var(--primary);box-shadow:inset 0 3px 0 var(--primary)}
+
+  .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:56px;padding:10px 16px;border-radius:16px;border:2px solid var(--primary);background:var(--primary);color:var(--primary-ink);font-size:20px;font-weight:700;font-family:inherit;cursor:pointer;margin-top:12px;text-align:center}
+  .btn.secondary{background:#fff;color:var(--primary)}
+  .btn.danger{background:#fff;color:var(--danger);border-color:var(--danger)}
+  .btn.small{min-height:48px;font-size:17px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 16px;margin-top:12px}
+  .card.tap{cursor:pointer;display:block;width:100%;text-align:left;font-family:inherit;color:inherit;font-size:inherit}
+  .card.tap:active{background:#eef3ff}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .name{font-size:21px;font-weight:700}
+  .sub{font-size:16px;color:var(--muted);margin-top:2px}
+  h2.sec{font-size:19px;margin:22px 0 0}
+  .tip{background:#fff8dc;border:1px solid #f0dc8a;border-radius:14px;padding:10px 12px;font-size:16px;margin-bottom:4px}
+  .sum{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .sum .box{border-radius:18px;padding:12px 14px}
+  .sum .lbl{font-size:15px;font-weight:600}
+  .sum .val{font-size:26px;font-weight:700;margin-top:2px}
+  .box.green{background:var(--st-completed-bg);color:var(--st-completed)}
+  .box.amber{background:var(--st-partial-bg);color:var(--st-partial)}
+
+  .chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;font-size:16px;font-weight:700;white-space:nowrap}
+  .chip.pending{background:var(--st-pending-bg);color:var(--st-pending)}
+  .chip.completed{background:var(--st-completed-bg);color:var(--st-completed)}
+  .chip.lateCompleted{background:var(--st-lateCompleted-bg);color:var(--st-lateCompleted)}
+  .chip.partial{background:var(--st-partial-bg);color:var(--st-partial)}
+  .chip.partialOverdue{background:var(--st-partialOverdue-bg);color:var(--st-partialOverdue)}
+  .chip.overdue{background:var(--st-overdue-bg);color:var(--st-overdue)}
+  .chip.backlog{background:var(--st-backlog-bg);color:var(--st-backlog)}
+  .chip.backlogCleared{background:var(--st-backlogCleared-bg);color:var(--st-backlogCleared)}
+  .olddue{display:inline-block;margin-top:6px;font-size:15px;font-weight:700;color:var(--st-backlog)}
+
+  label.f{display:block;font-weight:700;margin-top:18px}
+  .hint{font-size:15px;color:var(--muted);margin:2px 0 6px}
+  input.in,select.in{width:100%;min-height:56px;font-size:20px;padding:8px 12px;border:2px solid #aab4c0;border-radius:14px;background:#fff;font-family:inherit;color:var(--ink)}
+  input.in:focus,select.in:focus{outline:3px solid #9db8ff;border-color:var(--primary)}
+  .err{color:var(--danger);font-weight:700;font-size:16px;margin-top:6px}
+  .ok{color:var(--st-completed);font-weight:700;font-size:16px;margin-top:8px}
+  .info{background:#eef3ff;border:1px solid #c5d5ff;border-radius:14px;padding:10px 12px;font-size:16px;margin-top:12px}
+
+  .bar{height:12px;background:#e5e9ef;border-radius:99px;overflow:hidden;margin:10px 0 6px}
+  .bar i{display:block;height:100%;border-radius:99px;background:var(--primary)}
+  .hist{padding:10px 0;border-bottom:1px solid var(--line)}
+  .hist:last-child{border-bottom:0}
+  .hist .m{font-weight:700}
+
+  .choice{display:flex;align-items:center;gap:12px;width:100%;min-height:60px;padding:10px 14px;border:2px solid var(--line);border-radius:16px;background:#fff;font-size:20px;font-weight:700;font-family:inherit;cursor:pointer;margin-top:10px;color:var(--ink)}
+  .choice.on{border-color:var(--primary);background:#eef3ff;color:var(--primary)}
+  .dot{width:24px;height:24px;border-radius:50%;border:3px solid #aab4c0;flex:none}
+  .choice.on .dot{border-color:var(--primary);background:radial-gradient(var(--primary) 45%,transparent 50%)}
+  .switch{width:60px;height:34px;border-radius:99px;background:#b7c0cb;position:relative;flex:none;border:0;cursor:pointer}
+  .switch::after{content:"";position:absolute;top:4px;left:4px;width:26px;height:26px;border-radius:50%;background:#fff;transition:.15s}
+  .switch.on{background:var(--primary)}
+  .switch.on::after{left:30px}
+
+  .overlay{position:absolute;inset:0;background:rgba(10,20,35,.55);display:flex;align-items:center;justify-content:center;padding:20px;z-index:20}
+  .dialog{background:#fff;border-radius:22px;padding:20px;width:100%;max-height:90%;overflow:auto}
+  .dialog h3{margin:0 0 8px;font-size:22px}
+  .dialog p{margin:8px 0;line-height:1.45}
+  .legend{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+  .legend div{font-size:16px;line-height:1.35}
+  .toast{position:absolute;left:12px;right:12px;bottom:84px;background:#1b2430;color:#fff;border-radius:16px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:700;z-index:30}
+  .toast button{background:#fff;color:#1b2430;border:0;border-radius:10px;min-height:44px;padding:0 14px;font-size:17px;font-weight:700;font-family:inherit;cursor:pointer}
+  .empty{text-align:center;color:var(--muted);padding:30px 10px;line-height:1.5}
+  .welcome{display:flex;flex-direction:column;height:100%;justify-content:center;text-align:center;padding:10px}
+  .welcome .big{font-size:84px;margin-bottom:8px}
+  .welcome h1{margin:0 0 10px;font-size:30px}
+  .welcome p{font-size:20px;line-height:1.5;color:var(--muted);margin:0 0 20px}
+  .dots{display:flex;justify-content:center;gap:8px;margin:6px 0 10px}
+  .dots i{width:12px;height:12px;border-radius:50%;background:#c3ccd7}
+  .dots i.on{background:var(--primary)}
+  .banner{background:#ecdcfa;color:#4b1478;border-radius:14px;padding:10px 12px;font-weight:700;font-size:16px}
+
+  @media (max-width:760px){
+    body{padding:0;display:block;background:var(--bg)}
+    .side{display:none}
+    .phone{width:100vw;height:100vh;border:0;border-radius:0;box-shadow:none}
+  }
+</style>
+</head>
+<body>
+
+<aside class="side">
+  <h2>Mockup controls</h2>
+  <p>This is a design preview. Nothing is saved to a server.</p>
+  <label for="demoDate">Pretend today is:</label>
+  <input type="date" id="demoDate" onchange="setToday(this.value)">
+  <p>Change the date to see how the status tags change (for example, move past the due day or past month end).</p>
+  <button onclick="resetDemo()">Reset sample data</button>
+</aside>
+
+<div class="phone" id="phone"></div>
+
+<script>
+/* =========================== TRANSLATIONS =========================== */
+const T = {
+en: {
+  appName:"Rent Book", langBtn:"ಕನ್ನಡ", help:"?", back:"Back", close:"OK",
+  nav_home:"Home", nav_add:"Add", nav_settings:"Settings",
+  thisMonth:"This month – {m}", collected:"Money received", toCollect:"Still to receive",
+  tenants:"Tenants", sortNote:"People who need attention are at the top.",
+  noTenants:"No tenants yet. Tap the big blue button to add your first tenant.",
+  addTenantBtn:"+ Add a tenant", rentPerMonth:"₹{a} per month", dueOn:"Pay by {d}", oldDues:"Old dues: ₹{a}",
+  addTitle:"Add a tenant",
+  f_name:"Tenant's name", f_name_h:"Type the person's name.",
+  f_rent:"Rent per month (₹)", f_rent_h:"Numbers only, for example 8000.",
+  f_due:"Pay by which day of the month?", f_due_h:"If rent is not paid by this day, it is shown as late.",
+  f_start:"Starting month", f_start_h:"The first month you want to keep a record for.",
+  err_name:"Please type a name.", err_rent:"Please type the rent amount (a number more than 0).",
+  save:"Save", cancel:"Cancel", undo:"Undo", tenantAdded:"{n} added ",
+  received:"Received ₹{p} of ₹{r}", balance:"Balance: ₹{a}", dueDate:"Pay by {d}",
+  btn_payOld:"Record old dues received", btn_payMonth:"Record money for this month", pay_month_h:"To pay old dues, choose an older month from the list.",
+  btn_pay:"Money received", btn_rent:"Change rent", btn_delete:"Remove this tenant",
+  history:"Earlier months", noHistory:"No earlier months yet.",
+  pendingRentNote:"From {m}, rent will be ₹{a}.", extraNote:"Extra ₹{a} received (noted only).",
+  pay_title:"Money received", pay_amount:"How much did you receive? (₹)", pay_full:"Fill the full balance (₹{a})",
+  pay_date:"On which date?", pay_month:"For which month?",
+  pay_after:"After this, the balance will be ₹{a}.", pay_afterDone:"After this, the month is fully paid ",
+  pay_extra:"₹{a} extra will be noted. It is not added to next month.",
+  err_amount:"Please type an amount more than 0.", paymentSaved:"₹{a} saved ",
+  rent_title:"Change rent", rent_current:"Current rent: ₹{a}", rent_new:"New rent per month (₹)",
+  rent_notice:"This applies from {m}. {c} stays at ₹{a}.",
+  rent_up:"Rent goes up by ₹{a}", rent_down:"Rent goes down by ₹{a}", rent_same:"This is the same as the current rent.",
+  rentSaved:"Rent will change from {m} ",
+  del_title:"Remove {n}?", del_body:"{n} will be moved to the archive. Nothing is erased. All records are kept safely.",
+  del_owed:"Please note: ₹{a} is still unpaid.", del_yes:"Yes, remove", del_no:"No, keep", removed:"{n} removed",
+  set_title:"Settings", set_lang:"Language", set_tips:"Show tips", set_welcome:"Show the welcome guide again", set_about:"About", version:"Version 1.0",
+  arch_title:"Archive", arch_note:"Removed tenants are kept here. You can only look, you cannot change anything.",
+  arch_removedOn:"Removed in {m}", arch_empty:"The archive is empty.",
+  w1_t:"Welcome!", w1_b:"This app helps you remember who has paid rent and who has not.",
+  w2_t:"Add your tenants", w2_b:"Type the name and the monthly rent. That is all.",
+  w3_t:"Write down money received", w3_b:"When a tenant pays, tap their name and type the amount. The app shows the rest with colours and words.",
+  next:"Next", skip:"Skip", start:"Let's start",
+  help_home:"Tap a tenant's name to see details or to write down money received. The coloured tags show who has paid.",
+  help_add:"Fill the three boxes and press Save. You can change the rent later.",
+  help_detail:"Here you see every month for this tenant. Press the blue button when money is received.",
+  help_pay:"Type how much money you received and press Save. If you made a mistake, press Undo right after.",
+  help_rent:"The new rent starts from next month. This month's rent does not change.",
+  help_settings:"Change the language here. Choose English or ಕನ್ನಡ.",
+  help_archive:"Removed tenants are kept here for your records. You can only look.",
+  legendTitle:"What do the tags mean?",
+  st_pending:"Pending", st_completed:"Paid on time", st_lateCompleted:"Paid late", st_partial:"Part paid",
+  st_partialOverdue:"Part paid, late", st_overdue:"Overdue", st_backlog:"Old due", st_backlogCleared:"Old due paid",
+  sd_pending:"Nothing paid yet, but there is still time.",
+  sd_completed:"Fully paid on or before the last day.",
+  sd_lateCompleted:"Fully paid after the last day, but within the month.",
+  sd_partial:"Some money received. The last day has not come yet.",
+  sd_partialOverdue:"Only some money received and the last day has passed.",
+  sd_overdue:"Nothing received and the last day has passed.",
+  sd_backlog:"The month ended and the full rent was not received.",
+  sd_backlogCleared:"The full rent was received after the month had ended."
+},
+kn: {
+  appName:"ಬಾಡಿಗೆ ಲೆಕ್ಕ", langBtn:"English", help:"?", back:"ಹಿಂದೆ", close:"ಸರಿ",
+  nav_home:"ಮುಖಪುಟ", nav_add:"ಸೇರಿಸಿ", nav_settings:"ಸೆಟ್ಟಿಂಗ್ಸ್",
+  thisMonth:"ಈ ತಿಂಗಳು – {m}", collected:"ಬಂದ ಹಣ", toCollect:"ಇನ್ನೂ ಬರಬೇಕು",
+  tenants:"ಬಾಡಿಗೆದಾರರು", sortNote:"ಗಮನ ಬೇಕಾದವರು ಮೇಲೆ ಇದ್ದಾರೆ.",
+  noTenants:"ಇನ್ನೂ ಯಾರೂ ಇಲ್ಲ. ಮೊದಲ ಬಾಡಿಗೆದಾರರನ್ನು ಸೇರಿಸಲು ದೊಡ್ಡ ನೀಲಿ ಬಟನ್ ಒತ್ತಿ.",
+  addTenantBtn:"+ ಬಾಡಿಗೆದಾರರನ್ನು ಸೇರಿಸಿ", rentPerMonth:"ತಿಂಗಳಿಗೆ ₹{a}", dueOn:"{d} ರೊಳಗೆ ಕೊಡಬೇಕು", oldDues:"ಹಳೆಯ ಬಾಕಿ: ₹{a}",
+  addTitle:"ಬಾಡಿಗೆದಾರರನ್ನು ಸೇರಿಸಿ",
+  f_name:"ಬಾಡಿಗೆದಾರರ ಹೆಸರು", f_name_h:"ವ್ಯಕ್ತಿಯ ಹೆಸರು ಬರೆಯಿರಿ.",
+  f_rent:"ತಿಂಗಳ ಬಾಡಿಗೆ (₹)", f_rent_h:"ಅಂಕೆಗಳನ್ನು ಮಾತ್ರ ಬರೆಯಿರಿ, ಉದಾ: 8000.",
+  f_due:"ತಿಂಗಳ ಯಾವ ದಿನದೊಳಗೆ ಹಣ ಕೊಡಬೇಕು?", f_due_h:"ಈ ದಿನದೊಳಗೆ ಹಣ ಬರದಿದ್ದರೆ 'ತಡ' ಎಂದು ತೋರಿಸಲಾಗುತ್ತದೆ.",
+  f_start:"ಪ್ರಾರಂಭದ ತಿಂಗಳು", f_start_h:"ಯಾವ ತಿಂಗಳಿಂದ ಲೆಕ್ಕ ಇಡಬೇಕು.",
+  err_name:"ದಯವಿಟ್ಟು ಹೆಸರು ಬರೆಯಿರಿ.", err_rent:"ದಯವಿಟ್ಟು ಬಾಡಿಗೆ ಮೊತ್ತ ಬರೆಯಿರಿ (0 ಕ್ಕಿಂತ ಹೆಚ್ಚು).",
+  save:"ಉಳಿಸಿ", cancel:"ರದ್ದು ಮಾಡಿ", undo:"ಹಿಂದಕ್ಕೆ", tenantAdded:"{n} ಸೇರಿಸಲಾಗಿದೆ ",
+  received:"₹{r} ರಲ್ಲಿ ₹{p} ಬಂದಿದೆ", balance:"ಬಾಕಿ: ₹{a}", dueDate:"{d} ರೊಳಗೆ ಕೊಡಬೇಕು",
+  btn_payOld:"ಹಳೆಯ ಬಾಕಿ ಬಂದ ಹಣ ಬರೆಯಿರಿ", btn_payMonth:"ಈ ತಿಂಗಳಿಗೆ ಹಣ ಬರೆಯಿರಿ", pay_month_h:"ಹಳೆಯ ಬಾಕಿ ಕೊಡಲು ಪಟ್ಟಿಯಿಂದ ಹಳೆಯ ತಿಂಗಳನ್ನು ಆರಿಸಿ.",
+  btn_pay:"ಬಂದ ಹಣ ಬರೆಯಿರಿ", btn_rent:"ಬಾಡಿಗೆ ಬದಲಿಸಿ", btn_delete:"ಈ ಬಾಡಿಗೆದಾರರನ್ನು ತೆಗೆಯಿರಿ",
+  history:"ಹಿಂದಿನ ತಿಂಗಳುಗಳು", noHistory:"ಹಿಂದಿನ ತಿಂಗಳುಗಳು ಇನ್ನೂ ಇಲ್ಲ.",
+  pendingRentNote:"{m} ತಿಂಗಳಿನಿಂದ ಬಾಡಿಗೆ ₹{a} ಆಗುತ್ತದೆ.", extraNote:"ಹೆಚ್ಚುವರಿ ₹{a} ಬಂದಿದೆ (ಬರೆದಿಡಲಾಗಿದೆ ಅಷ್ಟೇ).",
+  pay_title:"ಬಂದ ಹಣ", pay_amount:"ಎಷ್ಟು ಹಣ ಬಂದಿದೆ? (₹)", pay_full:"ಪೂರ್ಣ ಬಾಕಿ ತುಂಬಿ (₹{a})",
+  pay_date:"ಯಾವ ದಿನಾಂಕದಂದು?", pay_month:"ಯಾವ ತಿಂಗಳಿಗೆ?",
+  pay_after:"ಇದರ ನಂತರ ಬಾಕಿ ₹{a} ಇರುತ್ತದೆ.", pay_afterDone:"ಇದರ ನಂತರ ಈ ತಿಂಗಳ ಬಾಡಿಗೆ ಪೂರ್ಣವಾಗಿ ಬಂದಿರುತ್ತದೆ ",
+  pay_extra:"₹{a} ಹೆಚ್ಚುವರಿ ಎಂದು ಬರೆದಿಡಲಾಗುತ್ತದೆ. ಮುಂದಿನ ತಿಂಗಳಿಗೆ ಸೇರಿಸುವುದಿಲ್ಲ.",
+  err_amount:"ದಯವಿಟ್ಟು 0 ಕ್ಕಿಂತ ಹೆಚ್ಚು ಮೊತ್ತ ಬರೆಯಿರಿ.", paymentSaved:"₹{a} ಉಳಿಸಲಾಗಿದೆ ",
+  rent_title:"ಬಾಡಿಗೆ ಬದಲಿಸಿ", rent_current:"ಈಗಿನ ಬಾಡಿಗೆ: ₹{a}", rent_new:"ಹೊಸ ತಿಂಗಳ ಬಾಡಿಗೆ (₹)",
+  rent_notice:"ಇದು {m} ತಿಂಗಳಿನಿಂದ ಅನ್ವಯವಾಗುತ್ತದೆ. {c} ತಿಂಗಳ ಬಾಡಿಗೆ ₹{a} ಆಗಿಯೇ ಇರುತ್ತದೆ.",
+  rent_up:"ಬಾಡಿಗೆ ₹{a} ಹೆಚ್ಚಾಗುತ್ತದೆ", rent_down:"ಬಾಡಿಗೆ ₹{a} ಕಡಿಮೆಯಾಗುತ್ತದೆ", rent_same:"ಇದು ಈಗಿನ ಬಾಡಿಗೆಯಷ್ಟೇ ಇದೆ.",
+  rentSaved:"{m} ನಿಂದ ಬಾಡಿಗೆ ಬದಲಾಗುತ್ತದೆ ",
+  del_title:"{n} ಅವರನ್ನು ತೆಗೆಯಬೇಕೇ?", del_body:"{n} ಅವರನ್ನು ಆರ್ಕೈವ್‌ಗೆ ಸರಿಸಲಾಗುತ್ತದೆ. ಏನೂ ಅಳಿಸಲ್ಪಡುವುದಿಲ್ಲ. ಎಲ್ಲಾ ಲೆಕ್ಕ ಸುರಕ್ಷಿತವಾಗಿ ಇರುತ್ತದೆ.",
+  del_owed:"ಗಮನಿಸಿ: ₹{a} ಇನ್ನೂ ಬಾಕಿ ಇದೆ.", del_yes:"ಹೌದು, ತೆಗೆಯಿರಿ", del_no:"ಇಲ್ಲ, ಇರಲಿ", removed:"{n} ಅವರನ್ನು ತೆಗೆಯಲಾಗಿದೆ",
+  set_title:"ಸೆಟ್ಟಿಂಗ್ಸ್", set_lang:"ಭಾಷೆ", set_tips:"ಸಲಹೆಗಳನ್ನು ತೋರಿಸಿ", set_welcome:"ಸ್ವಾಗತ ಮಾರ್ಗದರ್ಶನ ಮತ್ತೆ ತೋರಿಸಿ", set_about:"ಬಗ್ಗೆ", version:"ಆವೃತ್ತಿ 1.0",
+  arch_title:"ಆರ್ಕೈವ್", arch_note:"ತೆಗೆದ ಬಾಡಿಗೆದಾರರು ಇಲ್ಲಿ ಇರುತ್ತಾರೆ. ನೋಡಬಹುದು, ಏನನ್ನೂ ಬದಲಿಸಲು ಆಗುವುದಿಲ್ಲ.",
+  arch_removedOn:"{m} ರಲ್ಲಿ ತೆಗೆಯಲಾಗಿದೆ", arch_empty:"ಆರ್ಕೈವ್ ಖಾಲಿ ಇದೆ.",
+  w1_t:"ಸ್ವಾಗತ!", w1_b:"ಯಾರು ಬಾಡಿಗೆ ಕೊಟ್ಟಿದ್ದಾರೆ, ಯಾರು ಕೊಟ್ಟಿಲ್ಲ ಎಂದು ನೆನಪಿಡಲು ಈ ಆಪ್ ಸಹಾಯ ಮಾಡುತ್ತದೆ.",
+  w2_t:"ಬಾಡಿಗೆದಾರರನ್ನು ಸೇರಿಸಿ", w2_b:"ಹೆಸರು ಮತ್ತು ತಿಂಗಳ ಬಾಡಿಗೆ ಬರೆಯಿರಿ. ಅಷ್ಟೇ.",
+  w3_t:"ಬಂದ ಹಣ ಬರೆಯಿರಿ", w3_b:"ಬಾಡಿಗೆದಾರರು ಹಣ ಕೊಟ್ಟಾಗ ಅವರ ಹೆಸರನ್ನು ಒತ್ತಿ ಮೊತ್ತ ಬರೆಯಿರಿ. ಉಳಿದದ್ದನ್ನು ಆಪ್ ಬಣ್ಣ ಮತ್ತು ಪದಗಳಲ್ಲಿ ತೋರಿಸುತ್ತದೆ.",
+  next:"ಮುಂದೆ", skip:"ಬಿಟ್ಟುಬಿಡಿ", start:"ಶುರು ಮಾಡೋಣ",
+  help_home:"ಬಾಡಿಗೆದಾರರ ಹೆಸರನ್ನು ಒತ್ತಿದರೆ ಅವರ ವಿವರ ಕಾಣುತ್ತದೆ, ಅಲ್ಲಿ ಬಂದ ಹಣ ಬರೆಯಬಹುದು. ಬಣ್ಣದ ಲೇಬಲ್‌ಗಳು ಯಾರು ಕೊಟ್ಟಿದ್ದಾರೆ ಎಂದು ತೋರಿಸುತ್ತವೆ.",
+  help_add:"ಮೂರು ಬಾಕ್ಸ್‌ಗಳನ್ನು ತುಂಬಿ 'ಉಳಿಸಿ' ಒತ್ತಿ. ಬಾಡಿಗೆಯನ್ನು ನಂತರ ಬದಲಿಸಬಹುದು.",
+  help_detail:"ಇಲ್ಲಿ ಈ ಬಾಡಿಗೆದಾರರ ಪ್ರತಿ ತಿಂಗಳ ವಿವರ ಇದೆ. ಹಣ ಬಂದಾಗ ನೀಲಿ ಬಟನ್ ಒತ್ತಿ.",
+  help_pay:"ಎಷ್ಟು ಹಣ ಬಂದಿದೆ ಎಂದು ಬರೆದು 'ಉಳಿಸಿ' ಒತ್ತಿ. ತಪ್ಪಾದರೆ ತಕ್ಷಣ 'ಹಿಂದಕ್ಕೆ' ಒತ್ತಿ.",
+  help_rent:"ಹೊಸ ಬಾಡಿಗೆ ಮುಂದಿನ ತಿಂಗಳಿಂದ ಶುರುವಾಗುತ್ತದೆ. ಈ ತಿಂಗಳ ಬಾಡಿಗೆ ಬದಲಾಗುವುದಿಲ್ಲ.",
+  help_settings:"ಇಲ್ಲಿ ಭಾಷೆ ಬದಲಿಸಬಹುದು. English ಅಥವಾ ಕನ್ನಡ ಆಯ್ಕೆಮಾಡಿ.",
+  help_archive:"ತೆಗೆದ ಬಾಡಿಗೆದಾರರು ನಿಮ್ಮ ದಾಖಲೆಗಾಗಿ ಇಲ್ಲಿ ಇರುತ್ತಾರೆ. ನೋಡಬಹುದು ಅಷ್ಟೇ.",
+  legendTitle:"ಲೇಬಲ್‌ಗಳ ಅರ್ಥವೇನು?",
+  st_pending:"ಕಾಯುತ್ತಿದೆ", st_completed:"ಸಮಯಕ್ಕೆ ಪೂರ್ಣ", st_lateCompleted:"ತಡವಾಗಿ ಪೂರ್ಣ", st_partial:"ಸ್ವಲ್ಪ ಬಂದಿದೆ",
+  st_partialOverdue:"ಸ್ವಲ್ಪ ಬಂದಿದೆ, ತಡ", st_overdue:"ತಡವಾಗಿದೆ", st_backlog:"ಹಳೆಯ ಬಾಕಿ", st_backlogCleared:"ಹಳೆಯ ಬಾಕಿ ಬಂದಿದೆ",
+  sd_pending:"ಇನ್ನೂ ಹಣ ಬಂದಿಲ್ಲ, ಆದರೆ ಇನ್ನೂ ಸಮಯ ಇದೆ.",
+  sd_completed:"ಕೊನೆಯ ದಿನದೊಳಗೆ ಪೂರ್ತಿ ಹಣ ಬಂದಿದೆ.",
+  sd_lateCompleted:"ಕೊನೆಯ ದಿನದ ನಂತರ, ಆದರೆ ತಿಂಗಳೊಳಗೆ ಪೂರ್ತಿ ಹಣ ಬಂದಿದೆ.",
+  sd_partial:"ಸ್ವಲ್ಪ ಹಣ ಬಂದಿದೆ. ಕೊನೆಯ ದಿನ ಇನ್ನೂ ಬಂದಿಲ್ಲ.",
+  sd_partialOverdue:"ಸ್ವಲ್ಪ ಹಣ ಮಾತ್ರ ಬಂದಿದೆ, ಕೊನೆಯ ದಿನ ಮುಗಿದಿದೆ.",
+  sd_overdue:"ಒಂದು ರೂಪಾಯಿಯೂ ಬಂದಿಲ್ಲ, ಕೊನೆಯ ದಿನ ಮುಗಿದಿದೆ.",
+  sd_backlog:"ತಿಂಗಳು ಮುಗಿದರೂ ಪೂರ್ತಿ ಬಾಡಿಗೆ ಬಂದಿಲ್ಲ.",
+  sd_backlogCleared:"ತಿಂಗಳು ಮುಗಿದ ನಂತರ ಪೂರ್ತಿ ಬಾಡಿಗೆ ಬಂದಿದೆ."
+}
+};
+const MONTHS = {
+  en:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
+  kn:["ಜನವರಿ","ಫೆಬ್ರವರಿ","ಮಾರ್ಚ್","ಏಪ್ರಿಲ್","ಮೇ","ಜೂನ್","ಜುಲೈ","ಆಗಸ್ಟ್","ಸೆಪ್ಟೆಂಬರ್","ಅಕ್ಟೋಬರ್","ನವೆಂಬರ್","ಡಿಸೆಂಬರ್"]
+};
+const RANK = {overdue:0,partialOverdue:1,partial:2,pending:3,lateCompleted:4,completed:5,backlog:1,backlogCleared:5};
+
+/* =========================== DATE HELPERS (all 'YYYY-MM-DD' strings, no timezone surprises) =========================== */
+const pad = n => String(n).padStart(2,"0");
+const ymOf = d => d.slice(0,7);
+const daysIn = ym => new Date(+ym.slice(0,4), +ym.slice(5,7), 0).getDate();
+const dueDateOf = (ym,day) => `${ym}-${pad(Math.min(day,daysIn(ym)))}`;
+const endOf = ym => `${ym}-${pad(daysIn(ym))}`;
+const addMonth = (ym,n) => { const d = new Date(+ym.slice(0,4), +ym.slice(5,7)-1+n, 1); return `${d.getFullYear()}-${pad(d.getMonth()+1)}`; };
+const monthName = ym => (S.lang==="kn" ? MONTHS.kn : MONTHS.en)[+ym.slice(5,7)-1] + " " + ym.slice(0,4);
+const dayMonth = d => `${+d.slice(8,10)} ${(S.lang==="kn" ? MONTHS.kn : MONTHS.en)[+d.slice(5,7)-1]}`;
+const num = n => Math.round(n).toLocaleString("en-IN");
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* =========================== STATE RULES (from specs.md) =========================== */
+function paidAsOf(m, today){ return m.payments.filter(p => p.date <= today).reduce((s,p)=>s+p.amount,0); }
+function computeState(m, dueDay, today){
+  const paid = paidAsOf(m, today), req = m.required;
+  const due = dueDateOf(m.ym, dueDay), end = endOf(m.ym);
+  if (paid >= req){
+    let run = 0, reached = "";
+    for (const p of m.payments.filter(p=>p.date<=today).sort((a,b)=>a.date<b.date?-1:1)){ run += p.amount; if (run >= req){ reached = p.date; break; } }
+    if (reached <= due) return "completed";
+    if (reached <= end) return "lateCompleted";
+    return "backlogCleared";
+  }
+  if (today > end) return "backlog";
+  if (today > due) return paid === 0 ? "overdue" : "partialOverdue";
+  return paid === 0 ? "pending" : "partial";
+}
+
+/* =========================== SAMPLE DATA =========================== */
+function sampleData(){
+  const P = (date,amount)=>({date,amount});
+  return {
+    tenants:[
+      {id:1,name:"Ramesh Kumar",dueDay:15,rent:8000,pendingRent:null,start:"2026-08",months:[
+        {ym:"2026-08",required:8000,payments:[P("2026-08-10",8000)]},
+        {ym:"2026-09",required:8000,payments:[P("2026-09-14",8000)]},
+        {ym:"2026-10",required:8000,payments:[]}]},
+      {id:2,name:"Lakshmi Devi",dueDay:5,rent:6500,pendingRent:null,start:"2026-07",months:[
+        {ym:"2026-07",required:6500,payments:[P("2026-07-03",6500)]},
+        {ym:"2026-08",required:6500,payments:[P("2026-08-04",6500)]},
+        {ym:"2026-09",required:6500,payments:[P("2026-09-05",6500)]},
+        {ym:"2026-10",required:6500,payments:[P("2026-10-03",6500)]}]},
+      {id:3,name:"Suresh Gowda",dueDay:5,rent:12000,pendingRent:null,start:"2026-09",months:[
+        {ym:"2026-09",required:12000,payments:[P("2026-09-04",12000)]},
+        {ym:"2026-10",required:12000,payments:[P("2026-10-09",12000)]}]},
+      {id:4,name:"Anita Rao",dueDay:20,rent:7000,pendingRent:null,start:"2026-09",months:[
+        {ym:"2026-09",required:7000,payments:[P("2026-09-18",7000)]},
+        {ym:"2026-10",required:7000,payments:[P("2026-10-06",3000)]}]},
+      {id:5,name:"Manjunath S",dueDay:5,rent:5500,pendingRent:null,start:"2026-08",months:[
+        {ym:"2026-08",required:5500,payments:[P("2026-08-04",3000),P("2026-09-12",2500)]},
+        {ym:"2026-09",required:5500,payments:[P("2026-09-05",5500)]},
+        {ym:"2026-10",required:5500,payments:[P("2026-10-02",2000)]}]},
+      {id:6,name:"Farida Begum",dueDay:5,rent:9000,pendingRent:null,start:"2026-08",months:[
+        {ym:"2026-08",required:9000,payments:[P("2026-08-03",9000)]},
+        {ym:"2026-09",required:9000,payments:[P("2026-09-06",4000)]},
+        {ym:"2026-10",required:9000,payments:[]}]}
+    ],
+    archived:[
+      {id:7,name:"Venkatesh Murthy",dueDay:10,rent:7500,pendingRent:null,start:"2026-04",removedOn:"2026-06",months:[
+        {ym:"2026-04",required:7500,payments:[P("2026-04-08",7500)]},
+        {ym:"2026-05",required:7500,payments:[P("2026-05-09",7500)]},
+        {ym:"2026-06",required:7500,payments:[P("2026-06-10",7500)]}]}
+    ],
+    nextId:8
+  };
+}
+
+/* =========================== APP STATE =========================== */
+const S = Object.assign({
+  lang: localStorage.getItem("rb_lang") || "en",
+  tips: localStorage.getItem("rb_tips") !== "off",
+  today: "2026-10-12",
+  screen: localStorage.getItem("rb_seenWelcome") ? "home" : "welcome",
+  param: null, stack: [], wstep: 0, f: {}, err: "", toast: null, dialog: null, taps: 0
+}, sampleData());
+
+const t = (k, v={}) => { let s = (T[S.lang][k] ?? T.en[k] ?? k); for (const x in v) s = s.split("{"+x+"}").join(v[x]); return s; };
+const curYm = () => ymOf(S.today);
+const findTenant = id => S.tenants.find(x=>x.id===id) || S.archived.find(x=>x.id===id);
+
+function ensureMonths(tn){
+  const cur = curYm();
+  let last = tn.months[tn.months.length-1].ym;
+  while (last < cur){
+    last = addMonth(last,1);
+    if (tn.pendingRent && last >= tn.pendingRent.from){ tn.rent = tn.pendingRent.amount; tn.pendingRent = null; }
+    tn.months.push({ym:last, required:tn.rent, payments:[]});
+  }
+}
+const visibleMonths = tn => tn.months.filter(m => m.ym <= curYm() && m.ym >= tn.start);
+const monthOf = (tn, ym) => tn.months.find(m=>m.ym===ym);
+const stateOf = (tn, m) => computeState(m, tn.dueDay, S.today);
+const remaining = (m) => Math.max(0, m.required - paidAsOf(m, S.today));
+function oldDues(tn){ return visibleMonths(tn).filter(m=>m.ym<curYm()).reduce((s,m)=>s+remaining(m),0); }
+
+/* =========================== NAVIGATION =========================== */
+function go(screen, param=null, opts={}){
+  if (opts.reset) S.stack = []; else S.stack.push({screen:S.screen, param:S.param});
+  S.screen = screen; S.param = param; S.err = "";
+  if (screen==="add") S.f = {name:"", rent:"", due:"5", start:curYm()};
+  if (screen==="pay") initPay(param);
+  if (screen==="rent") S.f = {rent:""};
+  render(); const m = document.querySelector("main.screen"); if (m) m.scrollTop = 0;
+}
+function back(){ const p = S.stack.pop(); S.screen = p ? p.screen : "home"; S.param = p ? p.param : null; S.err=""; render(); }
+function tab(name){ go(name, null, {reset:true}); }
+
+/* =========================== SMALL PIECES =========================== */
+const chip = st => `<span class="chip ${st}">${t("st_"+st)}</span>`;
+const tip = k => S.tips ? `<div class="tip"> ${t(k)}</div>` : "";
+function setLang(l){ S.lang = l; localStorage.setItem("rb_lang", l); document.documentElement.lang = l; render(); }
+function toggleLang(){ setLang(S.lang==="en" ? "kn" : "en"); }
+function toast(msg, undo){ S.toast = {msg, undo}; clearTimeout(S.toastT); S.toastT = setTimeout(()=>{S.toast=null; render();}, undo?7000:2800); }
+function setToday(v){ if (v){ S.today = v; render(); } }
+function resetDemo(){ Object.assign(S, sampleData(), {stack:[], screen:"home", param:null, toast:null, dialog:null}); render(); }
+
+/* =========================== SCREENS =========================== */
+function screenHome(){
+  S.tenants.forEach(ensureMonths);
+  const rows = S.tenants.map(tn => { const m = monthOf(tn, curYm()); return {tn, m, st:stateOf(tn,m), old:oldDues(tn)}; });
+  rows.sort((a,b)=> (RANK[a.st] - (a.old>0?0.5:0)) - (RANK[b.st] - (b.old>0?0.5:0)) || a.tn.name.localeCompare(b.tn.name));
+  const got = rows.reduce((s,r)=>s+paidAsOf(r.m,S.today),0);
+  const due = rows.reduce((s,r)=>s+remaining(r.m),0);
+  return `${tip("help_home")}
+    <h2 class="sec" style="margin-top:8px">${t("thisMonth",{m:monthName(curYm())})}</h2>
+    <div class="sum" style="margin-top:10px">
+      <div class="box green"><div class="lbl">${t("collected")}</div><div class="val">₹${num(got)}</div></div>
+      <div class="box amber"><div class="lbl">${t("toCollect")}</div><div class="val">₹${num(due)}</div></div>
+    </div>
+    <h2 class="sec">${t("tenants")} (${rows.length})</h2>
+    <div class="hint">${t("sortNote")}</div>
+    ${rows.length ? rows.map(r=>`
+      <button class="card tap" onclick="go('detail',${r.tn.id})">
+        <div class="row"><span class="name">${esc(r.tn.name)}</span>${chip(r.st)}</div>
+        ${r.old>0 ? `<span class="olddue"> ${t("oldDues",{a:num(r.old)})}</span>` : ""}
+      </button>`).join("") : `<div class="empty">${t("noTenants")}</div>`}
+    <button class="btn" onclick="go('add')">${t("addTenantBtn")}</button>`;
+}
+
+function screenAdd(){
+  const months = []; for (let i=11;i>=0;i--) months.push(addMonth(curYm(),-i));
+  const days = Array.from({length:31},(_,i)=>i+1);
+  return `${tip("help_add")}
+    <label class="f" for="f_name">${t("f_name")}</label><div class="hint">${t("f_name_h")}</div>
+    <input class="in" id="f_name" type="text" autocomplete="off" value="${esc(S.f.name)}" oninput="S.f.name=this.value">
+    ${S.err==="name" ? `<div class="err">${t("err_name")}</div>`:""}
+    <label class="f" for="f_rent">${t("f_rent")}</label><div class="hint">${t("f_rent_h")}</div>
+    <input class="in" id="f_rent" type="text" inputmode="numeric" pattern="[0-9]*" value="${esc(S.f.rent)}" oninput="this.value=this.value.replace(/[^0-9]/g,'');S.f.rent=this.value">
+    ${S.err==="rent" ? `<div class="err">${t("err_rent")}</div>`:""}
+    <label class="f" for="f_due">${t("f_due")}</label><div class="hint">${t("f_due_h")}</div>
+    <select class="in" id="f_due" onchange="S.f.due=this.value">${days.map(d=>`<option value="${d}" ${+S.f.due===d?"selected":""}>${d}</option>`).join("")}</select>
+    <label class="f" for="f_start">${t("f_start")}</label><div class="hint">${t("f_start_h")}</div>
+    <select class="in" id="f_start" onchange="S.f.start=this.value">${months.map(m=>`<option value="${m}" ${S.f.start===m?"selected":""}>${monthName(m)}</option>`).join("")}</select>
+    <button class="btn" onclick="saveTenant()"> ${t("save")}</button>
+    <button class="btn secondary" onclick="back()">${t("cancel")}</button>`;
+}
+function saveTenant(){
+  const name = (S.f.name||"").trim(), rent = parseInt(S.f.rent,10);
+  if (!name){ S.err="name"; render(); return; }
+  if (!rent || rent<=0){ S.err="rent"; render(); return; }
+  const tn = {id:S.nextId++, name, dueDay:+S.f.due, rent, pendingRent:null, start:S.f.start, months:[{ym:S.f.start, required:rent, payments:[]}]};
+  ensureMonths(tn); S.tenants.push(tn);
+  toast(t("tenantAdded",{n:name})); go("detail", tn.id, {reset:true});
+}
+
+function screenDetail(readonly=false){
+  const tn = findTenant(S.param); if (!tn) return "";
+  if (!readonly) ensureMonths(tn);
+  const ms = visibleMonths(tn).slice().reverse();
+  const cur = readonly ? ms[0] : monthOf(tn, curYm());
+  const hist = readonly ? ms : ms.filter(m=>m.ym!==curYm());
+  const old = oldDues(tn);
+  let top = "";
+  if (cur){
+    const st = stateOf(tn,cur), paid = paidAsOf(cur,S.today), pct = Math.min(100, cur.required ? paid/cur.required*100 : 0);
+    top = `<div class="card">
+      <div class="row"><b>${monthName(cur.ym)}</b>${chip(st)}</div>
+      <div class="sub">${t("sd_"+st)}</div>
+      <div class="bar"><i style="width:${pct}%;background:var(--st-${st})"></i></div>
+      <div class="row"><span>${t("received",{p:num(paid),r:num(cur.required)})}</span></div>
+      ${remaining(cur)>0 ? `<div class="name" style="margin-top:6px">${t("balance",{a:num(remaining(cur))})}</div>` : ""}
+      ${paid>cur.required ? `<div class="sub">${t("extraNote",{a:num(paid-cur.required)})}</div>` : ""}
+      <div class="sub" style="margin-top:6px"> ${t("dueDate",{d:dayMonth(dueDateOf(cur.ym,tn.dueDay))})}</div>
+    </div>`;
+  }
+  const histHtml = hist.length ? hist.map(m=>{ const st = stateOf(tn,m);
+    return `<div class="hist"><div class="row"><span class="m">${monthName(m.ym)}</span>${chip(st)}</div>
+      <div class="sub">${t("received",{p:num(paidAsOf(m,S.today)),r:num(m.required)})}</div>
+      ${m.payments.map(p=>`<div class="sub">₹${num(p.amount)} · ${dayMonth(p.date)}</div>`).join("")}
+      ${!readonly && remaining(m)>0 ? `<div class="sub" style="font-weight:700;color:var(--ink)">${t("balance",{a:num(remaining(m))})}</div><button class="btn secondary small" style="margin-top:6px" onclick="payFor(${tn.id},'${m.ym}')">${t("btn_payMonth")}</button>` : ""}</div>`; }).join("")
+    : `<div class="sub" style="margin-top:8px">${t("noHistory")}</div>`;
+  return `${readonly ? `<div class="banner"> ${t("arch_removedOn",{m:monthName(tn.removedOn)})}</div>` : tip("help_detail")}
+    <div class="name" style="font-size:26px;margin-top:10px">${esc(tn.name)}</div>
+    <div class="sub">${t("rentPerMonth",{a:num(cur?cur.required:tn.rent)})}</div>
+    ${top}
+    ${!readonly && old>0 ? `<div class="info" style="background:#f6ecfd;border-color:#dbbdf2"><b>${t("oldDues",{a:num(old)})}</b><button class="btn small" style="margin-top:10px" onclick="payFor(${tn.id},'${oldestOwing(tn)}')">${t("btn_payOld")}</button></div>` : ""}
+    ${!readonly && tn.pendingRent ? `<div class="info"> ${t("pendingRentNote",{m:monthName(tn.pendingRent.from),a:num(tn.pendingRent.amount)})}</div>` : ""}
+    ${readonly ? "" : `<button class="btn" onclick="go('pay',${tn.id})"> ${t("btn_pay")}</button>
+      <button class="btn secondary" onclick="go('rent',${tn.id})"> ${t("btn_rent")}</button>`}
+    <h2 class="sec">${t("history")}</h2><div class="card" style="margin-top:8px;padding-top:4px;padding-bottom:4px">${histHtml}</div>
+    ${readonly ? "" : `<button class="btn danger small" style="margin-top:28px" onclick="askDelete(${tn.id})"> ${t("btn_delete")}</button>`}`;
+}
+
+/* ----- Record payment ----- */
+function initPay(id){
+  const tn = findTenant(id), ms = visibleMonths(tn);
+  const owing = ms.filter(m=>remaining(m)>0);
+  const month = monthOf(tn,curYm()) && remaining(monthOf(tn,curYm()))>0 ? curYm() : (owing[0] ? owing[0].ym : curYm());
+  S.f = {amount:"", date:S.today, month};
+}
+function oldestOwing(tn){ const m = visibleMonths(tn).find(x=>x.ym<curYm() && remaining(x)>0); return m ? m.ym : curYm(); }
+function payFor(id, ym){ go("pay", id); S.f.month = ym; render(); }
+function payMonths(tn){ const ms = visibleMonths(tn).filter(m=>remaining(m)>0 || m.ym===curYm()); return ms.sort((a,b)=>a.ym<b.ym?1:-1); }
+function payHintHtml(){
+  const tn = findTenant(S.param), m = monthOf(tn,S.f.month), a = parseInt(S.f.amount,10);
+  if (!a || a<=0) return "";
+  const left = m.required - paidAsOf(m,S.today) - a;
+  if (left>0) return `<div class="info">${t("pay_after",{a:num(left)})}</div>`;
+  return `<div class="ok">${t("pay_afterDone")}</div>` + (left<0 ? `<div class="info">${t("pay_extra",{a:num(-left)})}</div>` : "");
+}
+function updatePayHint(){ const el = document.getElementById("payHint"); if (el) el.innerHTML = payHintHtml(); }
+function screenPay(){
+  const tn = findTenant(S.param), m = monthOf(tn,S.f.month), bal = remaining(m);
+  return `${tip("help_pay")}
+    <div class="name" style="margin-top:8px">${esc(tn.name)}</div>
+    <label class="f" for="p_month">${t("pay_month")}</label><div class="hint">${t("pay_month_h")}</div>
+    <select class="in" id="p_month" onchange="S.f.month=this.value;render()">${payMonths(tn).map(x=>`<option value="${x.ym}" ${x.ym===S.f.month?"selected":""}>${monthName(x.ym)} – ${t("balance",{a:num(remaining(x))})}</option>`).join("")}</select>
+    <label class="f" for="p_amount">${t("pay_amount")}</label>
+    <input class="in" id="p_amount" type="text" inputmode="numeric" pattern="[0-9]*" value="${esc(S.f.amount)}" oninput="this.value=this.value.replace(/[^0-9]/g,'');S.f.amount=this.value;updatePayHint()">
+    ${S.err==="amount" ? `<div class="err">${t("err_amount")}</div>`:""}
+    ${bal>0 ? `<button class="btn secondary small" onclick="S.f.amount='${bal}';render()">${t("pay_full",{a:num(bal)})}</button>` : ""}
+    <div id="payHint">${payHintHtml()}</div>
+    <label class="f" for="p_date">${t("pay_date")}</label>
+    <input class="in" id="p_date" type="date" max="${S.today}" value="${S.f.date}" onchange="S.f.date=this.value||S.today">
+    <button class="btn" onclick="savePay()"> ${t("save")}</button>
+    <button class="btn secondary" onclick="back()">${t("cancel")}</button>`;
+}
+function savePay(){
+  const a = parseInt(S.f.amount,10);
+  if (!a || a<=0){ S.err="amount"; render(); return; }
+  const tn = findTenant(S.param), m = monthOf(tn,S.f.month), p = {date:S.f.date||S.today, amount:a};
+  m.payments.push(p);
+  toast(t("paymentSaved",{a:num(a)}), ()=>{ m.payments = m.payments.filter(x=>x!==p); S.toast=null; render(); });
+  S.stack.pop(); S.screen="detail"; render();
+}
+
+/* ----- Change rent ----- */
+function rentHintHtml(){
+  const tn = findTenant(S.param), m = monthOf(tn,curYm()), a = parseInt(S.f.rent,10);
+  if (!a || a<=0) return "";
+  const d = a - m.required, nextYm = addMonth(curYm(),1);
+  const msg = d>0 ? t("rent_up",{a:num(d)}) : d<0 ? t("rent_down",{a:num(-d)}) : t("rent_same");
+  return `<div class="info"><b>${msg}</b><br>${t("rent_notice",{m:monthName(nextYm),c:monthName(curYm()),a:num(m.required)})}</div>`;
+}
+function updateRentHint(){ const el = document.getElementById("rentHint"); if (el) el.innerHTML = rentHintHtml(); }
+function screenRent(){
+  const tn = findTenant(S.param), m = monthOf(tn,curYm());
+  return `${tip("help_rent")}
+    <div class="name" style="margin-top:8px">${esc(tn.name)}</div>
+    <div class="sub">${t("rent_current",{a:num(m.required)})}</div>
+    <label class="f" for="r_new">${t("rent_new")}</label>
+    <input class="in" id="r_new" type="text" inputmode="numeric" pattern="[0-9]*" value="${esc(S.f.rent)}" oninput="this.value=this.value.replace(/[^0-9]/g,'');S.f.rent=this.value;updateRentHint()">
+    ${S.err==="rent" ? `<div class="err">${t("err_rent")}</div>`:""}
+    <div id="rentHint">${rentHintHtml()}</div>
+    <button class="btn" onclick="saveRent()"> ${t("save")}</button>
+    <button class="btn secondary" onclick="back()">${t("cancel")}</button>`;
+}
+function saveRent(){
+  const a = parseInt(S.f.rent,10);
+  if (!a || a<=0){ S.err="rent"; render(); return; }
+  const tn = findTenant(S.param), from = addMonth(curYm(),1);
+  tn.pendingRent = {amount:a, from};
+  tn.months.forEach(m=>{ if (m.ym>=from) m.required = a; });   // any already-created future month follows the new rent
+  toast(t("rentSaved",{m:monthName(from)})); back();
+}
+
+/* ----- Delete (archive) ----- */
+function askDelete(id){ S.dialog = {type:"delete", id}; render(); }
+function doDelete(id){
+  const i = S.tenants.findIndex(x=>x.id===id), tn = S.tenants[i];
+  S.tenants.splice(i,1); tn.removedOn = curYm(); S.archived.push(tn);
+  S.dialog = null; toast(t("removed",{n:tn.name})); go("home", null, {reset:true});
+}
+
+/* ----- Settings / Archive / Welcome ----- */
+let pressT = null;
+function pressStart(){ pressT = setTimeout(()=>{ pressT=null; go("archive"); }, 800); }
+function pressEnd(){ if (pressT){ clearTimeout(pressT); pressT=null; } }
+function screenSettings(){
+  return `${tip("help_settings")}
+    <h2 class="sec" style="margin-top:8px"> ${t("set_lang")}</h2>
+    <button class="choice ${S.lang==="en"?"on":""}" onclick="setLang('en')"><span class="dot"></span>English</button>
+    <button class="choice ${S.lang==="kn"?"on":""}" onclick="setLang('kn')"><span class="dot"></span>ಕನ್ನಡ</button>
+    <div class="card row" style="margin-top:20px"><span style="font-weight:700"> ${t("set_tips")}</span>
+      <button class="switch ${S.tips?"on":""}" role="switch" aria-checked="${S.tips}" onclick="S.tips=!S.tips;localStorage.setItem('rb_tips',S.tips?'on':'off');render()"></button></div>
+    <button class="btn secondary" onclick="S.wstep=0;go('welcome',null,{reset:true})"> ${t("set_welcome")}</button>
+    <h2 class="sec">${t("set_about")}</h2>
+    <div class="card"><b>${t("appName")}</b>
+      <div class="sub" id="ver" style="user-select:none;padding:8px 0"
+        onpointerdown="pressStart()" onpointerup="pressEnd()" onpointerleave="pressEnd()" oncontextmenu="return false">${t("version")}</div></div>`;
+}
+function screenArchive(){
+  return `${tip("help_archive")}<div class="banner"> ${t("arch_note")}</div>
+    ${S.archived.length ? S.archived.map(tn=>`
+      <button class="card tap" onclick="go('archiveDetail',${tn.id})">
+        <div class="name">${esc(tn.name)}</div>
+        <div class="sub">${t("arch_removedOn",{m:monthName(tn.removedOn)})} · ${t("rentPerMonth",{a:num(tn.rent)})}</div></button>`).join("")
+      : `<div class="empty">${t("arch_empty")}</div>`}`;
+}
+function screenWelcome(){
+  const i = S.wstep, last = i===2;
+  return `<div class="welcome"><div class="big">${i+1}</div>
+    <h1>${t("w"+(i+1)+"_t")}</h1><p>${t("w"+(i+1)+"_b")}</p>
+    <div class="dots">${[0,1,2].map(n=>`<i class="${n===i?"on":""}"></i>`).join("")}</div>
+    <button class="btn" onclick="${last?"finishWelcome()":"S.wstep++;render()"}">${last?t("start"):t("next")}</button>
+    ${last?"":`<button class="btn secondary" onclick="finishWelcome()">${t("skip")}</button>`}</div>`;
+}
+function finishWelcome(){ localStorage.setItem("rb_seenWelcome","1"); go("home", null, {reset:true}); }
+
+/* ----- Help dialog / delete dialog ----- */
+function showHelp(){ S.dialog = {type:"help", screen:S.screen}; render(); }
+function dialogHtml(){
+  const d = S.dialog; if (!d) return "";
+  if (d.type==="help"){
+    const key = {archiveDetail:"detail"}[d.screen] || d.screen;
+    const legend = (d.screen==="home"||d.screen==="detail"||d.screen==="archiveDetail") ? `<h3 style="font-size:18px;margin-top:14px">${t("legendTitle")}</h3>
+      <div class="legend">${Object.keys(RANK).map(s=>`<div>${chip(s)}<br>${t("sd_"+s)}</div>`).join("")}</div>` : "";
+    return `<div class="overlay" onclick="S.dialog=null;render()"><div class="dialog" onclick="event.stopPropagation()">
+      <h3> ${t("help")}</h3><p>${t("help_"+key)}</p>${legend}
+      <button class="btn" onclick="S.dialog=null;render()">${t("close")}</button></div></div>`;
+  }
+  if (d.type==="delete"){
+    const tn = findTenant(d.id), owed = oldDues(tn) + remaining(monthOf(tn,curYm())) ;
+    return `<div class="overlay"><div class="dialog">
+      <h3> ${t("del_title",{n:esc(tn.name)})}</h3><p>${t("del_body",{n:esc(tn.name)})}</p>
+      ${owed>0 ? `<div class="info" style="background:#fdeec2;border-color:#f0d27a"> ${t("del_owed",{a:num(owed)})}</div>`:""}
+      <button class="btn secondary" onclick="S.dialog=null;render()">${t("del_no")}</button>
+      <button class="btn danger" onclick="doDelete(${tn.id})">${t("del_yes")}</button></div></div>`;
+  }
+  return "";
+}
+
+/* =========================== RENDER =========================== */
+function render(){
+  const sc = S.screen;
+  const titles = {home:t("appName"), add:t("addTitle"), detail:"", pay:t("pay_title"), rent:t("rent_title"), settings:t("set_title"), archive:t("arch_title"), archiveDetail:t("arch_title"), welcome:""};
+  const bodies = {home:screenHome, add:screenAdd, detail:()=>screenDetail(false), pay:screenPay, rent:screenRent, settings:screenSettings, archive:screenArchive, archiveDetail:()=>screenDetail(true), welcome:screenWelcome};
+  const tabs = ["home","settings"], isTab = tabs.includes(sc);
+  let title = titles[sc];
+  if (sc==="detail"||sc==="archiveDetail"){ const tn = findTenant(S.param); title = tn ? esc(tn.name) : ""; }
+  const titleAttr = sc==="home" ? `onclick="homeTap()"` : "";
+  const header = sc==="welcome" ? `<header class="top"><div class="title"></div><button class="icon-btn lang" onclick="toggleLang()">${t("langBtn")}</button></header>` :
+    `<header class="top">
+      ${isTab ? "" : `<button class="icon-btn back" onclick="back()" aria-label="Back">${t("back")}</button>`}
+      <div class="title" ${titleAttr}>${title}</div>
+      <button class="icon-btn" onclick="showHelp()" aria-label="Help">${t("help")}</button>
+      <button class="icon-btn lang" onclick="toggleLang()">${t("langBtn")}</button></header>`;
+  const nav = isTab ? `<nav class="bottom">${[["home"],["settings"]].map(([k])=>
+    `<button class="${sc===k?"on":""}" onclick="tab('${k}')">${t("nav_"+k)}</button>`).join("")}</nav>` : "";
+  const keepScroll = document.querySelector("main.screen")?.scrollTop || 0;
+  document.getElementById("phone").innerHTML = `${header}<main class="screen">${bodies[sc]()}</main>${nav}${dialogHtml()}` +
+    (S.toast ? `<div class="toast"><span>${esc(S.toast.msg)}</span>${S.toast.undo?`<button onclick="S.toast.undo()">${t("undo")}</button>`:""}</div>` : "");
+  const m = document.querySelector("main.screen"); if (m) m.scrollTop = keepScroll;
+  document.getElementById("demoDate").value = S.today;
+}
+function homeTap(){ S.taps++; clearTimeout(S.tapT); S.tapT = setTimeout(()=>S.taps=0, 2000); if (S.taps>=5){ S.taps=0; go("archive"); } }
+
+document.documentElement.lang = S.lang;
+render();
+</script>
+</body>
+</html>
