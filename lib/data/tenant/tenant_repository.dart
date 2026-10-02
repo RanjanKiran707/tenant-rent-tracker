@@ -14,25 +14,29 @@ class TenantRepository implements TenantRepositoryInterface {
 
   @override
   Future<Result<void>> addTenant(TenantModel tenant, int initialRent) {
-    return guard(() => _db.transaction(() async {
-          await _db.into(_db.tenants).insert(_toCompanion(tenant));
-          await _db.into(_db.rentHistories).insert(
-                RentHistoriesCompanion.insert(
-                  uuid: _uuid.v4(),
-                  tenantUuid: tenant.uuid,
-                  effectiveFromMonth: tenant.startMonth,
-                  amount: initialRent,
-                ),
-              );
-        }));
+    return guard(
+      () => _db.transaction(() async {
+        await _db.into(_db.tenants).insert(_toCompanion(tenant));
+        await _db
+            .into(_db.rentHistories)
+            .insert(
+              RentHistoriesCompanion.insert(
+                uuid: _uuid.v4(),
+                tenantUuid: tenant.uuid,
+                effectiveFromMonth: tenant.startMonth,
+                amount: initialRent,
+              ),
+            );
+      }),
+    );
   }
 
   @override
   Future<Result<TenantModel?>> getTenant(String uuid) {
     return guard(() async {
-      final row = await (_db.select(_db.tenants)
-            ..where((t) => t.uuid.equals(uuid)))
-          .getSingleOrNull();
+      final row = await (_db.select(
+        _db.tenants,
+      )..where((t) => t.uuid.equals(uuid))).getSingleOrNull();
       return row == null ? null : _fromRow(row);
     });
   }
@@ -40,10 +44,11 @@ class TenantRepository implements TenantRepositoryInterface {
   @override
   Future<Result<List<TenantModel>>> getActiveTenants() {
     return guard(() async {
-      final rows = await (_db.select(_db.tenants)
-            ..where((t) => t.deletedMonth.isNull())
-            ..orderBy([(t) => OrderingTerm.asc(t.createdOn)]))
-          .get();
+      final rows =
+          await (_db.select(_db.tenants)
+                ..where((t) => t.deletedMonth.isNull())
+                ..orderBy([(t) => OrderingTerm.asc(t.createdOn)]))
+              .get();
       return rows.map(_fromRow).toList();
     });
   }
@@ -69,28 +74,38 @@ class TenantRepository implements TenantRepositoryInterface {
   }
 
   @override
+  Future<Result<void>> renameTenant(String uuid, String name) {
+    return guard(() async {
+      await (_db.update(_db.tenants)..where((t) => t.uuid.equals(uuid))).write(
+        TenantsCompanion(name: Value(name)),
+      );
+    });
+  }
+
+  @override
   Future<Result<void>> deleteTenant(String uuid, String deletedMonth) {
     return guard(() async {
-      await (_db.update(_db.tenants)..where((t) => t.uuid.equals(uuid)))
-          .write(TenantsCompanion(deletedMonth: Value(deletedMonth)));
+      await (_db.update(_db.tenants)..where((t) => t.uuid.equals(uuid))).write(
+        TenantsCompanion(deletedMonth: Value(deletedMonth)),
+      );
     });
   }
 
   TenantsCompanion _toCompanion(TenantModel t) => TenantsCompanion.insert(
-        uuid: t.uuid,
-        name: t.name,
-        createdOn: t.createdOn,
-        dueDay: Value(t.dueDay),
-        startMonth: t.startMonth,
-        deletedMonth: Value(t.deletedMonth),
-      );
+    uuid: t.uuid,
+    name: t.name,
+    createdOn: t.createdOn,
+    dueDay: Value(t.dueDay),
+    startMonth: t.startMonth,
+    deletedMonth: Value(t.deletedMonth),
+  );
 
   TenantModel _fromRow(TenantRow r) => TenantModel(
-        uuid: r.uuid,
-        name: r.name,
-        createdOn: r.createdOn,
-        dueDay: r.dueDay,
-        startMonth: r.startMonth,
-        deletedMonth: r.deletedMonth,
-      );
+    uuid: r.uuid,
+    name: r.name,
+    createdOn: r.createdOn,
+    dueDay: r.dueDay,
+    startMonth: r.startMonth,
+    deletedMonth: r.deletedMonth,
+  );
 }

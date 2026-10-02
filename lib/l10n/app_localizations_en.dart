@@ -178,6 +178,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get btnDelete => 'Remove this tenant';
 
   @override
+  String get btnEditName => 'Edit name';
+
+  @override
+  String get editNameTitle => 'Edit tenant\'s name';
+
+  @override
+  String nameSaved(Object name) {
+    return 'Name changed to $name';
+  }
+
+  @override
   String get history => 'Earlier months';
 
   @override

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tenant_tracker/core/di/app_dependencies.dart';
+import 'package:tenant_tracker/core/errors/failure.dart';
 import 'package:tenant_tracker/core/utils/display_format.dart';
 import 'package:tenant_tracker/core/utils/failure_message.dart';
 import 'package:tenant_tracker/core/utils/status_text.dart';
@@ -23,9 +24,8 @@ class TenantDetailView extends StatefulWidget {
 
   const TenantDetailView({super.key, required this.bundle});
 
-  static Route<void> route(TenantDetailBundle bundle) => MaterialPageRoute(
-        builder: (_) => TenantDetailView(bundle: bundle),
-      );
+  static Route<void> route(TenantDetailBundle bundle) =>
+      MaterialPageRoute(builder: (_) => TenantDetailView(bundle: bundle));
 
   static Future<void> open(BuildContext context, TenantDetailBundle bundle) =>
       Navigator.push(context, route(bundle));
@@ -47,6 +47,7 @@ class _TenantDetailViewState extends State<TenantDetailView>
       ensureRentRecords: deps.ensureRentRecords,
       watchTenantDetail: deps.watchTenantDetail,
       deleteTenant: deps.deleteTenant,
+      renameTenant: deps.renameTenant,
       undoPayment: deps.undoPayment,
     );
     ctrl.deleteState.addListener(_onDeleteStateChanged);
@@ -72,9 +73,9 @@ class _TenantDetailViewState extends State<TenantDetailView>
   }
 
   String? get _loadedName => switch (ctrl.state.value) {
-        ViewStateLoaded(data: final d) => d.name,
-        _ => null,
-      };
+    ViewStateLoaded(data: final d) => d.name,
+    _ => null,
+  };
 
   @override
   void dispose() {
@@ -96,21 +97,23 @@ class _TenantDetailViewState extends State<TenantDetailView>
     final l = AppLocalizations.of(context);
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(
-        duration: const Duration(seconds: 7),
-        content: Text(l.paymentSaved(formatMoney(recorded.amount))),
-        action: SnackBarAction(
-          label: l.undo,
-          onPressed: () async {
-            final failure = await ctrl.undoPayment(recorded.paymentUuid);
-            if (failure != null && mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(failureMessage(l, failure))),
-              );
-            }
-          },
+      ..showSnackBar(
+        SnackBar(
+          duration: const Duration(seconds: 7),
+          content: Text(l.paymentSaved(formatMoney(recorded.amount))),
+          action: SnackBarAction(
+            label: l.undo,
+            onPressed: () async {
+              final failure = await ctrl.undoPayment(recorded.paymentUuid);
+              if (failure != null && mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(failureMessage(l, failure))),
+                );
+              }
+            },
+          ),
         ),
-      ));
+      );
   }
 
   Future<void> _openRent() async {
@@ -125,6 +128,19 @@ class _TenantDetailViewState extends State<TenantDetailView>
       ..showSnackBar(
         SnackBar(content: Text(l.rentSaved(formatMonth(l, from)))),
       );
+  }
+
+  Future<void> _openEditName(String currentName) async {
+    final newName = await showDialog<String>(
+      context: context,
+      builder: (_) =>
+          _EditNameDialog(initialName: currentName, onSave: ctrl.rename),
+    );
+    if (newName == null || !mounted) return;
+    final l = AppLocalizations.of(context);
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(l.nameSaved(newName))));
   }
 
   Future<void> _askDelete(WatchTenantDetailReturnModel data) async {
@@ -176,7 +192,9 @@ class _TenantDetailViewState extends State<TenantDetailView>
           child: Scaffold(
             appBar: AppBar(
               title: Text(title),
-              actions: [AppBarActions(helpText: l.helpDetail, showLegend: true)],
+              actions: [
+                AppBarActions(helpText: l.helpDetail, showLegend: true),
+              ],
             ),
             body: ctrl.state.value.when(
               loading: () => const Center(child: CircularProgressIndicator()),
@@ -188,6 +206,7 @@ class _TenantDetailViewState extends State<TenantDetailView>
                 deleteState: ctrl.deleteState.value,
                 onPay: _openPay,
                 onRent: _openRent,
+                onEditName: () => _openEditName(data.name),
                 onDelete: () => _askDelete(data),
               ),
             ),
@@ -204,6 +223,7 @@ class _DetailBody extends StatelessWidget {
   final ViewState<void> deleteState;
   final Future<void> Function(String? rentRecordUuid) onPay;
   final VoidCallback onRent;
+  final VoidCallback onEditName;
   final VoidCallback onDelete;
 
   const _DetailBody({
@@ -212,6 +232,7 @@ class _DetailBody extends StatelessWidget {
     required this.deleteState,
     required this.onPay,
     required this.onRent,
+    required this.onEditName,
     required this.onDelete,
   });
 
@@ -232,18 +253,39 @@ class _DetailBody extends StatelessWidget {
             child: Text(
               l.archRemovedOn(formatMonth(l, data.deletedMonth ?? '')),
               style: const TextStyle(
-                  color: Color(0xFF4B1478),
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700),
+                color: Color(0xFF4B1478),
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           )
         else
           TipBanner(text: l.helpDetail),
         const SizedBox(height: 10),
-        Text(data.name,
-            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w700)),
-        Text(l.rentPerMonth(formatMoney(data.currentRent)),
-            style: const TextStyle(fontSize: 16, color: Color(0xFF5B6675))),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                data.name,
+                style: const TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            if (!data.readOnly)
+              IconButton(
+                key: const Key('editNameButton'),
+                tooltip: l.btnEditName,
+                icon: const Icon(Icons.edit),
+                onPressed: busy ? null : onEditName,
+              ),
+          ],
+        ),
+        Text(
+          l.rentPerMonth(formatMoney(data.currentRent)),
+          style: const TextStyle(fontSize: 16, color: Color(0xFF5B6675)),
+        ),
         if (top != null) _TopMonthCard(month: top),
         if (!data.readOnly && data.oldDues > 0)
           InfoBox(
@@ -252,8 +294,10 @@ class _DetailBody extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(l.oldDues(formatMoney(data.oldDues)),
-                    style: const TextStyle(fontWeight: FontWeight.w700)),
+                Text(
+                  l.oldDues(formatMoney(data.oldDues)),
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
                 BigButton(
                   label: l.btnPayOld,
                   small: true,
@@ -264,10 +308,12 @@ class _DetailBody extends StatelessWidget {
           ),
         if (!data.readOnly && data.pendingRentMonth != null)
           InfoBox(
-            child: Text(l.pendingRentNote(
-              formatMonth(l, data.pendingRentMonth!),
-              formatMoney(data.pendingRentAmount ?? 0),
-            )),
+            child: Text(
+              l.pendingRentNote(
+                formatMonth(l, data.pendingRentMonth!),
+                formatMoney(data.pendingRentAmount ?? 0),
+              ),
+            ),
           ),
         if (!data.readOnly) ...[
           BigButton(label: l.btnPay, onPressed: () => onPay(null)),
@@ -278,16 +324,22 @@ class _DetailBody extends StatelessWidget {
           ),
         ],
         const SizedBox(height: 22),
-        Text(l.history,
-            style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w700)),
+        Text(
+          l.history,
+          style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w700),
+        ),
         SectionCard(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           child: data.months.isEmpty
               ? Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: Text(l.noHistory,
-                      style: const TextStyle(
-                          fontSize: 16, color: Color(0xFF5B6675))),
+                  child: Text(
+                    l.noHistory,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Color(0xFF5B6675),
+                    ),
+                  ),
                 )
               : Column(
                   children: [
@@ -316,6 +368,85 @@ class _DetailBody extends StatelessWidget {
   }
 }
 
+/// Asks for the new name. Pops with the saved name, or null when cancelled.
+/// A failed save (for example an empty name) is shown inside the dialog.
+class _EditNameDialog extends StatefulWidget {
+  final String initialName;
+  final Future<Failure?> Function(String name) onSave;
+
+  const _EditNameDialog({required this.initialName, required this.onSave});
+
+  @override
+  State<_EditNameDialog> createState() => _EditNameDialogState();
+}
+
+class _EditNameDialogState extends State<_EditNameDialog> {
+  late final TextEditingController _controller = TextEditingController(
+    text: widget.initialName,
+  );
+  Failure? _failure;
+  bool _saving = false;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    if (_saving) return; // blocking rule: ignore re-entry
+    final name = _controller.text.trim();
+    setState(() => _saving = true);
+    final failure = await widget.onSave(name);
+    if (!mounted) return;
+    if (failure == null) {
+      Navigator.pop(context, name);
+    } else {
+      setState(() {
+        _saving = false;
+        _failure = failure;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    return AlertDialog(
+      title: Text(l.editNameTitle),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextField(
+            key: const Key('editNameField'),
+            controller: _controller,
+            enabled: !_saving,
+            autofocus: true,
+            textCapitalization: TextCapitalization.words,
+          ),
+          if (_failure != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                failureMessage(l, _failure!),
+                style: const TextStyle(color: Color(0xFFB3261E)),
+              ),
+            ),
+        ],
+      ),
+      actions: [
+        BigButton(
+          label: l.cancel,
+          kind: BigButtonKind.secondary,
+          onPressed: _saving ? null : () => Navigator.pop(context),
+        ),
+        BigButton(label: l.save, busy: _saving, onPressed: _save),
+      ],
+    );
+  }
+}
+
 class _TopMonthCard extends StatelessWidget {
   final MonthDetail month;
 
@@ -334,16 +465,22 @@ class _TopMonthCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: Text(formatMonth(l, month.month),
-                    style: const TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.w700)),
+                child: Text(
+                  formatMonth(l, month.month),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
               StatusChip(status: month.status),
             ],
           ),
           const SizedBox(height: 2),
-          Text(statusDescription(l, month.status),
-              style: const TextStyle(fontSize: 16, color: Color(0xFF5B6675))),
+          Text(
+            statusDescription(l, month.status),
+            style: const TextStyle(fontSize: 16, color: Color(0xFF5B6675)),
+          ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 10),
             child: ClipRRect(
@@ -356,23 +493,34 @@ class _TopMonthCard extends StatelessWidget {
               ),
             ),
           ),
-          Text(l.received(
-              formatMoney(month.paid), formatMoney(month.requiredAmount))),
+          Text(
+            l.received(
+              formatMoney(month.paid),
+              formatMoney(month.requiredAmount),
+            ),
+          ),
           if (month.balance > 0)
             Padding(
               padding: const EdgeInsets.only(top: 6),
-              child: Text(l.balance(formatMoney(month.balance)),
-                  style: const TextStyle(
-                      fontSize: 21, fontWeight: FontWeight.w700)),
+              child: Text(
+                l.balance(formatMoney(month.balance)),
+                style: const TextStyle(
+                  fontSize: 21,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             ),
           if (month.extra > 0)
-            Text(l.extraNote(formatMoney(month.extra)),
-                style: const TextStyle(fontSize: 16, color: Color(0xFF5B6675))),
+            Text(
+              l.extraNote(formatMoney(month.extra)),
+              style: const TextStyle(fontSize: 16, color: Color(0xFF5B6675)),
+            ),
           Padding(
             padding: const EdgeInsets.only(top: 6),
             child: Text(
-                l.dueDate(formatDayMonth(l, month.dueDate)),
-                style: const TextStyle(fontSize: 16, color: Color(0xFF5B6675))),
+              l.dueDate(formatDayMonth(l, month.dueDate)),
+              style: const TextStyle(fontSize: 16, color: Color(0xFF5B6675)),
+            ),
           ),
         ],
       ),
@@ -403,24 +551,34 @@ class _HistoryMonth extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: Text(formatMonth(l, month.month),
-                    style: const TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.w700)),
+                child: Text(
+                  formatMonth(l, month.month),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
               StatusChip(status: month.status),
             ],
           ),
           Text(
-              l.received(
-                  formatMoney(month.paid), formatMoney(month.requiredAmount)),
-              style: sub),
+            l.received(
+              formatMoney(month.paid),
+              formatMoney(month.requiredAmount),
+            ),
+            style: sub,
+          ),
           for (final p in month.payments)
-            Text('₹${formatMoney(p.amount)} · ${formatDayMonth(l, p.paidOn)}',
-                style: sub),
+            Text(
+              '₹${formatMoney(p.amount)} · ${formatDayMonth(l, p.paidOn)}',
+              style: sub,
+            ),
           if (canPay && month.balance > 0) ...[
-            Text(l.balance(formatMoney(month.balance)),
-                style: const TextStyle(
-                    fontSize: 16, fontWeight: FontWeight.w700)),
+            Text(
+              l.balance(formatMoney(month.balance)),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+            ),
             BigButton(
               label: l.btnPayMonth,
               kind: BigButtonKind.secondary,

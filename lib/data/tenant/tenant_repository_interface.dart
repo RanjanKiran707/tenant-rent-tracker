@@ -18,6 +18,9 @@ abstract interface class TenantRepositoryInterface {
   /// Tenants with a `deletedMonth` (the Archived list), newest deletion first.
   Stream<Result<List<TenantModel>>> watchArchivedTenants();
 
+  /// Changes only the tenant's name. Nothing else about the tenant changes.
+  Future<Result<void>> renameTenant(String uuid, String name);
+
   /// Soft delete: sets `deletedMonth` (`YYYY-MM`). All rows are kept.
   Future<Result<void>> deleteTenant(String uuid, String deletedMonth);
 }

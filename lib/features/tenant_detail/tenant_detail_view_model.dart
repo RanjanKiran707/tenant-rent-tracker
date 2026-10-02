@@ -6,6 +6,7 @@ import 'package:tenant_tracker/core/errors/result.dart';
 import 'package:tenant_tracker/core/utils/view_state.dart';
 import 'package:tenant_tracker/domain/use_cases/business/delete_tenant/delete_tenant_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/business/ensure_rent_records/ensure_rent_records_usecase.dart';
+import 'package:tenant_tracker/domain/use_cases/business/rename_tenant/rename_tenant_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/business/undo_payment/undo_payment_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/ui/watch_tenant_detail/watch_tenant_detail_return_model.dart';
 import 'package:tenant_tracker/domain/use_cases/ui/watch_tenant_detail/watch_tenant_detail_usecase.dart';
@@ -22,14 +23,16 @@ class TenantDetailViewModel {
   final EnsureRentRecordsUsecase _ensureRentRecords;
   final WatchTenantDetailUsecase _watchTenantDetail;
   final DeleteTenantUsecase _deleteTenant;
+  final RenameTenantUsecase _renameTenant;
   final UndoPaymentUsecase _undoPayment;
 
   final ValueNotifier<ViewState<WatchTenantDetailReturnModel>> state =
       ValueNotifier(const ViewStateLoading());
 
   /// State of the "Remove this tenant" action.
-  final ValueNotifier<ViewState<void>> deleteState =
-      ValueNotifier(const ViewStateIdle());
+  final ValueNotifier<ViewState<void>> deleteState = ValueNotifier(
+    const ViewStateIdle(),
+  );
 
   StreamSubscription<Result<WatchTenantDetailReturnModel>>? _subscription;
   int _generation = 0;
@@ -40,11 +43,13 @@ class TenantDetailViewModel {
     required EnsureRentRecordsUsecase ensureRentRecords,
     required WatchTenantDetailUsecase watchTenantDetail,
     required DeleteTenantUsecase deleteTenant,
+    required RenameTenantUsecase renameTenant,
     required UndoPaymentUsecase undoPayment,
-  })  : _ensureRentRecords = ensureRentRecords,
-        _watchTenantDetail = watchTenantDetail,
-        _deleteTenant = deleteTenant,
-        _undoPayment = undoPayment;
+  }) : _ensureRentRecords = ensureRentRecords,
+       _watchTenantDetail = watchTenantDetail,
+       _deleteTenant = deleteTenant,
+       _renameTenant = renameTenant,
+       _undoPayment = undoPayment;
 
   /// Creates this tenant's missing monthly records, then (re)subscribes.
   /// Call it on open and when the app resumes.
@@ -53,16 +58,14 @@ class TenantDetailViewModel {
     await _subscription?.cancel();
     _subscription = null;
 
-    final ensured =
-        await _ensureRentRecords(tenantUuid: bundle.tenantUuid);
+    final ensured = await _ensureRentRecords(tenantUuid: bundle.tenantUuid);
     if (_disposed || generation != _generation) return;
     if (ensured case Err<void>(:final failure)) {
       state.value = ViewStateError(failure);
       return;
     }
 
-    _subscription =
-        _watchTenantDetail(bundle.tenantUuid).listen((result) {
+    _subscription = _watchTenantDetail(bundle.tenantUuid).listen((result) {
       state.value = result.fold(
         (failure) => ViewStateError(failure),
         (data) => ViewStateLoaded(data),
@@ -78,6 +81,13 @@ class TenantDetailViewModel {
       (failure) => ViewStateError(failure),
       (_) => const ViewStateLoaded(null),
     );
+  }
+
+  /// Saves a new name. Returns the failure, or null when it worked; the title
+  /// and heading update by themselves.
+  Future<Failure?> rename(String name) async {
+    final result = await _renameTenant(bundle.tenantUuid, name);
+    return result.fold((failure) => failure, (_) => null);
   }
 
   /// Removes a payment (the Undo button). Returns the failure, or null when it

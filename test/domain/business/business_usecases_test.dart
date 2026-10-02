@@ -11,6 +11,7 @@ import 'package:tenant_tracker/domain/use_cases/business/delete_tenant/delete_te
 import 'package:tenant_tracker/domain/use_cases/business/ensure_rent_records/ensure_rent_records_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/business/record_payment/record_payment_argument_model.dart';
 import 'package:tenant_tracker/domain/use_cases/business/record_payment/record_payment_usecase.dart';
+import 'package:tenant_tracker/domain/use_cases/business/rename_tenant/rename_tenant_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/business/settings/settings_usecases.dart';
 import 'package:tenant_tracker/domain/use_cases/business/undo_payment/undo_payment_usecase.dart';
 
@@ -43,35 +44,38 @@ void main() {
     int rent = 5000,
     int dueDay = 10,
     String start = '2026-01',
-  }) =>
-      addTenant(AddTenantArgumentModel(
-        name: name,
-        rent: rent,
-        dueDay: dueDay,
-        startMonth: start,
-      ));
+  }) => addTenant(
+    AddTenantArgumentModel(
+      name: name,
+      rent: rent,
+      dueDay: dueDay,
+      startMonth: start,
+    ),
+  );
 
   Future<List<String>> monthsOf(String tenantUuid) async =>
       ok(await h.records.getRecords(tenantUuid)).map((r) => r.month).toList();
 
   Future<Map<String, int>> amountsOf(String tenantUuid) async => {
-        for (final r in ok(await h.records.getRecords(tenantUuid)))
-          r.month: r.requiredAmount,
-      };
+    for (final r in ok(await h.records.getRecords(tenantUuid)))
+      r.month: r.requiredAmount,
+  };
 
   group('AddTenantUsecase', () {
-    test('saves the tenant, its first rent and every month up to now',
-        () async {
-      final id = ok(await add(name: '  Ramesh  ', rent: 5000, dueDay: 15));
+    test(
+      'saves the tenant, its first rent and every month up to now',
+      () async {
+        final id = ok(await add(name: '  Ramesh  ', rent: 5000, dueDay: 15));
 
-      final tenant = ok(await h.tenants.getTenant(id))!;
-      expect(tenant.name, 'Ramesh'); // trimmed
-      expect(tenant.dueDay, 15);
-      expect(tenant.startMonth, '2026-01');
-      expect(ok(await h.history.getRentForMonth(id, '2026-01')), 5000);
-      expect(await monthsOf(id), ['2026-01', '2026-02', '2026-03']);
-      expect((await amountsOf(id)).values, everyElement(5000));
-    });
+        final tenant = ok(await h.tenants.getTenant(id))!;
+        expect(tenant.name, 'Ramesh'); // trimmed
+        expect(tenant.dueDay, 15);
+        expect(tenant.startMonth, '2026-01');
+        expect(ok(await h.history.getRentForMonth(id, '2026-01')), 5000);
+        expect(await monthsOf(id), ['2026-01', '2026-02', '2026-03']);
+        expect((await amountsOf(id)).values, everyElement(5000));
+      },
+    );
 
     test('starting this month creates one record', () async {
       final id = ok(await add(start: '2026-03'));
@@ -106,10 +110,12 @@ void main() {
       ok(await add(start: '2026-03'));
     });
 
-    test('validation failures are ValidationFailure, not storage errors',
-        () async {
-      expect(isValidation(await add(name: '')), isTrue);
-    });
+    test(
+      'validation failures are ValidationFailure, not storage errors',
+      () async {
+        expect(isValidation(await add(name: '')), isTrue);
+      },
+    );
   });
 
   group('EnsureRentRecordsUsecase', () {
@@ -147,10 +153,20 @@ void main() {
     test('each month takes the rent that was in force for it', () async {
       final id = ok(await add(start: '2026-01', rent: 5000));
       // Rent changes from April, and from June.
-      ok(await h.history
-          .changeRent(tenantUuid: id, effectiveFromMonth: '2026-04', amount: 6000));
-      ok(await h.history
-          .changeRent(tenantUuid: id, effectiveFromMonth: '2026-06', amount: 4000));
+      ok(
+        await h.history.changeRent(
+          tenantUuid: id,
+          effectiveFromMonth: '2026-04',
+          amount: 6000,
+        ),
+      );
+      ok(
+        await h.history.changeRent(
+          tenantUuid: id,
+          effectiveFromMonth: '2026-06',
+          amount: 4000,
+        ),
+      );
       h.clock.setToday('2026-07-01');
       ok(await ensure());
 
@@ -215,11 +231,13 @@ void main() {
     });
 
     Future<Result<String>> pay({int amount = 2000, String on = '2026-03-12'}) =>
-        recordPayment(RecordPaymentArgumentModel(
-          rentRecordUuid: recordId,
-          amount: amount,
-          paidOn: on,
-        ));
+        recordPayment(
+          RecordPaymentArgumentModel(
+            rentRecordUuid: recordId,
+            amount: amount,
+            paidOn: on,
+          ),
+        );
 
     test('saves the payment and returns its uuid', () async {
       final paymentId = ok(await pay());
@@ -251,26 +269,34 @@ void main() {
     });
 
     test('an unknown month record comes back as a StorageFailure', () async {
-      final r = await recordPayment(const RecordPaymentArgumentModel(
-        rentRecordUuid: 'nope',
-        amount: 100,
-        paidOn: '2026-03-10',
-      ));
+      final r = await recordPayment(
+        const RecordPaymentArgumentModel(
+          rentRecordUuid: 'nope',
+          amount: 100,
+          paidOn: '2026-03-10',
+        ),
+      );
       expect((r as Err<String>).failure, isA<StorageFailure>());
     });
 
-    test('a payment for an older month is allowed (paying old dues)',
-        () async {
+    test('a payment for an older month is allowed (paying old dues)', () async {
       final id = ok(await add(name: 'old', start: '2026-01'));
       final january = ok(await h.records.getRecords(id)).first;
 
-      ok(await recordPayment(RecordPaymentArgumentModel(
-        rentRecordUuid: january.uuid,
-        amount: 5000,
-        paidOn: '2026-03-15',
-      )));
+      ok(
+        await recordPayment(
+          RecordPaymentArgumentModel(
+            rentRecordUuid: january.uuid,
+            amount: 5000,
+            paidOn: '2026-03-15',
+          ),
+        ),
+      );
 
-      expect(ok(await h.payments.getPaymentsOfRecord(january.uuid)), hasLength(1));
+      expect(
+        ok(await h.payments.getPaymentsOfRecord(january.uuid)),
+        hasLength(1),
+      );
     });
 
     test('Undo removes exactly that payment', () async {
@@ -296,47 +322,55 @@ void main() {
       id = ok(await add(start: '2026-01', rent: 5000));
     });
 
-    test('applies from next month only: past and current months keep 5000',
-        () async {
-      ok(await changeRent(id, 7000));
+    test(
+      'applies from next month only: past and current months keep 5000',
+      () async {
+        ok(await changeRent(id, 7000));
 
-      expect(await amountsOf(id), {
-        '2026-01': 5000,
-        '2026-02': 5000,
-        '2026-03': 5000,
-      });
-      expect(ok(await h.history.getRentForMonth(id, '2026-03')), 5000);
-      expect(ok(await h.history.getRentForMonth(id, '2026-04')), 7000);
-    });
+        expect(await amountsOf(id), {
+          '2026-01': 5000,
+          '2026-02': 5000,
+          '2026-03': 5000,
+        });
+        expect(ok(await h.history.getRentForMonth(id, '2026-03')), 5000);
+        expect(ok(await h.history.getRentForMonth(id, '2026-04')), 7000);
+      },
+    );
 
-    test('the first month is not changed either, while its record exists',
-        () async {
-      final first = ok(await add(name: 'x', start: '2026-03', rent: 5000));
+    test(
+      'the first month is not changed either, while its record exists',
+      () async {
+        final first = ok(await add(name: 'x', start: '2026-03', rent: 5000));
 
-      ok(await changeRent(first, 9000));
+        ok(await changeRent(first, 9000));
 
-      expect((await amountsOf(first))['2026-03'], 5000);
-    });
+        expect((await amountsOf(first))['2026-03'], 5000);
+      },
+    );
 
-    test('next month then gets the new rent when its record is created',
-        () async {
-      ok(await changeRent(id, 7000));
-      h.clock.setToday('2026-04-01');
-      ok(await ensure());
+    test(
+      'next month then gets the new rent when its record is created',
+      () async {
+        ok(await changeRent(id, 7000));
+        h.clock.setToday('2026-04-01');
+        ok(await ensure());
 
-      expect((await amountsOf(id))['2026-04'], 7000);
-    });
+        expect((await amountsOf(id))['2026-04'], 7000);
+      },
+    );
 
     test('if next month\'s record already exists it is updated', () async {
       // Put an April record in place before the change.
-      ok(await h.records.insertMissing([
-        RentRecordModel(
-          uuid: 'apr',
-          tenantUuid: id,
-          month: '2026-04',
-          requiredAmount: 5000,
-        ),
-      ]));
+      ok(
+        await h.records.insertMissing([
+          RentRecordModel(
+            uuid: 'apr',
+            tenantUuid: id,
+            month: '2026-04',
+            requiredAmount: 5000,
+          ),
+        ]),
+      );
 
       ok(await changeRent(id, 7000));
 
@@ -350,7 +384,10 @@ void main() {
 
       expect(ok(await h.history.getRentForMonth(id, '2026-04')), 6500);
       final history = ok(await h.history.getHistory(id));
-      expect(history.where((e) => e.effectiveFromMonth == '2026-04'), hasLength(1));
+      expect(
+        history.where((e) => e.effectiveFromMonth == '2026-04'),
+        hasLength(1),
+      );
     });
 
     test('a decrease does not reduce backlog', () async {
@@ -383,25 +420,34 @@ void main() {
   });
 
   group('DeleteTenantUsecase', () {
-    test('archives the tenant with the current month and keeps everything',
-        () async {
-      final id = ok(await add(start: '2026-02'));
-      final first = ok(await h.records.getRecords(id)).first;
-      ok(await recordPayment(RecordPaymentArgumentModel(
-        rentRecordUuid: first.uuid,
-        amount: 1000,
-        paidOn: '2026-02-05',
-      )));
+    test(
+      'archives the tenant with the current month and keeps everything',
+      () async {
+        final id = ok(await add(start: '2026-02'));
+        final first = ok(await h.records.getRecords(id)).first;
+        ok(
+          await recordPayment(
+            RecordPaymentArgumentModel(
+              rentRecordUuid: first.uuid,
+              amount: 1000,
+              paidOn: '2026-02-05',
+            ),
+          ),
+        );
 
-      ok(await deleteTenant(id));
+        ok(await deleteTenant(id));
 
-      final tenant = ok(await h.tenants.getTenant(id))!;
-      expect(tenant.deletedMonth, '2026-03');
-      expect(ok(await h.tenants.getActiveTenants()), isEmpty);
-      expect(await monthsOf(id), ['2026-02', '2026-03']);
-      expect(ok(await h.payments.getPaymentsOfRecord(first.uuid)), hasLength(1));
-      expect(ok(await h.history.getHistory(id)), hasLength(1));
-    });
+        final tenant = ok(await h.tenants.getTenant(id))!;
+        expect(tenant.deletedMonth, '2026-03');
+        expect(ok(await h.tenants.getActiveTenants()), isEmpty);
+        expect(await monthsOf(id), ['2026-02', '2026-03']);
+        expect(
+          ok(await h.payments.getPaymentsOfRecord(first.uuid)),
+          hasLength(1),
+        );
+        expect(ok(await h.history.getHistory(id)), hasLength(1));
+      },
+    );
 
     test('deleting a tenant that still owes money is allowed', () async {
       final id = ok(await add(start: '2026-01'));
@@ -419,6 +465,49 @@ void main() {
 
       expect(errorOf(await deleteTenant(id)), 'tenant_deleted');
       expect(ok(await h.tenants.getTenant(id))!.deletedMonth, '2026-03');
+    });
+  });
+
+  group('RenameTenantUsecase', () {
+    test('changes only the name, trimmed', () async {
+      final id = ok(await add(start: '2026-02'));
+      final before = ok(await h.tenants.getTenant(id))!;
+
+      ok(await RenameTenantUsecase(h.tenants)(id, '  Ravi Kumar '));
+
+      final after = ok(await h.tenants.getTenant(id))!;
+      expect(after.name, 'Ravi Kumar');
+      expect(after.dueDay, before.dueDay);
+      expect(after.startMonth, before.startMonth);
+      expect(after.deletedMonth, isNull);
+      expect(await monthsOf(id), ['2026-02', '2026-03']);
+    });
+
+    test('empty name is rejected and the old name stays', () async {
+      final id = ok(await add());
+      final rename = RenameTenantUsecase(h.tenants);
+
+      expect(errorOf(await rename(id, '   ')), 'name_required');
+      expect(ok(await h.tenants.getTenant(id))!.name, isNot(''));
+    });
+
+    test('unknown tenant', () async {
+      expect(
+        errorOf(await RenameTenantUsecase(h.tenants)('nope', 'Ravi')),
+        'tenant_not_found',
+      );
+    });
+
+    test('an archived tenant cannot be renamed', () async {
+      final id = ok(await add());
+      final oldName = ok(await h.tenants.getTenant(id))!.name;
+      ok(await deleteTenant(id));
+
+      expect(
+        errorOf(await RenameTenantUsecase(h.tenants)(id, 'Ravi')),
+        'tenant_deleted',
+      );
+      expect(ok(await h.tenants.getTenant(id))!.name, oldName);
     });
   });
 
@@ -444,8 +533,10 @@ void main() {
     });
 
     test('an unsupported language is rejected and not saved', () async {
-      expect(errorOf(await SetLanguageUsecase(settings)('fr')),
-          'language_unsupported');
+      expect(
+        errorOf(await SetLanguageUsecase(settings)('fr')),
+        'language_unsupported',
+      );
       expect(ok(await LoadSettingsUsecase(settings)()).languageCode, 'en');
     });
   });

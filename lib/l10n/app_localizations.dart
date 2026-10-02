@@ -398,6 +398,24 @@ abstract class AppLocalizations {
   /// **'Remove this tenant'**
   String get btnDelete;
 
+  /// No description provided for @btnEditName.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit name'**
+  String get btnEditName;
+
+  /// No description provided for @editNameTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit tenant\'s name'**
+  String get editNameTitle;
+
+  /// No description provided for @nameSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Name changed to {name}'**
+  String nameSaved(Object name);
+
   /// No description provided for @history.
   ///
   /// In en, this message translates to:

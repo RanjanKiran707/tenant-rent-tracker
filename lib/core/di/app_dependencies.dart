@@ -11,6 +11,7 @@ import 'package:tenant_tracker/domain/use_cases/business/change_rent/change_rent
 import 'package:tenant_tracker/domain/use_cases/business/delete_tenant/delete_tenant_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/business/ensure_rent_records/ensure_rent_records_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/business/record_payment/record_payment_usecase.dart';
+import 'package:tenant_tracker/domain/use_cases/business/rename_tenant/rename_tenant_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/business/settings/settings_usecases.dart';
 import 'package:tenant_tracker/domain/use_cases/business/undo_payment/undo_payment_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/ui/load_add_tenant_form/load_add_tenant_form_usecase.dart';
@@ -34,6 +35,7 @@ class AppDependencies {
   final UndoPaymentUsecase undoPayment;
   final ChangeRentUsecase changeRent;
   final DeleteTenantUsecase deleteTenant;
+  final RenameTenantUsecase renameTenant;
   final LoadSettingsUsecase loadSettings;
   final SetLanguageUsecase setLanguage;
   final SetShowTipsUsecase setShowTips;
@@ -54,6 +56,7 @@ class AppDependencies {
     required this.undoPayment,
     required this.changeRent,
     required this.deleteTenant,
+    required this.renameTenant,
     required this.loadSettings,
     required this.setLanguage,
     required this.setShowTips,
@@ -89,8 +92,12 @@ class AppDependencies {
     final settings = SettingsRepository(prefs);
 
     // 2. Domain layer.
-    final ensureRentRecords =
-        EnsureRentRecordsUsecase(tenants, history, records, clock);
+    final ensureRentRecords = EnsureRentRecordsUsecase(
+      tenants,
+      history,
+      records,
+      clock,
+    );
 
     return AppDependencies._(
       addTenant: AddTenantUsecase(tenants, ensureRentRecords, clock),
@@ -99,16 +106,26 @@ class AppDependencies {
       undoPayment: UndoPaymentUsecase(payments),
       changeRent: ChangeRentUsecase(tenants, history, clock),
       deleteTenant: DeleteTenantUsecase(tenants, clock),
+      renameTenant: RenameTenantUsecase(tenants),
       loadSettings: LoadSettingsUsecase(settings),
       setLanguage: SetLanguageUsecase(settings),
       setShowTips: SetShowTipsUsecase(settings),
       markWelcomeSeen: MarkWelcomeSeenUsecase(settings),
       watchHome: WatchHomeUsecase(tenants, records, payments, clock),
-      watchTenantDetail:
-          WatchTenantDetailUsecase(tenants, records, payments, history, clock),
+      watchTenantDetail: WatchTenantDetailUsecase(
+        tenants,
+        records,
+        payments,
+        history,
+        clock,
+      ),
       watchArchivedTenants: WatchArchivedTenantsUsecase(tenants, records),
-      loadPaymentOptions:
-          LoadPaymentOptionsUsecase(tenants, records, payments, clock),
+      loadPaymentOptions: LoadPaymentOptionsUsecase(
+        tenants,
+        records,
+        payments,
+        clock,
+      ),
       loadRentChangeInfo: LoadRentChangeInfoUsecase(tenants, history, clock),
       loadAddTenantForm: LoadAddTenantFormUsecase(clock),
     );

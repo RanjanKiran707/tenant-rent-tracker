@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tenant_tracker/core/errors/failure.dart';
 import 'package:tenant_tracker/core/di/app_dependencies.dart';
 import 'package:tenant_tracker/core/utils/view_state.dart';
 import 'package:tenant_tracker/domain/use_cases/ui/month_status/month_status.dart';
@@ -17,9 +18,9 @@ import '../domain/harness.dart';
 import 'feature_harness.dart';
 
 String? _code(ViewState<Object?> s) => switch (s) {
-      ViewStateError(failure: final f) => f.message,
-      _ => null,
-    };
+  ViewStateError(failure: final f) => f.message,
+  _ => null,
+};
 
 void main() {
   late Harness h;
@@ -51,11 +52,11 @@ void main() {
 
   group('AppViewModel', () {
     AppViewModel build() => AppViewModel(
-          loadSettings: deps.loadSettings,
-          setLanguage: deps.setLanguage,
-          setShowTips: deps.setShowTips,
-          markWelcomeSeen: deps.markWelcomeSeen,
-        );
+      loadSettings: deps.loadSettings,
+      setLanguage: deps.setLanguage,
+      setShowTips: deps.setShowTips,
+      markWelcomeSeen: deps.markWelcomeSeen,
+    );
 
     test('loads the defaults', () async {
       final vm = build();
@@ -92,26 +93,35 @@ void main() {
 
   group('HomeViewModel', () {
     HomeViewModel build() => HomeViewModel(
-          ensureRentRecords: deps.ensureRentRecords,
-          watchHome: deps.watchHome,
-        );
+      ensureRentRecords: deps.ensureRentRecords,
+      watchHome: deps.watchHome,
+    );
 
-    test('starts Loading, then lists tenants after creating missing records',
-        () async {
-      // Added straight to the repository: no monthly records exist yet.
-      await seedTenantWithoutRecords(h, id: 'a', start: '2026-01', rent: 8000);
-      final vm = build();
-      expect(vm.state.value, isA<ViewStateLoading<Object?>>());
-      await vm.refresh();
-      final data = loaded(await waitFor(vm.state, (s) => s is ViewStateLoaded));
-      expect(data.currentMonth, '2026-03');
-      expect(data.rows.single.name, 'a');
-      // 15 March, due day 10, nothing paid.
-      expect(data.rows.single.status, MonthStatus.overdue);
-      // January and February were created and are owed.
-      expect(data.rows.single.oldDues, 16000);
-      vm.dispose();
-    });
+    test(
+      'starts Loading, then lists tenants after creating missing records',
+      () async {
+        // Added straight to the repository: no monthly records exist yet.
+        await seedTenantWithoutRecords(
+          h,
+          id: 'a',
+          start: '2026-01',
+          rent: 8000,
+        );
+        final vm = build();
+        expect(vm.state.value, isA<ViewStateLoading<Object?>>());
+        await vm.refresh();
+        final data = loaded(
+          await waitFor(vm.state, (s) => s is ViewStateLoaded),
+        );
+        expect(data.currentMonth, '2026-03');
+        expect(data.rows.single.name, 'a');
+        // 15 March, due day 10, nothing paid.
+        expect(data.rows.single.status, MonthStatus.overdue);
+        // January and February were created and are owed.
+        expect(data.rows.single.oldDues, 16000);
+        vm.dispose();
+      },
+    );
 
     test('updates when a payment is recorded', () async {
       await seedTenant(h, id: 'a', start: '2026-03', rent: 5000);
@@ -121,8 +131,14 @@ void main() {
       expect(loaded(vm.state.value).received, 0);
 
       await payTo(h, 'a', '2026-03', 5000, '2026-03-05');
-      final data = loaded(await waitFor(
-          vm.state, (s) => s is ViewStateLoaded<WatchHomeReturnModel> && s.data.received == 5000));
+      final data = loaded(
+        await waitFor(
+          vm.state,
+          (s) =>
+              s is ViewStateLoaded<WatchHomeReturnModel> &&
+              s.data.received == 5000,
+        ),
+      );
       expect(data.toReceive, 0);
       expect(data.rows.single.status, MonthStatus.completed);
       vm.dispose();
@@ -137,11 +153,14 @@ void main() {
       // A new month: the second refresh creates April's record.
       h.clock.setToday('2026-04-02');
       await vm.refresh();
-      final data = loaded(await waitFor(
+      final data = loaded(
+        await waitFor(
           vm.state,
           (s) =>
               s is ViewStateLoaded<WatchHomeReturnModel> &&
-              s.data.currentMonth == '2026-04'));
+              s.data.currentMonth == '2026-04',
+        ),
+      );
       expect(data.rows.single.oldDues, 5000); // March is now an old due
       vm.dispose();
     });
@@ -170,9 +189,9 @@ void main() {
 
   group('AddTenantViewModel', () {
     AddTenantViewModel build() => AddTenantViewModel(
-          loadForm: deps.loadAddTenantForm,
-          addTenant: deps.addTenant,
-        );
+      loadForm: deps.loadAddTenantForm,
+      addTenant: deps.addTenant,
+    );
 
     test('form defaults: due day 10, current month, 12 months', () {
       final vm = build();
@@ -221,12 +240,41 @@ void main() {
 
   group('TenantDetailViewModel', () {
     TenantDetailViewModel build(String id) => TenantDetailViewModel(
-          bundle: TenantDetailBundle(tenantUuid: id),
-          ensureRentRecords: deps.ensureRentRecords,
-          watchTenantDetail: deps.watchTenantDetail,
-          deleteTenant: deps.deleteTenant,
-          undoPayment: deps.undoPayment,
-        );
+      bundle: TenantDetailBundle(tenantUuid: id),
+      ensureRentRecords: deps.ensureRentRecords,
+      watchTenantDetail: deps.watchTenantDetail,
+      deleteTenant: deps.deleteTenant,
+      renameTenant: deps.renameTenant,
+      undoPayment: deps.undoPayment,
+    );
+
+    test('rename updates the loaded name', () async {
+      await seedTenant(h, id: 'a', start: '2026-02', rent: 6000);
+      final vm = build('a');
+      await vm.refresh();
+      await waitFor(vm.state, (s) => s is ViewStateLoaded);
+
+      expect(await vm.rename('  Ravi Kumar '), isNull);
+
+      final data = loaded(
+        await waitFor(
+          vm.state,
+          (s) =>
+              s is ViewStateLoaded<WatchTenantDetailReturnModel> &&
+              s.data.name == 'Ravi Kumar',
+        ),
+      );
+      expect(data.name, 'Ravi Kumar');
+      vm.dispose();
+    });
+
+    test('rename with an empty name returns a failure', () async {
+      await seedTenant(h, id: 'a', start: '2026-02', rent: 6000);
+      final vm = build('a');
+      final failure = await vm.rename('   ');
+      expect(failure, isA<ValidationFailure>());
+      vm.dispose();
+    });
 
     test('loads the tenant with old dues', () async {
       await seedTenant(h, id: 'a', start: '2026-02', rent: 6000);
@@ -257,11 +305,14 @@ void main() {
       expect(loaded(vm.state.value).topMonth!.paid, 6000);
 
       expect(await vm.undoPayment(id), isNull);
-      final data = loaded(await waitFor(
+      final data = loaded(
+        await waitFor(
           vm.state,
           (s) =>
               s is ViewStateLoaded<WatchTenantDetailReturnModel> &&
-              s.data.topMonth!.paid == 0));
+              s.data.topMonth!.paid == 0,
+        ),
+      );
       expect(data.topMonth!.balance, 6000);
       vm.dispose();
     });
@@ -291,11 +342,14 @@ void main() {
       final vm = build('a');
       await vm.onDelete();
       await vm.refresh();
-      final data = loaded(await waitFor(
+      final data = loaded(
+        await waitFor(
           vm.state,
           (s) =>
               s is ViewStateLoaded<WatchTenantDetailReturnModel> &&
-              s.data.readOnly));
+              s.data.readOnly,
+        ),
+      );
       expect(data.deletedMonth, '2026-03');
       vm.dispose();
     });
@@ -305,7 +359,9 @@ void main() {
     RecordPaymentViewModel build(String id, {String? record}) =>
         RecordPaymentViewModel(
           bundle: RecordPaymentBundle(
-              tenantUuid: id, initialRentRecordUuid: record),
+            tenantUuid: id,
+            initialRentRecordUuid: record,
+          ),
           loadPaymentOptions: deps.loadPaymentOptions,
           recordPayment: deps.recordPayment,
         );
@@ -325,8 +381,9 @@ void main() {
 
     test('a month from the bundle is preselected', () async {
       await seedTenant(h, id: 'a', start: '2026-02', rent: 6000);
-      final feb = ok(await h.records.getRecords('a'))
-          .firstWhere((r) => r.month == '2026-02');
+      final feb = ok(
+        await h.records.getRecords('a'),
+      ).firstWhere((r) => r.month == '2026-02');
       final vm = build('a', record: feb.uuid);
       await vm.load();
       expect(vm.selectedOption!.month, '2026-02');
@@ -383,16 +440,18 @@ void main() {
       final vm = build('a');
       await vm.load();
       final feb = vm.loadState.value is ViewStateLoaded
-          ? loaded(vm.loadState.value)
-              .options
-              .firstWhere((o) => o.month == '2026-02')
+          ? loaded(
+              vm.loadState.value,
+            ).options.firstWhere((o) => o.month == '2026-02')
           : throw StateError('not loaded');
       vm.onMonthChanged(feb.rentRecordUuid);
       vm.onAmountChanged('2500');
       vm.onDateChanged('2026-03-10');
       await vm.onSave();
       final paymentUuid = loaded(vm.saveState.value);
-      final payments = ok(await h.payments.getPaymentsOfRecord(feb.rentRecordUuid));
+      final payments = ok(
+        await h.payments.getPaymentsOfRecord(feb.rentRecordUuid),
+      );
       expect(payments.single.uuid, paymentUuid);
       expect(payments.single.amount, 2500);
       expect(payments.single.paidOn, '2026-03-10');
@@ -420,10 +479,10 @@ void main() {
 
   group('ChangeRentViewModel', () {
     ChangeRentViewModel build(String id) => ChangeRentViewModel(
-          bundle: ChangeRentBundle(tenantUuid: id),
-          loadInfo: deps.loadRentChangeInfo,
-          changeRent: deps.changeRent,
-        );
+      bundle: ChangeRentBundle(tenantUuid: id),
+      loadInfo: deps.loadRentChangeInfo,
+      changeRent: deps.changeRent,
+    );
 
     test('loads the current rent and the start month of the change', () async {
       await seedTenant(h, id: 'a', start: '2026-03', rent: 6000);
@@ -497,5 +556,4 @@ void main() {
       await Future<void>.delayed(const Duration(milliseconds: 50));
     });
   });
-
 }

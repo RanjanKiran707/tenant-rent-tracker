@@ -176,6 +176,17 @@ class AppLocalizationsKn extends AppLocalizations {
   String get btnDelete => 'ಈ ಬಾಡಿಗೆದಾರರನ್ನು ತೆಗೆಯಿರಿ';
 
   @override
+  String get btnEditName => 'ಹೆಸರು ಬದಲಿಸಿ';
+
+  @override
+  String get editNameTitle => 'ಬಾಡಿಗೆದಾರರ ಹೆಸರು ಬದಲಿಸಿ';
+
+  @override
+  String nameSaved(Object name) {
+    return 'ಹೆಸರನ್ನು $name ಎಂದು ಬದಲಿಸಲಾಗಿದೆ';
+  }
+
+  @override
   String get history => 'ಹಿಂದಿನ ತಿಂಗಳುಗಳು';
 
   @override
