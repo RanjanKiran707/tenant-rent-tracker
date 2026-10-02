@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:tenant_tracker/core/di/app_dependencies.dart';
 import 'package:tenant_tracker/core/utils/view_state.dart';
@@ -13,6 +14,7 @@ import 'package:tenant_tracker/l10n/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   await AppDependencies.init();
   runApp(const MyApp());
 }
