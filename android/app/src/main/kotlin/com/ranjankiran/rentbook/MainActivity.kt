@@ -1,4 +1,4 @@
-package com.example.tenant_tracker
+package com.ranjankiran.rentbook
 
 import io.flutter.embedding.android.FlutterActivity
 
