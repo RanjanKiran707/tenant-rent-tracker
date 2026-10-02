@@ -67,9 +67,21 @@ class AppDependencies {
   });
 
   static Future<void> init() async {
+    instance = create(
+      db: AppDatabase(),
+      prefs: await SharedPreferences.getInstance(),
+      clock: const SystemClock(),
+    );
+  }
+
+  /// Builds everything from a database, preferences and a clock. [init] uses
+  /// the real ones; tests pass an in-memory database and a fake clock.
+  static AppDependencies create({
+    required AppDatabase db,
+    required SharedPreferences prefs,
+    required Clock clock,
+  }) {
     // 1. Data layer (the only place that knows the real implementations).
-    final db = AppDatabase();
-    final prefs = await SharedPreferences.getInstance();
     final tenants = TenantRepository(db);
     final history = RentHistoryRepository(db);
     final records = RentRecordRepository(db);
@@ -77,11 +89,10 @@ class AppDependencies {
     final settings = SettingsRepository(prefs);
 
     // 2. Domain layer.
-    const Clock clock = SystemClock();
     final ensureRentRecords =
         EnsureRentRecordsUsecase(tenants, history, records, clock);
 
-    instance = AppDependencies._(
+    return AppDependencies._(
       addTenant: AddTenantUsecase(tenants, ensureRentRecords, clock),
       ensureRentRecords: ensureRentRecords,
       recordPayment: RecordPaymentUsecase(payments, clock),
