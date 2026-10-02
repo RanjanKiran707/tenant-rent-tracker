@@ -1,6 +1,6 @@
 # Tenant Tracker – Data Model
 
-Reference for the database tables. Rules come from `specs.md`. Storage is drift (SQLite), used only inside `data/`.
+Reference for the database tables. Rules come from `specs.md`. Storage is drift (SQLite), used only inside `data/`. A diagram of the tables is in `erd_tenant_tracker.md`.
 
 ## Conventions
 
@@ -75,7 +75,7 @@ Tenant 1 ──< RentRecord 1 ──< Payment
 
 | Spec rule | How |
 |---|---|
-| Rent change applies from next month | upsert RentHistory at `nextMonth`; if next month's RentRecord already exists, update its `requiredAmount` |
+| Rent change applies from next month | `RentHistoryRepository.changeRent(...)`: one transaction that upserts RentHistory at the month and, if that month's RentRecord already exists, updates its `requiredAmount`. The repository does not check the month: the **use case** must pass next month only (it knows today's date) |
 | Past, current and backlog amounts unchanged | RentRecord snapshot, never rewritten except next month |
 | Completed vs Late Completed vs Backlog Cleared | walk the month's Payments in `paidOn` order; the date the running total reaches `requiredAmount` is compared with the due date and month end |
 | Due date | `min(dueDay, daysInMonth)` of the record's month |

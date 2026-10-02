@@ -1,14 +1,105 @@
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tenant_tracker/core/utils/clock.dart';
+import 'package:tenant_tracker/data/database/app_database.dart';
+import 'package:tenant_tracker/data/payment/payment_repository.dart';
+import 'package:tenant_tracker/data/rent_history/rent_history_repository.dart';
+import 'package:tenant_tracker/data/rent_record/rent_record_repository.dart';
+import 'package:tenant_tracker/data/settings/settings_repository.dart';
+import 'package:tenant_tracker/data/tenant/tenant_repository.dart';
+import 'package:tenant_tracker/domain/use_cases/business/add_tenant/add_tenant_usecase.dart';
+import 'package:tenant_tracker/domain/use_cases/business/change_rent/change_rent_usecase.dart';
+import 'package:tenant_tracker/domain/use_cases/business/delete_tenant/delete_tenant_usecase.dart';
+import 'package:tenant_tracker/domain/use_cases/business/ensure_rent_records/ensure_rent_records_usecase.dart';
+import 'package:tenant_tracker/domain/use_cases/business/record_payment/record_payment_usecase.dart';
+import 'package:tenant_tracker/domain/use_cases/business/settings/settings_usecases.dart';
+import 'package:tenant_tracker/domain/use_cases/business/undo_payment/undo_payment_usecase.dart';
+import 'package:tenant_tracker/domain/use_cases/ui/load_add_tenant_form/load_add_tenant_form_usecase.dart';
+import 'package:tenant_tracker/domain/use_cases/ui/load_payment_options/load_payment_options_usecase.dart';
+import 'package:tenant_tracker/domain/use_cases/ui/load_rent_change_info/load_rent_change_info_usecase.dart';
+import 'package:tenant_tracker/domain/use_cases/ui/watch_archived_tenants/watch_archived_tenants_usecase.dart';
+import 'package:tenant_tracker/domain/use_cases/ui/watch_home/watch_home_usecase.dart';
+import 'package:tenant_tracker/domain/use_cases/ui/watch_tenant_detail/watch_tenant_detail_usecase.dart';
+
 /// Everything global is built once, at startup, in one place.
-/// Nothing else creates repositories or use cases.
+/// Nothing else creates repositories or use cases. Views and ViewModels get
+/// use cases only; the repositories stay inside [init].
 class AppDependencies {
   // Set once in main() before runApp. Tests can replace it.
   static late AppDependencies instance;
 
-  AppDependencies._();
+  // Business use cases: they write and validate.
+  final AddTenantUsecase addTenant;
+  final EnsureRentRecordsUsecase ensureRentRecords;
+  final RecordPaymentUsecase recordPayment;
+  final UndoPaymentUsecase undoPayment;
+  final ChangeRentUsecase changeRent;
+  final DeleteTenantUsecase deleteTenant;
+  final LoadSettingsUsecase loadSettings;
+  final SetLanguageUsecase setLanguage;
+  final SetShowTipsUsecase setShowTips;
+  final MarkWelcomeSeenUsecase markWelcomeSeen;
+
+  // UI use cases: they only read, for presentation.
+  final WatchHomeUsecase watchHome;
+  final WatchTenantDetailUsecase watchTenantDetail;
+  final WatchArchivedTenantsUsecase watchArchivedTenants;
+  final LoadPaymentOptionsUsecase loadPaymentOptions;
+  final LoadRentChangeInfoUsecase loadRentChangeInfo;
+  final LoadAddTenantFormUsecase loadAddTenantForm;
+
+  AppDependencies._({
+    required this.addTenant,
+    required this.ensureRentRecords,
+    required this.recordPayment,
+    required this.undoPayment,
+    required this.changeRent,
+    required this.deleteTenant,
+    required this.loadSettings,
+    required this.setLanguage,
+    required this.setShowTips,
+    required this.markWelcomeSeen,
+    required this.watchHome,
+    required this.watchTenantDetail,
+    required this.watchArchivedTenants,
+    required this.loadPaymentOptions,
+    required this.loadRentChangeInfo,
+    required this.loadAddTenantForm,
+  });
 
   static Future<void> init() async {
     // 1. Data layer (the only place that knows the real implementations).
-    // 2. Domain layer (use cases).
-    instance = AppDependencies._();
+    final db = AppDatabase();
+    final prefs = await SharedPreferences.getInstance();
+    final tenants = TenantRepository(db);
+    final history = RentHistoryRepository(db);
+    final records = RentRecordRepository(db);
+    final payments = PaymentRepository(db);
+    final settings = SettingsRepository(prefs);
+
+    // 2. Domain layer.
+    const Clock clock = SystemClock();
+    final ensureRentRecords =
+        EnsureRentRecordsUsecase(tenants, history, records, clock);
+
+    instance = AppDependencies._(
+      addTenant: AddTenantUsecase(tenants, ensureRentRecords, clock),
+      ensureRentRecords: ensureRentRecords,
+      recordPayment: RecordPaymentUsecase(payments, clock),
+      undoPayment: UndoPaymentUsecase(payments),
+      changeRent: ChangeRentUsecase(tenants, history, clock),
+      deleteTenant: DeleteTenantUsecase(tenants, clock),
+      loadSettings: LoadSettingsUsecase(settings),
+      setLanguage: SetLanguageUsecase(settings),
+      setShowTips: SetShowTipsUsecase(settings),
+      markWelcomeSeen: MarkWelcomeSeenUsecase(settings),
+      watchHome: WatchHomeUsecase(tenants, records, payments, clock),
+      watchTenantDetail:
+          WatchTenantDetailUsecase(tenants, records, payments, history, clock),
+      watchArchivedTenants: WatchArchivedTenantsUsecase(tenants, records),
+      loadPaymentOptions:
+          LoadPaymentOptionsUsecase(tenants, records, payments, clock),
+      loadRentChangeInfo: LoadRentChangeInfoUsecase(tenants, history, clock),
+      loadAddTenantForm: LoadAddTenantFormUsecase(clock),
+    );
   }
 }

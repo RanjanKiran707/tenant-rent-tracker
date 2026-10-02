@@ -427,6 +427,15 @@ A plain pass-through (one repository call, no logic, one feature) may still have
 | Action with result | `Future<Result<XReturnModel>>` |
 | Live data | `Stream<Result<XReturnModel>>` |
 
+### 6.3.1 Business use cases and UI use cases (optional split)
+
+When an app has many use cases, split `domain/use_cases/` into two folders:
+
+- `business/`: actions that **write and validate** (add, record, change, delete). They return `Future<Result<..>>` and enforce the rules.
+- `ui/`: **read-only**, presentation-only use cases that shape data for one screen (lists, totals, computed statuses, form options). They return a `Stream<Result<..>>` for live screens or a one-time `Future<Result<..>>` for forms. They never write.
+
+Rules: a UI use case never calls a business use case; if reads need data to exist first (for example monthly records), a ViewModel runs the business use case, then subscribes to the UI use case. Shared pure helpers for the UI use cases (for example a status calculation) live in a folder next to them under `ui/`. A use case with no I/O and no failure may return its model directly instead of a `Result`.
+
 ### 6.4 Action with logic — `AddStudentUsecase`
 
 `domain/use_cases/add_student/add_student_argument_model.dart`

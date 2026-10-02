@@ -1,0 +1,23 @@
+import 'package:tenant_tracker/core/errors/result.dart';
+import 'package:tenant_tracker/data/tenant/tenant_model.dart';
+
+abstract interface class TenantRepositoryInterface {
+  /// Saves the tenant and its first rent (effective from `startMonth`)
+  /// together: both are saved or neither.
+  Future<Result<void>> addTenant(TenantModel tenant, int initialRent);
+
+  /// Returns null inside `Ok` when no tenant has this uuid.
+  Future<Result<TenantModel?>> getTenant(String uuid);
+
+  /// One-shot version of [watchActiveTenants], oldest first.
+  Future<Result<List<TenantModel>>> getActiveTenants();
+
+  /// Tenants with no `deletedMonth`, oldest first.
+  Stream<Result<List<TenantModel>>> watchActiveTenants();
+
+  /// Tenants with a `deletedMonth` (the Archived list), newest deletion first.
+  Stream<Result<List<TenantModel>>> watchArchivedTenants();
+
+  /// Soft delete: sets `deletedMonth` (`YYYY-MM`). All rows are kept.
+  Future<Result<void>> deleteTenant(String uuid, String deletedMonth);
+}
