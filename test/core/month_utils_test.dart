@@ -27,7 +27,10 @@ void main() {
   });
 
   group('dueDateOf', () {
-    test('a normal due day', () => expect(dueDateOf('2026-03', 10), '2026-03-10'));
+    test(
+      'a normal due day',
+      () => expect(dueDateOf('2026-03', 10), '2026-03-10'),
+    );
 
     test('due day 31 falls back to the last day of a shorter month', () {
       expect(dueDateOf('2026-04', 31), '2026-04-30');
@@ -49,10 +52,17 @@ void main() {
 
   group('monthsBetween', () {
     test('both ends included', () {
-      expect(monthsBetween('2026-11', '2027-02'),
-          ['2026-11', '2026-12', '2027-01', '2027-02']);
+      expect(monthsBetween('2026-11', '2027-02'), [
+        '2026-11',
+        '2026-12',
+        '2027-01',
+        '2027-02',
+      ]);
     });
-    test('same month', () => expect(monthsBetween('2026-03', '2026-03'), ['2026-03']));
+    test(
+      'same month',
+      () => expect(monthsBetween('2026-03', '2026-03'), ['2026-03']),
+    );
     test('from after to is empty', () {
       expect(monthsBetween('2026-04', '2026-03'), isEmpty);
     });

@@ -36,8 +36,8 @@ class RentHistories extends Table {
 
   @override
   List<Set<Column>> get uniqueKeys => [
-        {tenantUuid, effectiveFromMonth},
-      ];
+    {tenantUuid, effectiveFromMonth},
+  ];
 }
 
 @DataClassName('RentRecordRow')
@@ -55,8 +55,8 @@ class RentRecords extends Table {
 
   @override
   List<Set<Column>> get uniqueKeys => [
-        {tenantUuid, month},
-      ];
+    {tenantUuid, month},
+  ];
 }
 
 @DataClassName('PaymentRow')

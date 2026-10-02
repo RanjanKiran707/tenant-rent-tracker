@@ -73,17 +73,21 @@ class WatchTenantDetailUsecase {
     final readOnly = tenant.isDeleted;
 
     // Months that count: from the start month up to now, newest first.
-    final visible = records
-        .where((r) =>
-            r.month.compareTo(current) <= 0 &&
-            r.month.compareTo(tenant.startMonth) >= 0)
-        .toList()
-      ..sort((a, b) => b.month.compareTo(a.month));
+    final visible =
+        records
+            .where(
+              (r) =>
+                  r.month.compareTo(current) <= 0 &&
+                  r.month.compareTo(tenant.startMonth) >= 0,
+            )
+            .toList()
+          ..sort((a, b) => b.month.compareTo(a.month));
 
     MonthDetail detailOf(RentRecordModel r) {
       final paid = byRecord[r.uuid] ?? const <PaymentModel>[];
       final received = paidAsOf(paid, today);
-      final ordered = [...paid]..sort((a, b) {
+      final ordered = [...paid]
+        ..sort((a, b) {
           final byDay = a.paidOn.compareTo(b.paidOn);
           return byDay != 0 ? byDay : a.createdOn.compareTo(b.createdOn);
         });
@@ -134,8 +138,9 @@ class WatchTenantDetailUsecase {
         .map(detailOf)
         .firstOrNull;
 
-    final pending =
-        history.where((h) => h.effectiveFromMonth.compareTo(current) > 0);
+    final pending = history.where(
+      (h) => h.effectiveFromMonth.compareTo(current) > 0,
+    );
 
     return WatchTenantDetailReturnModel(
       tenantUuid: tenant.uuid,
@@ -143,7 +148,8 @@ class WatchTenantDetailUsecase {
       dueDay: tenant.dueDay,
       readOnly: readOnly,
       deletedMonth: tenant.deletedMonth,
-      currentRent: topDetail?.requiredAmount ?? _rentFromHistory(history, current),
+      currentRent:
+          topDetail?.requiredAmount ?? _rentFromHistory(history, current),
       topMonth: topDetail,
       oldDues: oldDues,
       oldestOwingMonth: oldest?.month,

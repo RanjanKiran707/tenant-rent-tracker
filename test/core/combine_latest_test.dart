@@ -33,9 +33,8 @@ void main() {
     unawaited(c.close());
   });
 
-  List<Object?> shown() => out
-      .map((r) => r.fold((f) => 'err:${f.message}', (v) => v))
-      .toList();
+  List<Object?> shown() =>
+      out.map((r) => r.fold((f) => 'err:${f.message}', (v) => v)).toList();
 
   test('emits nothing until all three sources have emitted', () async {
     a.add(const Ok(1));
@@ -89,8 +88,10 @@ void main() {
     final y = StreamController<Result<int>>();
     final got = <Object?>[];
     final s = combineLatest2<int, int, String>(
-            x.stream, y.stream, (p, q) => '$p+$q')
-        .listen((r) => got.add(r.fold((f) => 'err:${f.message}', (v) => v)));
+      x.stream,
+      y.stream,
+      (p, q) => '$p+$q',
+    ).listen((r) => got.add(r.fold((f) => 'err:${f.message}', (v) => v)));
 
     x.add(const Ok(1));
     await pumpEventQueue();

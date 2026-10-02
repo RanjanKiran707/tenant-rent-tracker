@@ -10,7 +10,9 @@ import 'features/feature_harness.dart';
 /// [finder] matches.
 Future<void> pumpUntil(WidgetTester tester, Finder finder) async {
   for (var i = 0; i < 100; i++) {
-    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 20)),
+    );
     await tester.pump();
     if (finder.evaluate().isNotEmpty) return;
   }
@@ -20,7 +22,9 @@ Future<void> pumpUntil(WidgetTester tester, Finder finder) async {
 /// Runs the database work of a tap, then redraws.
 Future<void> settle(WidgetTester tester) async {
   for (var i = 0; i < 5; i++) {
-    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 20)),
+    );
     await tester.pump();
   }
 }
@@ -43,8 +47,9 @@ void main() {
     await tester.runAsync(() => h.close());
   }
 
-  testWidgets('first run shows the welcome guide, Skip opens an empty home',
-      (tester) async {
+  testWidgets('first run shows the welcome guide, Skip opens an empty home', (
+    tester,
+  ) async {
     await start(tester);
     expect(find.text('Welcome!'), findsOneWidget);
 
@@ -60,18 +65,23 @@ void main() {
     await finish(tester);
   });
 
-  testWidgets('the language button switches the screen to Kannada',
-      (tester) async {
+  testWidgets('the language button switches the screen to Kannada', (
+    tester,
+  ) async {
     await start(tester);
     await tester.tap(find.text('ಕನ್ನಡ'));
     await pumpUntil(tester, find.text('ಸ್ವಾಗತ!'));
     expect(find.text('Welcome!'), findsNothing);
-    expect(find.text('English'), findsOneWidget); // the button now offers English
+    expect(
+      find.text('English'),
+      findsOneWidget,
+    ); // the button now offers English
     await finish(tester);
   });
 
-  testWidgets('add a tenant: validation, save, then the tenant page',
-      (tester) async {
+  testWidgets('add a tenant: validation, save, then the tenant page', (
+    tester,
+  ) async {
     await start(tester);
     await tester.tap(find.text('Skip'));
     await pumpUntil(tester, find.text('+ Add a tenant'));
@@ -102,9 +112,16 @@ void main() {
     await finish(tester);
   });
 
-  testWidgets('record money for a tenant, see it on the page, undo it',
-      (tester) async {
-    await seedTenant(h, id: 'ramesh', name: 'Ramesh Kumar', start: '2026-10', rent: 8000);
+  testWidgets('record money for a tenant, see it on the page, undo it', (
+    tester,
+  ) async {
+    await seedTenant(
+      h,
+      id: 'ramesh',
+      name: 'Ramesh Kumar',
+      start: '2026-10',
+      rent: 8000,
+    );
     await start(tester);
     await tester.tap(find.text('Skip'));
     await pumpUntil(tester, find.text('Ramesh Kumar'));
@@ -117,7 +134,10 @@ void main() {
     await pumpUntil(tester, find.byKey(const Key('amountField')));
     await tester.enterText(find.byKey(const Key('amountField')), '3000');
     await tester.pump();
-    expect(find.text('After this, the balance will be ₹5,000.'), findsOneWidget);
+    expect(
+      find.text('After this, the balance will be ₹5,000.'),
+      findsOneWidget,
+    );
 
     await tester.tap(find.text('Save'));
     await pumpUntil(tester, find.text('Received ₹3,000 of ₹8,000'));
@@ -128,36 +148,54 @@ void main() {
     await finish(tester);
   });
 
-  testWidgets('removing a tenant asks first, shows what is owed, then archives',
-      (tester) async {
-    await seedTenant(h, id: 'ramesh', name: 'Ramesh Kumar', start: '2026-09', rent: 8000);
-    await start(tester);
-    await tester.tap(find.text('Skip'));
-    await pumpUntil(tester, find.text('Ramesh Kumar'));
-    expect(find.text('Old dues: ₹8,000'), findsOneWidget);
+  testWidgets(
+    'removing a tenant asks first, shows what is owed, then archives',
+    (tester) async {
+      await seedTenant(
+        h,
+        id: 'ramesh',
+        name: 'Ramesh Kumar',
+        start: '2026-09',
+        rent: 8000,
+      );
+      await start(tester);
+      await tester.tap(find.text('Skip'));
+      await pumpUntil(tester, find.text('Ramesh Kumar'));
+      expect(find.text('Old dues: ₹8,000'), findsOneWidget);
 
-    await tester.tap(find.text('Ramesh Kumar'));
-    await pumpUntil(tester, find.text('Remove this tenant'));
-    await tester.ensureVisible(find.text('Remove this tenant'));
-    await tester.tap(find.text('Remove this tenant'));
-    await pumpUntil(tester, find.text('Remove Ramesh Kumar?'));
-    expect(find.text('Please note: ₹16,000 is still unpaid.'), findsOneWidget);
+      await tester.tap(find.text('Ramesh Kumar'));
+      await pumpUntil(tester, find.text('Remove this tenant'));
+      await tester.ensureVisible(find.text('Remove this tenant'));
+      await tester.tap(find.text('Remove this tenant'));
+      await pumpUntil(tester, find.text('Remove Ramesh Kumar?'));
+      expect(
+        find.text('Please note: ₹16,000 is still unpaid.'),
+        findsOneWidget,
+      );
 
-    await tester.tap(find.text('No, keep'));
-    await settle(tester);
-    expect(find.text('Remove Ramesh Kumar?'), findsNothing);
+      await tester.tap(find.text('No, keep'));
+      await settle(tester);
+      expect(find.text('Remove Ramesh Kumar?'), findsNothing);
 
-    await tester.tap(find.text('Remove this tenant'));
-    await pumpUntil(tester, find.text('Remove Ramesh Kumar?'));
-    await tester.tap(find.text('Yes, remove'));
-    await pumpUntil(tester, find.text('Ramesh Kumar removed'));
-    await pumpUntil(tester, find.textContaining('No tenants yet'));
-    await finish(tester);
-  });
+      await tester.tap(find.text('Remove this tenant'));
+      await pumpUntil(tester, find.text('Remove Ramesh Kumar?'));
+      await tester.tap(find.text('Yes, remove'));
+      await pumpUntil(tester, find.text('Ramesh Kumar removed'));
+      await pumpUntil(tester, find.textContaining('No tenants yet'));
+      await finish(tester);
+    },
+  );
 
-  testWidgets('settings: the archive tile lists removed tenants read-only',
-      (tester) async {
-    await seedTenant(h, id: 'ramesh', name: 'Ramesh Kumar', start: '2026-09', rent: 8000);
+  testWidgets('settings: the archive tile lists removed tenants read-only', (
+    tester,
+  ) async {
+    await seedTenant(
+      h,
+      id: 'ramesh',
+      name: 'Ramesh Kumar',
+      start: '2026-09',
+      rent: 8000,
+    );
     ok(await h.tenants.deleteTenant('ramesh', '2026-10'));
     await start(tester);
     await tester.tap(find.text('Skip'));

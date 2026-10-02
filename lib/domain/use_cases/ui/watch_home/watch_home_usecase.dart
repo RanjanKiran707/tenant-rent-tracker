@@ -73,22 +73,26 @@ class WatchHomeUsecase {
         toReceive += balanceOfRecord(currentRecord, paid, today);
       }
 
-      rows.add(HomeTenantRow(
-        tenantUuid: tenant.uuid,
-        name: tenant.name,
-        status: status,
-        oldDues: oldDuesOf(
-          records: own,
-          paymentsByRecord: byRecord,
-          currentMonth: current,
-          today: today,
+      rows.add(
+        HomeTenantRow(
+          tenantUuid: tenant.uuid,
+          name: tenant.name,
+          status: status,
+          oldDues: oldDuesOf(
+            records: own,
+            paymentsByRecord: byRecord,
+            currentMonth: current,
+            today: today,
+          ),
         ),
-      ));
+      );
     }
 
     rows.sort((a, b) {
-      final byRank = attentionRank(a.status, hasOldDues: a.oldDues > 0)
-          .compareTo(attentionRank(b.status, hasOldDues: b.oldDues > 0));
+      final byRank = attentionRank(
+        a.status,
+        hasOldDues: a.oldDues > 0,
+      ).compareTo(attentionRank(b.status, hasOldDues: b.oldDues > 0));
       if (byRank != 0) return byRank;
       return a.name.toLowerCase().compareTo(b.name.toLowerCase());
     });

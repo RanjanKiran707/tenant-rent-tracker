@@ -54,12 +54,14 @@ class EnsureRentRecordsUsecase {
           for (final month in monthsBetween(tenant.startMonth, current)) {
             final rent = _rentForMonth(value, month);
             if (rent == null) continue;
-            missing.add(RentRecordModel(
-              uuid: _uuid.v4(),
-              tenantUuid: tenant.uuid,
-              month: month,
-              requiredAmount: rent,
-            ));
+            missing.add(
+              RentRecordModel(
+                uuid: _uuid.v4(),
+                tenantUuid: tenant.uuid,
+                month: month,
+                requiredAmount: rent,
+              ),
+            );
           }
       }
     }
@@ -72,7 +74,8 @@ class EnsureRentRecordsUsecase {
     return (await _tenants.getTenant(tenantUuid)).flatMap((tenant) {
       if (tenant == null) {
         return const Err<List<TenantModel>>(
-            ValidationFailure('tenant_not_found'));
+          ValidationFailure('tenant_not_found'),
+        );
       }
       return Ok(tenant.isDeleted ? <TenantModel>[] : [tenant]);
     });

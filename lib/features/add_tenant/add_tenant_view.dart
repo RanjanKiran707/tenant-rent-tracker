@@ -17,9 +17,9 @@ class AddTenantView extends StatefulWidget {
   const AddTenantView({super.key});
 
   static Future<void> open(BuildContext context) => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => const AddTenantView()),
-      );
+    context,
+    MaterialPageRoute(builder: (_) => const AddTenantView()),
+  );
 
   @override
   State<AddTenantView> createState() => _AddTenantViewState();
@@ -111,8 +111,9 @@ class _AddTenantViewState extends State<AddTenantView> {
                       for (var d = 1; d <= 31; d++)
                         DropdownMenuItem(value: d, child: Text('$d')),
                     ],
-                    onChanged:
-                        busy ? null : (v) => ctrl.dueDay.value = v ?? day,
+                    onChanged: busy
+                        ? null
+                        : (v) => ctrl.dueDay.value = v ?? day,
                   ),
                 ),
                 ErrorLine(state: state, codes: const {'due_day_invalid'}),
@@ -125,16 +126,19 @@ class _AddTenantViewState extends State<AddTenantView> {
                     items: [
                       for (final m in ctrl.form.startMonthOptions.reversed)
                         DropdownMenuItem(
-                            value: m, child: Text(formatMonth(l, m))),
+                          value: m,
+                          child: Text(formatMonth(l, m)),
+                        ),
                     ],
-                    onChanged:
-                        busy ? null : (v) => ctrl.startMonth.value = v ?? month,
+                    onChanged: busy
+                        ? null
+                        : (v) => ctrl.startMonth.value = v ?? month,
                   ),
                 ),
-                ErrorLine(state: state, codes: const {
-                  'start_month_invalid',
-                  'start_month_in_future',
-                }),
+                ErrorLine(
+                  state: state,
+                  codes: const {'start_month_invalid', 'start_month_in_future'},
+                ),
                 // Anything that is not about one of the fields above.
                 ErrorLine(state: state, exceptCodes: _fieldCodes),
                 BigButton(

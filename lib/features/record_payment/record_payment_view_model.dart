@@ -59,27 +59,25 @@ class RecordPaymentViewModel {
   final ValueNotifier<String> date = ValueNotifier('');
 
   /// State of the save action. `Loaded` holds the new payment's uuid (for Undo).
-  final ValueNotifier<ViewState<String>> saveState =
-      ValueNotifier(const ViewStateIdle());
+  final ValueNotifier<ViewState<String>> saveState = ValueNotifier(
+    const ViewStateIdle(),
+  );
 
   RecordPaymentViewModel({
     required this.bundle,
     required LoadPaymentOptionsUsecase loadPaymentOptions,
     required RecordPaymentUsecase recordPayment,
-  })  : _loadPaymentOptions = loadPaymentOptions,
-        _recordPayment = recordPayment;
+  }) : _loadPaymentOptions = loadPaymentOptions,
+       _recordPayment = recordPayment;
 
   Future<void> load() async {
     final result = await _loadPaymentOptions(bundle.tenantUuid);
-    result.fold(
-      (failure) => loadState.value = ViewStateError(failure),
-      (data) {
-        selectedRecord.value =
-            bundle.initialRentRecordUuid ?? data.defaultRentRecordUuid;
-        date.value = data.today;
-        loadState.value = ViewStateLoaded(data);
-      },
-    );
+    result.fold((failure) => loadState.value = ViewStateError(failure), (data) {
+      selectedRecord.value =
+          bundle.initialRentRecordUuid ?? data.defaultRentRecordUuid;
+      date.value = data.today;
+      loadState.value = ViewStateLoaded(data);
+    });
   }
 
   PaymentMonthOption? get selectedOption {
@@ -119,22 +117,26 @@ class RecordPaymentViewModel {
     final record = selectedRecord.value;
     final value = amount.value;
     if (record == null) {
-      saveState.value =
-          const ViewStateError(ValidationFailure('tenant_not_found'));
+      saveState.value = const ViewStateError(
+        ValidationFailure('tenant_not_found'),
+      );
       return;
     }
     if (value == null) {
-      saveState.value =
-          const ViewStateError(ValidationFailure('amount_invalid'));
+      saveState.value = const ViewStateError(
+        ValidationFailure('amount_invalid'),
+      );
       return;
     }
 
     saveState.value = const ViewStateLoading();
-    final result = await _recordPayment(RecordPaymentArgumentModel(
-      rentRecordUuid: record,
-      amount: value,
-      paidOn: date.value,
-    ));
+    final result = await _recordPayment(
+      RecordPaymentArgumentModel(
+        rentRecordUuid: record,
+        amount: value,
+        paidOn: date.value,
+      ),
+    );
     saveState.value = result.fold(
       (failure) => ViewStateError(failure),
       (uuid) => ViewStateLoaded(uuid),

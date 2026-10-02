@@ -28,16 +28,18 @@ Future<void> seedTenantWithoutRecords(
   required int rent,
   int dueDay = 10,
 }) async {
-  ok(await h.tenants.addTenant(
-    TenantModel(
-      uuid: id,
-      name: id,
-      createdOn: h.clock.nowUtc(),
-      dueDay: dueDay,
-      startMonth: start,
+  ok(
+    await h.tenants.addTenant(
+      TenantModel(
+        uuid: id,
+        name: id,
+        createdOn: h.clock.nowUtc(),
+        dueDay: dueDay,
+        startMonth: start,
+      ),
+      rent,
     ),
-    rent,
-  ));
+  );
 }
 
 /// Waits until [listenable]'s value satisfies [test] (checks right away too).
@@ -61,6 +63,6 @@ Future<T> waitFor<T>(
 
 /// The data of a loaded state; fails the test for any other state.
 T loaded<T>(ViewState<T> state) => switch (state) {
-      ViewStateLoaded(data: final d) => d,
-      _ => throw StateError('Expected Loaded, got $state'),
-    };
+  ViewStateLoaded(data: final d) => d,
+  _ => throw StateError('Expected Loaded, got $state'),
+};

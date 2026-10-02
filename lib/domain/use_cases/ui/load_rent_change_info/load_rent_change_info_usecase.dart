@@ -35,11 +35,13 @@ class LoadRentChangeInfoUsecase {
 
     final current = _clock.currentMonth();
     final rent = await _history.getRentForMonth(tenantUuid, current);
-    return rent.map((amount) => LoadRentChangeInfoReturnModel(
-          tenantName: name,
-          currentRent: amount ?? 0,
-          currentMonth: current,
-          effectiveFromMonth: addMonths(current, 1),
-        ));
+    return rent.map(
+      (amount) => LoadRentChangeInfoReturnModel(
+        tenantName: name,
+        currentRent: amount ?? 0,
+        currentMonth: current,
+        effectiveFromMonth: addMonths(current, 1),
+      ),
+    );
   }
 }

@@ -32,11 +32,10 @@ double attentionRank(MonthStatus status, {required bool hasOldDues}) =>
 
 /// Payments are ordered by the day received, then by when they were entered.
 List<PaymentModel> _inOrder(Iterable<PaymentModel> payments) =>
-    payments.toList()
-      ..sort((a, b) {
-        final byDay = a.paidOn.compareTo(b.paidOn);
-        return byDay != 0 ? byDay : a.createdOn.compareTo(b.createdOn);
-      });
+    payments.toList()..sort((a, b) {
+      final byDay = a.paidOn.compareTo(b.paidOn);
+      return byDay != 0 ? byDay : a.createdOn.compareTo(b.createdOn);
+    });
 
 /// Total of the payments received on or before [today].
 int paidAsOf(Iterable<PaymentModel> payments, String today) => payments
@@ -62,8 +61,9 @@ MonthStatus computeMonthStatus({
   required Iterable<PaymentModel> payments,
   required String today,
 }) {
-  final received =
-      _inOrder(payments.where((p) => p.paidOn.compareTo(today) <= 0));
+  final received = _inOrder(
+    payments.where((p) => p.paidOn.compareTo(today) <= 0),
+  );
   final paid = received.fold(0, (sum, p) => sum + p.amount);
   final due = dueDateOf(month, dueDay);
   final end = monthEnd(month);

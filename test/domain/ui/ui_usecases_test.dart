@@ -23,10 +23,19 @@ void main() {
     h = Harness(today: '2026-10-12');
     watchHome = WatchHomeUsecase(h.tenants, h.records, h.payments, h.clock);
     watchDetail = WatchTenantDetailUsecase(
-        h.tenants, h.records, h.payments, h.history, h.clock);
+      h.tenants,
+      h.records,
+      h.payments,
+      h.history,
+      h.clock,
+    );
     watchArchived = WatchArchivedTenantsUsecase(h.tenants, h.records);
-    paymentOptions =
-        LoadPaymentOptionsUsecase(h.tenants, h.records, h.payments, h.clock);
+    paymentOptions = LoadPaymentOptionsUsecase(
+      h.tenants,
+      h.records,
+      h.payments,
+      h.clock,
+    );
     rentChangeInfo = LoadRentChangeInfoUsecase(h.tenants, h.history, h.clock);
   });
 
@@ -34,21 +43,49 @@ void main() {
 
   /// The mockup's tenants (the ones needed here).
   Future<void> seedMockup() async {
-    await seedTenant(h, id: 'ramesh', name: 'Ramesh Kumar', start: '2026-08', rent: 8000, dueDay: 15);
+    await seedTenant(
+      h,
+      id: 'ramesh',
+      name: 'Ramesh Kumar',
+      start: '2026-08',
+      rent: 8000,
+      dueDay: 15,
+    );
     await payTo(h, 'ramesh', '2026-08', 8000, '2026-08-10');
     await payTo(h, 'ramesh', '2026-09', 8000, '2026-09-14');
 
-    await seedTenant(h, id: 'manju', name: 'Manjunath S', start: '2026-08', rent: 5500, dueDay: 5);
+    await seedTenant(
+      h,
+      id: 'manju',
+      name: 'Manjunath S',
+      start: '2026-08',
+      rent: 5500,
+      dueDay: 5,
+    );
     await payTo(h, 'manju', '2026-08', 3000, '2026-08-04');
     await payTo(h, 'manju', '2026-08', 2500, '2026-09-12');
     await payTo(h, 'manju', '2026-09', 5500, '2026-09-05');
     await payTo(h, 'manju', '2026-10', 2000, '2026-10-02');
 
-    await seedTenant(h, id: 'farida', name: 'Farida Begum', start: '2026-08', rent: 9000, dueDay: 5);
+    await seedTenant(
+      h,
+      id: 'farida',
+      name: 'Farida Begum',
+      start: '2026-08',
+      rent: 9000,
+      dueDay: 5,
+    );
     await payTo(h, 'farida', '2026-08', 9000, '2026-08-03');
     await payTo(h, 'farida', '2026-09', 4000, '2026-09-06');
 
-    await seedTenant(h, id: 'anita', name: 'Anita Rao', start: '2026-09', rent: 7000, dueDay: 20);
+    await seedTenant(
+      h,
+      id: 'anita',
+      name: 'Anita Rao',
+      start: '2026-09',
+      rent: 7000,
+      dueDay: 20,
+    );
     await payTo(h, 'anita', '2026-09', 7000, '2026-09-18');
     await payTo(h, 'anita', '2026-10', 3000, '2026-10-06');
   }
@@ -63,36 +100,40 @@ void main() {
       expect(home.toReceive, 0);
     });
 
-    test('needs-attention first, old dues move a tenant up, then by name',
-        () async {
-      await seedMockup();
-      final home = ok(await watchHome().first);
+    test(
+      'needs-attention first, old dues move a tenant up, then by name',
+      () async {
+        await seedMockup();
+        final home = ok(await watchHome().first);
 
-      expect(home.rows.map((r) => r.name), [
-        'Farida Begum', // overdue, plus old dues
-        'Manjunath S', // partial overdue
-        'Anita Rao', // partial
-        'Ramesh Kumar', // pending
-      ]);
-      expect(home.rows.map((r) => r.status), [
-        MonthStatus.overdue,
-        MonthStatus.partialOverdue,
-        MonthStatus.partial,
-        MonthStatus.pending,
-      ]);
-    });
+        expect(home.rows.map((r) => r.name), [
+          'Farida Begum', // overdue, plus old dues
+          'Manjunath S', // partial overdue
+          'Anita Rao', // partial
+          'Ramesh Kumar', // pending
+        ]);
+        expect(home.rows.map((r) => r.status), [
+          MonthStatus.overdue,
+          MonthStatus.partialOverdue,
+          MonthStatus.partial,
+          MonthStatus.pending,
+        ]);
+      },
+    );
 
-    test('old dues: Farida owes 5000 for September, Manjunath cleared August',
-        () async {
-      await seedMockup();
-      final home = ok(await watchHome().first);
-      final dues = {for (final r in home.rows) r.name: r.oldDues};
+    test(
+      'old dues: Farida owes 5000 for September, Manjunath cleared August',
+      () async {
+        await seedMockup();
+        final home = ok(await watchHome().first);
+        final dues = {for (final r in home.rows) r.name: r.oldDues};
 
-      expect(dues['Farida Begum'], 5000);
-      expect(dues['Manjunath S'], 0);
-      expect(dues['Anita Rao'], 0);
-      expect(dues['Ramesh Kumar'], 0);
-    });
+        expect(dues['Farida Begum'], 5000);
+        expect(dues['Manjunath S'], 0);
+        expect(dues['Anita Rao'], 0);
+        expect(dues['Ramesh Kumar'], 0);
+      },
+    );
 
     test('totals are for the current month only', () async {
       await seedMockup();
@@ -135,47 +176,57 @@ void main() {
       expect(home.toReceive, 15500); // Farida's 9000 is gone from the total
     });
 
-    test('a status follows the date: due day passes while paid in part',
-        () async {
-      await seedTenant(h, id: 't', start: '2026-10', rent: 5000, dueDay: 20);
-      await payTo(h, 't', '2026-10', 1000, '2026-10-05');
-      expect(ok(await watchHome().first).rows.single.status,
-          MonthStatus.partial);
+    test(
+      'a status follows the date: due day passes while paid in part',
+      () async {
+        await seedTenant(h, id: 't', start: '2026-10', rent: 5000, dueDay: 20);
+        await payTo(h, 't', '2026-10', 1000, '2026-10-05');
+        expect(
+          ok(await watchHome().first).rows.single.status,
+          MonthStatus.partial,
+        );
 
-      h.clock.setToday('2026-10-21');
-      expect(ok(await watchHome().first).rows.single.status,
-          MonthStatus.partialOverdue);
-    });
+        h.clock.setToday('2026-10-21');
+        expect(
+          ok(await watchHome().first).rows.single.status,
+          MonthStatus.partialOverdue,
+        );
+      },
+    );
 
-    test('a tenant with no record for this month is Pending, not in totals',
-        () async {
-      await seedTenant(h, id: 't', start: '2026-09', rent: 5000);
-      h.clock.setToday('2026-11-02'); // November's record is not created yet
+    test(
+      'a tenant with no record for this month is Pending, not in totals',
+      () async {
+        await seedTenant(h, id: 't', start: '2026-09', rent: 5000);
+        h.clock.setToday('2026-11-02'); // November's record is not created yet
 
-      final home = ok(await watchHome().first);
-      expect(home.rows.single.status, MonthStatus.pending);
-      expect(home.toReceive, 0);
-      // September and October are both unpaid and now in the past.
-      expect(home.rows.single.oldDues, 10000);
-    });
+        final home = ok(await watchHome().first);
+        expect(home.rows.single.status, MonthStatus.pending);
+        expect(home.toReceive, 0);
+        // September and October are both unpaid and now in the past.
+        expect(home.rows.single.oldDues, 10000);
+      },
+    );
   });
 
   group('WatchTenantDetailUsecase', () {
     setUp(() => seedMockup());
 
-    test('active tenant: this month on top, earlier months newest first',
-        () async {
-      final d = ok(await watchDetail('farida').first);
+    test(
+      'active tenant: this month on top, earlier months newest first',
+      () async {
+        final d = ok(await watchDetail('farida').first);
 
-      expect(d.name, 'Farida Begum');
-      expect(d.readOnly, isFalse);
-      expect(d.topMonth!.month, '2026-10');
-      expect(d.topMonth!.status, MonthStatus.overdue);
-      expect(d.topMonth!.balance, 9000);
-      expect(d.topMonth!.dueDate, '2026-10-05');
-      expect(d.months.map((m) => m.month), ['2026-09', '2026-08']);
-      expect(d.currentRent, 9000);
-    });
+        expect(d.name, 'Farida Begum');
+        expect(d.readOnly, isFalse);
+        expect(d.topMonth!.month, '2026-10');
+        expect(d.topMonth!.status, MonthStatus.overdue);
+        expect(d.topMonth!.balance, 9000);
+        expect(d.topMonth!.dueDate, '2026-10-05');
+        expect(d.months.map((m) => m.month), ['2026-09', '2026-08']);
+        expect(d.currentRent, 9000);
+      },
+    );
 
     test('old dues, the oldest month owing, and the total owed', () async {
       final d = ok(await watchDetail('farida').first);
@@ -202,8 +253,10 @@ void main() {
       expect(august.status, MonthStatus.backlogCleared);
       expect(august.paid, 5500);
       expect(august.balance, 0);
-      expect(august.payments.map((p) => '${p.amount}@${p.paidOn}'),
-          ['3000@2026-08-04', '2500@2026-09-12']);
+      expect(august.payments.map((p) => '${p.amount}@${p.paidOn}'), [
+        '3000@2026-08-04',
+        '2500@2026-09-12',
+      ]);
     });
 
     test('overpayment shows as extra and the balance stays zero', () async {
@@ -216,8 +269,13 @@ void main() {
     });
 
     test('a rent change shows as pending until its month starts', () async {
-      ok(await h.history.changeRent(
-          tenantUuid: 'farida', effectiveFromMonth: '2026-11', amount: 9500));
+      ok(
+        await h.history.changeRent(
+          tenantUuid: 'farida',
+          effectiveFromMonth: '2026-11',
+          amount: 9500,
+        ),
+      );
 
       final d = ok(await watchDetail('farida').first);
       expect(d.pendingRentMonth, '2026-11');
@@ -229,25 +287,34 @@ void main() {
       expect(next.pendingRentMonth, isNull);
     });
 
-    test('re-emits when a rent change is made even though no record changes',
-        () async {
-      final notes = <String?>[];
-      final sub = watchDetail('farida')
-          .listen((r) => notes.add(ok(r).pendingRentMonth));
-      await pumpEventQueue();
+    test(
+      're-emits when a rent change is made even though no record changes',
+      () async {
+        final notes = <String?>[];
+        final sub = watchDetail(
+          'farida',
+        ).listen((r) => notes.add(ok(r).pendingRentMonth));
+        await pumpEventQueue();
 
-      ok(await h.history.changeRent(
-          tenantUuid: 'farida', effectiveFromMonth: '2026-11', amount: 9500));
-      await pumpEventQueue();
+        ok(
+          await h.history.changeRent(
+            tenantUuid: 'farida',
+            effectiveFromMonth: '2026-11',
+            amount: 9500,
+          ),
+        );
+        await pumpEventQueue();
 
-      expect(notes, [null, '2026-11']);
-      await sub.cancel();
-    });
+        expect(notes, [null, '2026-11']);
+        await sub.cancel();
+      },
+    );
 
     test('re-emits after a payment', () async {
       final balances = <int>[];
-      final sub = watchDetail('farida')
-          .listen((r) => balances.add(ok(r).topMonth!.balance));
+      final sub = watchDetail(
+        'farida',
+      ).listen((r) => balances.add(ok(r).topMonth!.balance));
       await pumpEventQueue();
 
       await payTo(h, 'farida', '2026-10', 4000, '2026-10-12');
@@ -257,20 +324,23 @@ void main() {
       await sub.cancel();
     });
 
-    test('archived tenant is read-only, latest month on top, all months listed',
-        () async {
-      ok(await h.tenants.deleteTenant('farida', '2026-10'));
+    test(
+      'archived tenant is read-only, latest month on top, all months listed',
+      () async {
+        ok(await h.tenants.deleteTenant('farida', '2026-10'));
 
-      final d = ok(await watchDetail('farida').first);
-      expect(d.readOnly, isTrue);
-      expect(d.deletedMonth, '2026-10');
-      expect(d.topMonth!.month, '2026-10');
-      expect(d.months.map((m) => m.month), ['2026-10', '2026-09', '2026-08']);
-    });
+        final d = ok(await watchDetail('farida').first);
+        expect(d.readOnly, isTrue);
+        expect(d.deletedMonth, '2026-10');
+        expect(d.topMonth!.month, '2026-10');
+        expect(d.months.map((m) => m.month), ['2026-10', '2026-09', '2026-08']);
+      },
+    );
 
     test('a tenant with no records yet takes the rent from history', () async {
       // Saved straight to the repository, so no records exist yet.
-      ok(await h.tenants.addTenant(
+      ok(
+        await h.tenants.addTenant(
           TenantModel(
             uuid: 'new',
             name: 'New',
@@ -278,7 +348,9 @@ void main() {
             dueDay: 10,
             startMonth: '2026-10',
           ),
-          6000));
+          6000,
+        ),
+      );
 
       final d = ok(await watchDetail('new').first);
       expect(d.topMonth, isNull);
@@ -294,8 +366,20 @@ void main() {
   group('WatchArchivedTenantsUsecase', () {
     test('newest deletion first, with the last rent', () async {
       await seedTenant(h, id: 'a', name: 'Anil', start: '2026-08', rent: 5000);
-      await seedTenant(h, id: 'b', name: 'Bhaskar', start: '2026-09', rent: 7000);
-      await seedTenant(h, id: 'c', name: 'Chitra', start: '2026-09', rent: 6000);
+      await seedTenant(
+        h,
+        id: 'b',
+        name: 'Bhaskar',
+        start: '2026-09',
+        rent: 7000,
+      );
+      await seedTenant(
+        h,
+        id: 'c',
+        name: 'Chitra',
+        start: '2026-09',
+        rent: 6000,
+      );
       ok(await h.tenants.deleteTenant('a', '2026-09'));
       ok(await h.tenants.deleteTenant('b', '2026-10'));
 
@@ -328,44 +412,54 @@ void main() {
   group('LoadPaymentOptionsUsecase', () {
     setUp(() => seedMockup());
 
-    test('months owing plus this month, newest first; this month is default',
-        () async {
-      final o = ok(await paymentOptions('farida'));
+    test(
+      'months owing plus this month, newest first; this month is default',
+      () async {
+        final o = ok(await paymentOptions('farida'));
 
-      expect(o.tenantName, 'Farida Begum');
-      expect(o.today, '2026-10-12');
-      expect(o.options.map((x) => x.month), ['2026-10', '2026-09']);
-      expect(o.options.map((x) => x.balance), [9000, 5000]);
-      expect(o.options.first.paid, 0);
-      expect(o.options.first.requiredAmount, 9000);
-      expect(o.defaultRentRecordUuid, o.options.first.rentRecordUuid);
-    });
+        expect(o.tenantName, 'Farida Begum');
+        expect(o.today, '2026-10-12');
+        expect(o.options.map((x) => x.month), ['2026-10', '2026-09']);
+        expect(o.options.map((x) => x.balance), [9000, 5000]);
+        expect(o.options.first.paid, 0);
+        expect(o.options.first.requiredAmount, 9000);
+        expect(o.defaultRentRecordUuid, o.options.first.rentRecordUuid);
+      },
+    );
 
-    test('when this month is paid, the default is the oldest month owing',
-        () async {
-      // Make August owe too, then pay October in full.
-      await seedTenant(h, id: 'x', start: '2026-08', rent: 1000);
-      await payTo(h, 'x', '2026-10', 1000, '2026-10-01');
+    test(
+      'when this month is paid, the default is the oldest month owing',
+      () async {
+        // Make August owe too, then pay October in full.
+        await seedTenant(h, id: 'x', start: '2026-08', rent: 1000);
+        await payTo(h, 'x', '2026-10', 1000, '2026-10-01');
 
-      final o = ok(await paymentOptions('x'));
-      // Newest first: October (paid, still offered), September, August.
-      expect(o.options.map((p) => p.month), ['2026-10', '2026-09', '2026-08']);
-      final oldest = o.options.last;
-      expect(o.defaultRentRecordUuid, oldest.rentRecordUuid);
-    });
+        final o = ok(await paymentOptions('x'));
+        // Newest first: October (paid, still offered), September, August.
+        expect(o.options.map((p) => p.month), [
+          '2026-10',
+          '2026-09',
+          '2026-08',
+        ]);
+        final oldest = o.options.last;
+        expect(o.defaultRentRecordUuid, oldest.rentRecordUuid);
+      },
+    );
 
-    test('everything paid: only this month is offered, and it is the default',
-        () async {
-      final o = ok(await paymentOptions('ramesh'));
-      // Ramesh: Aug and Sep paid, October unpaid -> October has a balance.
-      expect(o.options.map((x) => x.month), ['2026-10']);
+    test(
+      'everything paid: only this month is offered, and it is the default',
+      () async {
+        final o = ok(await paymentOptions('ramesh'));
+        // Ramesh: Aug and Sep paid, October unpaid -> October has a balance.
+        expect(o.options.map((x) => x.month), ['2026-10']);
 
-      await payTo(h, 'ramesh', '2026-10', 8000, '2026-10-12');
-      final paid = ok(await paymentOptions('ramesh'));
-      expect(paid.options.map((x) => x.month), ['2026-10']);
-      expect(paid.options.single.balance, 0);
-      expect(paid.defaultRentRecordUuid, paid.options.single.rentRecordUuid);
-    });
+        await payTo(h, 'ramesh', '2026-10', 8000, '2026-10-12');
+        final paid = ok(await paymentOptions('ramesh'));
+        expect(paid.options.map((x) => x.month), ['2026-10']);
+        expect(paid.options.single.balance, 0);
+        expect(paid.defaultRentRecordUuid, paid.options.single.rentRecordUuid);
+      },
+    );
 
     test('a cleared old month is no longer offered', () async {
       await payTo(h, 'farida', '2026-09', 5000, '2026-10-12');
@@ -393,8 +487,13 @@ void main() {
     });
 
     test('a pending change does not alter the current rent', () async {
-      ok(await h.history.changeRent(
-          tenantUuid: 'farida', effectiveFromMonth: '2026-11', amount: 9500));
+      ok(
+        await h.history.changeRent(
+          tenantUuid: 'farida',
+          effectiveFromMonth: '2026-11',
+          amount: 9500,
+        ),
+      );
 
       expect(ok(await rentChangeInfo('farida')).currentRent, 9000);
     });

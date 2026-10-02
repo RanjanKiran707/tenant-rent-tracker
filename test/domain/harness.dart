@@ -38,15 +38,15 @@ class Harness {
   final PaymentRepository payments;
 
   Harness._(this.db, this.clock)
-      : tenants = TenantRepository(db),
-        history = RentHistoryRepository(db),
-        records = RentRecordRepository(db),
-        payments = PaymentRepository(db);
+    : tenants = TenantRepository(db),
+      history = RentHistoryRepository(db),
+      records = RentRecordRepository(db),
+      payments = PaymentRepository(db);
 
   factory Harness({String today = '2026-03-15'}) => Harness._(
-        AppDatabase.forTesting(NativeDatabase.memory()),
-        FakeClock(today),
-      );
+    AppDatabase.forTesting(NativeDatabase.memory()),
+    FakeClock(today),
+  );
 
   Future<void> close() => db.close();
 }
@@ -61,18 +61,23 @@ Future<String> seedTenant(
   required int rent,
   int dueDay = 10,
 }) async {
-  ok(await h.tenants.addTenant(
-    TenantModel(
-      uuid: id,
-      name: name ?? id,
-      createdOn: h.clock.nowUtc(),
-      dueDay: dueDay,
-      startMonth: start,
+  ok(
+    await h.tenants.addTenant(
+      TenantModel(
+        uuid: id,
+        name: name ?? id,
+        createdOn: h.clock.nowUtc(),
+        dueDay: dueDay,
+        startMonth: start,
+      ),
+      rent,
     ),
-    rent,
-  ));
-  ok(await EnsureRentRecordsUsecase(
-          h.tenants, h.history, h.records, h.clock)(tenantUuid: id));
+  );
+  ok(
+    await EnsureRentRecordsUsecase(h.tenants, h.history, h.records, h.clock)(
+      tenantUuid: id,
+    ),
+  );
   return id;
 }
 
@@ -87,31 +92,37 @@ Future<String> payTo(
   int amount,
   String paidOn,
 ) async {
-  final record = ok(await h.records.getRecords(tenantUuid))
-      .firstWhere((r) => r.month == month);
+  final record = ok(
+    await h.records.getRecords(tenantUuid),
+  ).firstWhere((r) => r.month == month);
   final id = 'pay${_paymentCounter++}';
-  ok(await h.payments.addPayment(PaymentModel(
-    uuid: id,
-    rentRecordUuid: record.uuid,
-    amount: amount,
-    paidOn: paidOn,
-    createdOn: DateTime.utc(2026, 1, 1, 0, 0, _paymentCounter),
-  )));
+  ok(
+    await h.payments.addPayment(
+      PaymentModel(
+        uuid: id,
+        rentRecordUuid: record.uuid,
+        amount: amount,
+        paidOn: paidOn,
+        createdOn: DateTime.utc(2026, 1, 1, 0, 0, _paymentCounter),
+      ),
+    ),
+  );
   return id;
 }
 
 /// The value of an `Ok`; fails the test on an `Err`.
 T ok<T>(Result<T> r) => switch (r) {
-      Ok(:final value) => value,
-      Err(:final failure) =>
-        throw TestFailure('Expected Ok, got ${failure.message}'),
-    };
+  Ok(:final value) => value,
+  Err(:final failure) => throw TestFailure(
+    'Expected Ok, got ${failure.message}',
+  ),
+};
 
 /// The message of an `Err`; fails the test on an `Ok`.
 String errorOf<T>(Result<T> r) => switch (r) {
-      Err(:final failure) => failure.message,
-      Ok() => throw TestFailure('Expected Err, got Ok'),
-    };
+  Err(:final failure) => failure.message,
+  Ok() => throw TestFailure('Expected Err, got Ok'),
+};
 
 /// True when the failure is a [ValidationFailure].
 bool isValidation<T>(Result<T> r) =>

@@ -21,11 +21,10 @@ class RecordPaymentView extends StatefulWidget {
   static Future<RecordedPayment?> open(
     BuildContext context,
     RecordPaymentBundle bundle,
-  ) =>
-      Navigator.push<RecordedPayment>(
-        context,
-        MaterialPageRoute(builder: (_) => RecordPaymentView(bundle: bundle)),
-      );
+  ) => Navigator.push<RecordedPayment>(
+    context,
+    MaterialPageRoute(builder: (_) => RecordPaymentView(bundle: bundle)),
+  );
 
   @override
   State<RecordPaymentView> createState() => _RecordPaymentViewState();
@@ -121,8 +120,10 @@ class _RecordPaymentViewState extends State<RecordPaymentView> {
       children: [
         TipBanner(text: l.helpPay),
         const SizedBox(height: 8),
-        Text(data.tenantName,
-            style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w700)),
+        Text(
+          data.tenantName,
+          style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w700),
+        ),
         FormLabel(label: l.payMonth, hint: l.payMonthHint),
         ObxValue<String?>(
           listenable: ctrl.selectedRecord,
@@ -187,23 +188,19 @@ class _RecordPaymentViewState extends State<RecordPaymentView> {
               decoration: const InputDecoration(
                 suffixIcon: Icon(Icons.calendar_today),
               ),
-              child: Text(formatDate(l, date),
-                  style: const TextStyle(fontSize: 20)),
+              child: Text(
+                formatDate(l, date),
+                style: const TextStyle(fontSize: 20),
+              ),
             ),
           ),
         ),
         ObxValue<ViewState<String>>(
           listenable: ctrl.saveState,
-          builder: (state) => ErrorLine(
-            state: state,
-            exceptCodes: const {'amount_invalid'},
-          ),
+          builder: (state) =>
+              ErrorLine(state: state, exceptCodes: const {'amount_invalid'}),
         ),
-        BigButton(
-          label: l.save,
-          busy: busy,
-          onPressed: ctrl.onSave,
-        ),
+        BigButton(label: l.save, busy: busy, onPressed: ctrl.onSave),
         BigButton(
           label: l.cancel,
           kind: BigButtonKind.secondary,
@@ -223,11 +220,14 @@ class _RecordPaymentViewState extends State<RecordPaymentView> {
       children: [
         Padding(
           padding: const EdgeInsets.only(top: 8),
-          child: Text(l.payAfterDone,
-              style: const TextStyle(
-                  color: Color(0xFF14683A),
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700)),
+          child: Text(
+            l.payAfterDone,
+            style: const TextStyle(
+              color: Color(0xFF14683A),
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
         ),
         if (hint.extra > 0)
           InfoBox(child: Text(l.payExtra(formatMoney(hint.extra)))),

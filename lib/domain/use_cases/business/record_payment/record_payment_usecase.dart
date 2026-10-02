@@ -18,9 +18,8 @@ class RecordPaymentUsecase {
   final Clock _clock;
   final Uuid _uuid;
 
-  RecordPaymentUsecase(this._payments, this._clock,
-      {Uuid uuid = const Uuid()})
-      : _uuid = uuid;
+  RecordPaymentUsecase(this._payments, this._clock, {Uuid uuid = const Uuid()})
+    : _uuid = uuid;
 
   Future<Result<String>> call(RecordPaymentArgumentModel model) async {
     if (model.amount <= 0) {

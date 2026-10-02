@@ -33,14 +33,16 @@ class WatchArchivedTenantsUsecase {
         latest[r.tenantUuid] = r;
       }
     }
-    return WatchArchivedTenantsReturnModel(rows: [
-      for (final t in tenants)
-        ArchivedTenantRow(
-          tenantUuid: t.uuid,
-          name: t.name,
-          deletedMonth: t.deletedMonth!,
-          lastRent: latest[t.uuid]?.requiredAmount,
-        ),
-    ]);
+    return WatchArchivedTenantsReturnModel(
+      rows: [
+        for (final t in tenants)
+          ArchivedTenantRow(
+            tenantUuid: t.uuid,
+            name: t.name,
+            deletedMonth: t.deletedMonth!,
+            lastRent: latest[t.uuid]?.requiredAmount,
+          ),
+      ],
+    );
   }
 }

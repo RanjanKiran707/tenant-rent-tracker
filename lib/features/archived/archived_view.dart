@@ -16,9 +16,9 @@ class ArchivedView extends StatefulWidget {
   const ArchivedView({super.key});
 
   static Future<void> open(BuildContext context) => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => const ArchivedView()),
-      );
+    context,
+    MaterialPageRoute(builder: (_) => const ArchivedView()),
+  );
 
   @override
   State<ArchivedView> createState() => _ArchivedViewState();
@@ -60,25 +60,34 @@ class _ArchivedViewState extends State<ArchivedView> {
               TipBanner(text: l.helpArchive),
               Container(
                 margin: const EdgeInsets.only(top: 4),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFFECDCFA),
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: Text(l.archNote,
-                    style: const TextStyle(
-                        color: Color(0xFF4B1478),
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700)),
+                child: Text(
+                  l.archNote,
+                  style: const TextStyle(
+                    color: Color(0xFF4B1478),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
               if (data.rows.isEmpty)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 30),
-                  child: Text(l.archEmpty,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                          fontSize: 18, color: Color(0xFF5B6675))),
+                  child: Text(
+                    l.archEmpty,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      color: Color(0xFF5B6675),
+                    ),
+                  ),
                 )
               else
                 for (final row in data.rows) _ArchivedCard(row: row),
@@ -120,15 +129,21 @@ class _ArchivedCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(row.name,
-                    style: const TextStyle(
-                        fontSize: 21, fontWeight: FontWeight.w700)),
+                Text(
+                  row.name,
+                  style: const TextStyle(
+                    fontSize: 21,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
                 Text(
                   rent == null
                       ? removed
                       : '$removed · ${l.rentPerMonth(formatMoney(rent))}',
-                  style:
-                      const TextStyle(fontSize: 16, color: Color(0xFF5B6675)),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Color(0xFF5B6675),
+                  ),
                 ),
               ],
             ),

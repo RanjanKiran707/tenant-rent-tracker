@@ -63,9 +63,9 @@ class _MyAppState extends State<MyApp> {
         supportedLocales: AppLocalizations.supportedLocales,
         // Above the Navigator, so every pushed screen can reach the settings.
         builder: (context, child) => MediaQuery(
-          data: MediaQuery.of(context).copyWith(
-            textScaler: TextScaler.linear(_textScale),
-          ),
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: TextScaler.linear(_textScale)),
           child: AppScope(app: app, child: child!),
         ),
         home: _Root(app: app),
@@ -86,9 +86,8 @@ class _Root extends StatelessWidget {
     return ObxValue<ViewState<AppSettings>>(
       listenable: app.state,
       builder: (state) => state.when(
-        loading: () => const Scaffold(
-          body: Center(child: CircularProgressIndicator()),
-        ),
+        loading: () =>
+            const Scaffold(body: Center(child: CircularProgressIndicator())),
         error: (failure) => Scaffold(
           body: LoadError(failure: failure, onRetry: app.load),
         ),

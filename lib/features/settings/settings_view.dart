@@ -32,9 +32,10 @@ class SettingsView extends StatelessWidget {
           children: [
             TipBanner(text: l.helpSettings),
             const SizedBox(height: 8),
-            Text(l.setLang,
-                style:
-                    const TextStyle(fontSize: 19, fontWeight: FontWeight.w700)),
+            Text(
+              l.setLang,
+              style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w700),
+            ),
             _LanguageChoice(
               label: 'English',
               selected: app.settings.languageCode == 'en',
@@ -49,9 +50,13 @@ class SettingsView extends StatelessWidget {
               child: Row(
                 children: [
                   Expanded(
-                    child: Text(l.setTips,
-                        style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.w700)),
+                    child: Text(
+                      l.setTips,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
                   Switch(
                     key: const Key('tipsSwitch'),
@@ -79,20 +84,29 @@ class SettingsView extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 22),
-            Text(l.setAbout,
-                style:
-                    const TextStyle(fontSize: 19, fontWeight: FontWeight.w700)),
+            Text(
+              l.setAbout,
+              style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w700),
+            ),
             SectionCard(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(l.appTitle,
-                      style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.w700)),
+                  Text(
+                    l.appTitle,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                   const SizedBox(height: 4),
-                  Text(l.version,
-                      style: const TextStyle(
-                          fontSize: 16, color: Color(0xFF5B6675))),
+                  Text(
+                    l.version,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Color(0xFF5B6675),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -125,7 +139,9 @@ class _LanguageChoice extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: BorderSide(
-              color: selected ? blue : const Color(0xFFD9DFE6), width: 2),
+            color: selected ? blue : const Color(0xFFD9DFE6),
+            width: 2,
+          ),
         ),
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
@@ -142,11 +158,14 @@ class _LanguageChoice extends StatelessWidget {
                   color: selected ? blue : const Color(0xFFAAB4C0),
                 ),
                 const SizedBox(width: 12),
-                Text(label,
-                    style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        color: selected ? blue : const Color(0xFF1B2430))),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: selected ? blue : const Color(0xFF1B2430),
+                  ),
+                ),
               ],
             ),
           ),

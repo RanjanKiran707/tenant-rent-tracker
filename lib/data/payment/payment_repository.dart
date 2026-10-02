@@ -13,7 +13,9 @@ class PaymentRepository implements PaymentRepositoryInterface {
   @override
   Future<Result<void>> addPayment(PaymentModel payment) {
     return guard(() async {
-      await _db.into(_db.payments).insert(
+      await _db
+          .into(_db.payments)
+          .insert(
             PaymentsCompanion.insert(
               uuid: payment.uuid,
               rentRecordUuid: payment.rentRecordUuid,
@@ -37,35 +39,36 @@ class PaymentRepository implements PaymentRepositoryInterface {
     String rentRecordUuid,
   ) {
     return guard(() async {
-      final rows = await (_db.select(_db.payments)
-            ..where((p) => p.rentRecordUuid.equals(rentRecordUuid))
-            ..orderBy([
-              (p) => OrderingTerm.asc(p.paidOn),
-              (p) => OrderingTerm.asc(p.createdOn),
-            ]))
-          .get();
+      final rows =
+          await (_db.select(_db.payments)
+                ..where((p) => p.rentRecordUuid.equals(rentRecordUuid))
+                ..orderBy([
+                  (p) => OrderingTerm.asc(p.paidOn),
+                  (p) => OrderingTerm.asc(p.createdOn),
+                ]))
+              .get();
       return rows.map(_fromRow).toList();
     });
   }
 
   @override
   Stream<Result<List<PaymentModel>>> watchPaymentsOfTenant(String tenantUuid) {
-    final query = _db.select(_db.payments).join([
-      innerJoin(
-        _db.rentRecords,
-        _db.rentRecords.uuid.equalsExp(_db.payments.rentRecordUuid),
-      ),
-    ])
-      ..where(_db.rentRecords.tenantUuid.equals(tenantUuid))
-      ..orderBy([
-        OrderingTerm.asc(_db.payments.paidOn),
-        OrderingTerm.asc(_db.payments.createdOn),
-      ]);
+    final query =
+        _db.select(_db.payments).join([
+            innerJoin(
+              _db.rentRecords,
+              _db.rentRecords.uuid.equalsExp(_db.payments.rentRecordUuid),
+            ),
+          ])
+          ..where(_db.rentRecords.tenantUuid.equals(tenantUuid))
+          ..orderBy([
+            OrderingTerm.asc(_db.payments.paidOn),
+            OrderingTerm.asc(_db.payments.createdOn),
+          ]);
     return guardStream(
       query.watch().map(
-            (rows) =>
-                rows.map((r) => _fromRow(r.readTable(_db.payments))).toList(),
-          ),
+        (rows) => rows.map((r) => _fromRow(r.readTable(_db.payments))).toList(),
+      ),
     );
   }
 
@@ -82,10 +85,10 @@ class PaymentRepository implements PaymentRepositoryInterface {
   }
 
   PaymentModel _fromRow(PaymentRow r) => PaymentModel(
-        uuid: r.uuid,
-        rentRecordUuid: r.rentRecordUuid,
-        amount: r.amount,
-        paidOn: r.paidOn,
-        createdOn: r.createdOn,
-      );
+    uuid: r.uuid,
+    rentRecordUuid: r.rentRecordUuid,
+    amount: r.amount,
+    paidOn: r.paidOn,
+    createdOn: r.createdOn,
+  );
 }

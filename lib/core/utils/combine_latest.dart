@@ -43,11 +43,11 @@ Stream<Result<R>> combineLatest3<A, B, C, R>(
     if (ra is Err<A>) return controller.add(Err(ra.failure));
     if (rb is Err<B>) return controller.add(Err(rb.failure));
     if (rc is Err<C>) return controller.add(Err(rc.failure));
-    controller.add(Ok(combine(
-      (ra as Ok<A>).value,
-      (rb as Ok<B>).value,
-      (rc as Ok<C>).value,
-    )));
+    controller.add(
+      Ok(
+        combine((ra as Ok<A>).value, (rb as Ok<B>).value, (rc as Ok<C>).value),
+      ),
+    );
   }
 
   void sourceDone() {
@@ -57,18 +57,24 @@ Stream<Result<R>> combineLatest3<A, B, C, R>(
 
   controller = StreamController<Result<R>>(
     onListen: () {
-      subscriptions.add(a.listen((v) {
-        latestA = v;
-        emit();
-      }, onDone: sourceDone));
-      subscriptions.add(b.listen((v) {
-        latestB = v;
-        emit();
-      }, onDone: sourceDone));
-      subscriptions.add(c.listen((v) {
-        latestC = v;
-        emit();
-      }, onDone: sourceDone));
+      subscriptions.add(
+        a.listen((v) {
+          latestA = v;
+          emit();
+        }, onDone: sourceDone),
+      );
+      subscriptions.add(
+        b.listen((v) {
+          latestB = v;
+          emit();
+        }, onDone: sourceDone),
+      );
+      subscriptions.add(
+        c.listen((v) {
+          latestC = v;
+          emit();
+        }, onDone: sourceDone),
+      );
     },
     onCancel: () async {
       await Future.wait(subscriptions.map((s) => s.cancel()));

@@ -83,8 +83,10 @@ class _HomeBody extends StatelessWidget {
       children: [
         TipBanner(text: l.helpHome),
         const SizedBox(height: 8),
-        Text(l.thisMonth(formatMonth(l, data.currentMonth)),
-            style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w700)),
+        Text(
+          l.thisMonth(formatMonth(l, data.currentMonth)),
+          style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w700),
+        ),
         const SizedBox(height: 10),
         Row(
           children: [
@@ -108,17 +110,26 @@ class _HomeBody extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 22),
-        Text(l.tenantsCount(data.rows.length),
-            style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w700)),
-        Text(l.sortNote,
-            style: const TextStyle(fontSize: 15, color: Color(0xFF5B6675))),
+        Text(
+          l.tenantsCount(data.rows.length),
+          style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w700),
+        ),
+        Text(
+          l.sortNote,
+          style: const TextStyle(fontSize: 15, color: Color(0xFF5B6675)),
+        ),
         if (data.rows.isEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 10),
-            child: Text(l.noTenants,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                    fontSize: 18, height: 1.5, color: Color(0xFF5B6675))),
+            child: Text(
+              l.noTenants,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 18,
+                height: 1.5,
+                color: Color(0xFF5B6675),
+              ),
+            ),
           )
         else
           for (final row in data.rows) _TenantCard(row: row),
@@ -155,13 +166,23 @@ class _TotalBox extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label,
-              style: TextStyle(
-                  color: ink, fontSize: 15, fontWeight: FontWeight.w600)),
+          Text(
+            label,
+            style: TextStyle(
+              color: ink,
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
           const SizedBox(height: 2),
-          Text('₹${formatMoney(amount)}',
-              style: TextStyle(
-                  color: ink, fontSize: 26, fontWeight: FontWeight.w700)),
+          Text(
+            '₹${formatMoney(amount)}',
+            style: TextStyle(
+              color: ink,
+              fontSize: 26,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
         ],
       ),
     );
@@ -198,9 +219,13 @@ class _TenantCard extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: Text(row.name,
-                          style: const TextStyle(
-                              fontSize: 21, fontWeight: FontWeight.w700)),
+                      child: Text(
+                        row.name,
+                        style: const TextStyle(
+                          fontSize: 21,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                     ),
                     const SizedBox(width: 8),
                     StatusChip(status: row.status),
@@ -209,11 +234,14 @@ class _TenantCard extends StatelessWidget {
                 if (row.oldDues > 0)
                   Padding(
                     padding: const EdgeInsets.only(top: 6),
-                    child: Text(l.oldDues(formatMoney(row.oldDues)),
-                        style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF6B21A8))),
+                    child: Text(
+                      l.oldDues(formatMoney(row.oldDues)),
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF6B21A8),
+                      ),
+                    ),
                   ),
               ],
             ),

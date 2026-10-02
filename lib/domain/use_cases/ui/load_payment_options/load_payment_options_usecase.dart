@@ -68,12 +68,15 @@ class LoadPaymentOptionsUsecase {
     final byRecord = groupPaymentsByRecord(paymentList);
 
     // Oldest first, only months that have started.
-    final visible = recordList
-        .where((r) =>
-            r.month.compareTo(current) <= 0 &&
-            r.month.compareTo(tenant.startMonth) >= 0)
-        .toList()
-      ..sort((a, b) => a.month.compareTo(b.month));
+    final visible =
+        recordList
+            .where(
+              (r) =>
+                  r.month.compareTo(current) <= 0 &&
+                  r.month.compareTo(tenant.startMonth) >= 0,
+            )
+            .toList()
+          ..sort((a, b) => a.month.compareTo(b.month));
 
     PaymentMonthOption optionOf(RentRecordModel r) {
       final paid = paidAsOf(byRecord[r.uuid] ?? const <PaymentModel>[], today);
@@ -87,7 +90,9 @@ class LoadPaymentOptionsUsecase {
     }
 
     final all = visible.map(optionOf).toList();
-    final options = all.where((o) => o.balance > 0 || o.month == current).toList();
+    final options = all
+        .where((o) => o.balance > 0 || o.month == current)
+        .toList();
 
     final currentOption = all.where((o) => o.month == current).firstOrNull;
     final oldestOwing = all.where((o) => o.balance > 0).firstOrNull;
@@ -100,11 +105,13 @@ class LoadPaymentOptionsUsecase {
       defaultUuid = currentOption?.rentRecordUuid;
     }
 
-    return Ok(LoadPaymentOptionsReturnModel(
-      tenantName: tenant.name,
-      today: today,
-      options: options.reversed.toList(),
-      defaultRentRecordUuid: defaultUuid,
-    ));
+    return Ok(
+      LoadPaymentOptionsReturnModel(
+        tenantName: tenant.name,
+        today: today,
+        options: options.reversed.toList(),
+        defaultRentRecordUuid: defaultUuid,
+      ),
+    );
   }
 }

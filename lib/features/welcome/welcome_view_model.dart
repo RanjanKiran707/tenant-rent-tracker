@@ -12,7 +12,7 @@ class WelcomeViewModel {
   final ValueNotifier<int> page = ValueNotifier(0);
 
   WelcomeViewModel({required Future<void> Function() onFinish})
-      : _onFinish = onFinish;
+    : _onFinish = onFinish;
 
   bool get isLast => page.value == pageCount - 1;
 

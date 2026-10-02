@@ -39,9 +39,10 @@ class _WelcomeViewState extends State<WelcomeView> {
         actions: [
           TextButton(
             onPressed: AppScope.of(context).toggleLanguage,
-            child: Text(l.langToggle,
-                style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+            child: Text(
+              l.langToggle,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+            ),
           ),
           const SizedBox(width: 8),
         ],
@@ -60,17 +61,24 @@ class _WelcomeViewState extends State<WelcomeView> {
                 children: [
                   Text('${page + 1}', style: const TextStyle(fontSize: 84)),
                   const SizedBox(height: 8),
-                  Text(title,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                          fontSize: 30, fontWeight: FontWeight.w700)),
+                  Text(
+                    title,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                   const SizedBox(height: 10),
-                  Text(body,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                          fontSize: 20,
-                          height: 1.5,
-                          color: Color(0xFF5B6675))),
+                  Text(
+                    body,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      height: 1.5,
+                      color: Color(0xFF5B6675),
+                    ),
+                  ),
                   const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,

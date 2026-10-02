@@ -12,24 +12,25 @@ class AppViewModel {
   final SetShowTipsUsecase _setShowTips;
   final MarkWelcomeSeenUsecase _markWelcomeSeen;
 
-  final ValueNotifier<ViewState<AppSettings>> state =
-      ValueNotifier(const ViewStateLoading());
+  final ValueNotifier<ViewState<AppSettings>> state = ValueNotifier(
+    const ViewStateLoading(),
+  );
 
   AppViewModel({
     required LoadSettingsUsecase loadSettings,
     required SetLanguageUsecase setLanguage,
     required SetShowTipsUsecase setShowTips,
     required MarkWelcomeSeenUsecase markWelcomeSeen,
-  })  : _loadSettings = loadSettings,
-        _setLanguage = setLanguage,
-        _setShowTips = setShowTips,
-        _markWelcomeSeen = markWelcomeSeen;
+  }) : _loadSettings = loadSettings,
+       _setLanguage = setLanguage,
+       _setShowTips = setShowTips,
+       _markWelcomeSeen = markWelcomeSeen;
 
   /// The settings once loaded, otherwise the defaults.
   AppSettings get settings => switch (state.value) {
-        ViewStateLoaded(data: final s) => s,
-        _ => const AppSettings(),
-      };
+    ViewStateLoaded(data: final s) => s,
+    _ => const AppSettings(),
+  };
 
   Future<void> load() async {
     state.value = const ViewStateLoading();

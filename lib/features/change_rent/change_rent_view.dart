@@ -100,10 +100,14 @@ class _ChangeRentViewState extends State<ChangeRentView> {
       children: [
         TipBanner(text: l.helpRent),
         const SizedBox(height: 8),
-        Text(info.tenantName,
-            style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w700)),
-        Text(l.rentCurrent(formatMoney(info.currentRent)),
-            style: const TextStyle(fontSize: 16, color: Color(0xFF5B6675))),
+        Text(
+          info.tenantName,
+          style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w700),
+        ),
+        Text(
+          l.rentCurrent(formatMoney(info.currentRent)),
+          style: const TextStyle(fontSize: 16, color: Color(0xFF5B6675)),
+        ),
         FormLabel(label: l.rentNew),
         TextField(
           key: const Key('newRentField'),
@@ -126,19 +130,23 @@ class _ChangeRentViewState extends State<ChangeRentView> {
             final headline = d > 0
                 ? l.rentUp(formatMoney(d))
                 : d < 0
-                    ? l.rentDown(formatMoney(-d))
-                    : l.rentSame;
+                ? l.rentDown(formatMoney(-d))
+                : l.rentSame;
             return InfoBox(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(headline,
-                      style: const TextStyle(fontWeight: FontWeight.w700)),
-                  Text(l.rentNotice(
-                    formatMonth(l, info.effectiveFromMonth),
-                    formatMonth(l, info.currentMonth),
-                    formatMoney(info.currentRent),
-                  )),
+                  Text(
+                    headline,
+                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                  Text(
+                    l.rentNotice(
+                      formatMonth(l, info.effectiveFromMonth),
+                      formatMonth(l, info.currentMonth),
+                      formatMoney(info.currentRent),
+                    ),
+                  ),
                 ],
               ),
             );

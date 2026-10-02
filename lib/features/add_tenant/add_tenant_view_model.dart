@@ -13,18 +13,20 @@ class AddTenantViewModel {
   final LoadAddTenantFormReturnModel form;
 
   late final ValueNotifier<int> dueDay = ValueNotifier(form.defaultDueDay);
-  late final ValueNotifier<String> startMonth =
-      ValueNotifier(form.defaultStartMonth);
+  late final ValueNotifier<String> startMonth = ValueNotifier(
+    form.defaultStartMonth,
+  );
 
   /// State of the save action. `Loaded` holds the new tenant's uuid.
-  final ValueNotifier<ViewState<String>> saveState =
-      ValueNotifier(const ViewStateIdle());
+  final ValueNotifier<ViewState<String>> saveState = ValueNotifier(
+    const ViewStateIdle(),
+  );
 
   AddTenantViewModel({
     required LoadAddTenantFormUsecase loadForm,
     required AddTenantUsecase addTenant,
-  })  : form = loadForm(),
-        _addTenant = addTenant;
+  }) : form = loadForm(),
+       _addTenant = addTenant;
 
   Future<void> onSave({required String name, required String rentText}) async {
     if (saveState.value.isLoading) return; // blocking rule: ignore re-entry
@@ -36,12 +38,14 @@ class AddTenantViewModel {
     }
 
     saveState.value = const ViewStateLoading();
-    final result = await _addTenant(AddTenantArgumentModel(
-      name: name,
-      rent: rent,
-      dueDay: dueDay.value,
-      startMonth: startMonth.value,
-    ));
+    final result = await _addTenant(
+      AddTenantArgumentModel(
+        name: name,
+        rent: rent,
+        dueDay: dueDay.value,
+        startMonth: startMonth.value,
+      ),
+    );
     saveState.value = result.fold(
       (failure) => ViewStateError(failure),
       (uuid) => ViewStateLoaded(uuid),

@@ -33,13 +33,16 @@ void main() {
 
       expect((const Ok(8).flatMap(half) as Ok<int>).value, 4);
       expect(((const Ok(8).flatMap(half)).flatMap(half) as Ok<int>).value, 2);
-      expect(((const Ok(6).flatMap(half)).flatMap(half) as Err<int>).failure,
-          isA<ValidationFailure>());
       expect(
-          (const Err<int>(StorageFailure('first')).flatMap(half) as Err<int>)
-              .failure
-              .message,
-          'first');
+        ((const Ok(6).flatMap(half)).flatMap(half) as Err<int>).failure,
+        isA<ValidationFailure>(),
+      );
+      expect(
+        (const Err<int>(StorageFailure('first')).flatMap(half) as Err<int>)
+            .failure
+            .message,
+        'first',
+      );
     });
   });
 
@@ -49,8 +52,10 @@ void main() {
     });
 
     test('SystemClock.today looks like YYYY-MM-DD', () {
-      expect(const SystemClock().today(),
-          matches(RegExp(r'^\d{4}-\d{2}-\d{2}$')));
+      expect(
+        const SystemClock().today(),
+        matches(RegExp(r'^\d{4}-\d{2}-\d{2}$')),
+      );
     });
 
     test('SystemClock is on IST, 5h30 ahead of UTC', () {
@@ -60,7 +65,9 @@ void main() {
           '${ist.year.toString().padLeft(4, '0')}-${ist.month.toString().padLeft(2, '0')}-${ist.day.toString().padLeft(2, '0')}';
       final actual = const SystemClock().today();
       // The two readings may straddle IST midnight; accept either day.
-      final later = DateTime.now().toUtc().add(const Duration(hours: 5, minutes: 30));
+      final later = DateTime.now().toUtc().add(
+        const Duration(hours: 5, minutes: 30),
+      );
       final expectedLater =
           '${later.year.toString().padLeft(4, '0')}-${later.month.toString().padLeft(2, '0')}-${later.day.toString().padLeft(2, '0')}';
       expect([expected, expectedLater], contains(actual));

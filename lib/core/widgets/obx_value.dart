@@ -10,9 +10,9 @@ class ObxValue<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ValueListenableBuilder<T>(
-        valueListenable: listenable,
-        builder: (context, value, child) => builder(value),
-      );
+    valueListenable: listenable,
+    builder: (context, value, child) => builder(value),
+  );
 }
 
 /// Rebuilds when any of several notifiers change.
@@ -24,7 +24,7 @@ class ObxMulti extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ListenableBuilder(
-        listenable: Listenable.merge(listenables),
-        builder: (context, child) => builder(),
-      );
+    listenable: Listenable.merge(listenables),
+    builder: (context, child) => builder(),
+  );
 }

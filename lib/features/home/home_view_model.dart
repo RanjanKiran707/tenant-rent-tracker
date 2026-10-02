@@ -11,8 +11,9 @@ class HomeViewModel {
   final EnsureRentRecordsUsecase _ensureRentRecords;
   final WatchHomeUsecase _watchHome;
 
-  final ValueNotifier<ViewState<WatchHomeReturnModel>> state =
-      ValueNotifier(const ViewStateLoading());
+  final ValueNotifier<ViewState<WatchHomeReturnModel>> state = ValueNotifier(
+    const ViewStateLoading(),
+  );
 
   StreamSubscription<Result<WatchHomeReturnModel>>? _subscription;
 
@@ -24,8 +25,8 @@ class HomeViewModel {
   HomeViewModel({
     required EnsureRentRecordsUsecase ensureRentRecords,
     required WatchHomeUsecase watchHome,
-  })  : _ensureRentRecords = ensureRentRecords,
-        _watchHome = watchHome;
+  }) : _ensureRentRecords = ensureRentRecords,
+       _watchHome = watchHome;
 
   /// Creates any missing monthly records, then (re)subscribes to the home
   /// list. Call it when the screen opens and when the app comes back to the

@@ -18,8 +18,7 @@ int balanceOfRecord(
   RentRecordModel record,
   List<PaymentModel> payments,
   String today,
-) =>
-    balanceOf(record.requiredAmount, paidAsOf(payments, today));
+) => balanceOf(record.requiredAmount, paidAsOf(payments, today));
 
 /// Total still owed for months before [currentMonth] ("Old dues").
 /// [records] are one tenant's records.

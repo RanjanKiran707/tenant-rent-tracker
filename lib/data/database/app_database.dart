@@ -17,9 +17,9 @@ class AppDatabase extends _$AppDatabase {
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        beforeOpen: (details) async {
-          // SQLite ignores foreign keys unless this is switched on.
-          await customStatement('PRAGMA foreign_keys = ON');
-        },
-      );
+    beforeOpen: (details) async {
+      // SQLite ignores foreign keys unless this is switched on.
+      await customStatement('PRAGMA foreign_keys = ON');
+    },
+  );
 }

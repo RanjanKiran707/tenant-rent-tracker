@@ -18,12 +18,15 @@ class FormLabel extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label,
-              style:
-                  const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+          ),
           if (hint != null)
-            Text(hint!,
-                style: const TextStyle(fontSize: 15, color: Color(0xFF5B6675))),
+            Text(
+              hint!,
+              style: const TextStyle(fontSize: 15, color: Color(0xFF5B6675)),
+            ),
         ],
       ),
     );

@@ -59,9 +59,13 @@ Future<void> showHelpDialog(
             Text(helpText, style: const TextStyle(fontSize: 18)),
             if (showLegend) ...[
               const SizedBox(height: 16),
-              Text(l.legendTitle,
-                  style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.w700)),
+              Text(
+                l.legendTitle,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
               for (final status in MonthStatus.values)
                 Padding(
                   padding: const EdgeInsets.only(top: 10),
@@ -70,8 +74,10 @@ Future<void> showHelpDialog(
                     children: [
                       _LegendChip(status: status, l: l),
                       const SizedBox(height: 2),
-                      Text(statusDescription(l, status),
-                          style: const TextStyle(fontSize: 16)),
+                      Text(
+                        statusDescription(l, status),
+                        style: const TextStyle(fontSize: 16),
+                      ),
                     ],
                   ),
                 ),
@@ -80,10 +86,7 @@ Future<void> showHelpDialog(
         ),
       ),
       actions: [
-        BigButton(
-          label: l.ok,
-          onPressed: () => Navigator.pop(dialogContext),
-        ),
+        BigButton(label: l.ok, onPressed: () => Navigator.pop(dialogContext)),
       ],
     ),
   );
@@ -104,8 +107,10 @@ class _LegendChip extends StatelessWidget {
         color: colors.background,
         borderRadius: BorderRadius.circular(999),
       ),
-      child: Text(statusLabel(l, status),
-          style: TextStyle(color: colors.ink, fontWeight: FontWeight.w700)),
+      child: Text(
+        statusLabel(l, status),
+        style: TextStyle(color: colors.ink, fontWeight: FontWeight.w700),
+      ),
     );
   }
 }

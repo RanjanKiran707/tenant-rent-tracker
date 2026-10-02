@@ -29,15 +29,16 @@ class ChangeRentViewModel {
   /// The typed rent; null while empty or not a number.
   final ValueNotifier<int?> newRent = ValueNotifier(null);
 
-  final ValueNotifier<ViewState<void>> saveState =
-      ValueNotifier(const ViewStateIdle());
+  final ValueNotifier<ViewState<void>> saveState = ValueNotifier(
+    const ViewStateIdle(),
+  );
 
   ChangeRentViewModel({
     required this.bundle,
     required LoadRentChangeInfoUsecase loadInfo,
     required ChangeRentUsecase changeRent,
-  })  : _loadInfo = loadInfo,
-        _changeRent = changeRent;
+  }) : _loadInfo = loadInfo,
+       _changeRent = changeRent;
 
   Future<void> load() async {
     final result = await _loadInfo(bundle.tenantUuid);

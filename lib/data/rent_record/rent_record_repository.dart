@@ -14,19 +14,15 @@ class RentRecordRepository implements RentRecordRepositoryInterface {
   Future<Result<void>> insertMissing(List<RentRecordModel> records) {
     return guard(() async {
       await _db.batch((batch) {
-        batch.insertAll(
-          _db.rentRecords,
-          [
-            for (final r in records)
-              RentRecordsCompanion.insert(
-                uuid: r.uuid,
-                tenantUuid: r.tenantUuid,
-                month: r.month,
-                requiredAmount: r.requiredAmount,
-              ),
-          ],
-          mode: InsertMode.insertOrIgnore,
-        );
+        batch.insertAll(_db.rentRecords, [
+          for (final r in records)
+            RentRecordsCompanion.insert(
+              uuid: r.uuid,
+              tenantUuid: r.tenantUuid,
+              month: r.month,
+              requiredAmount: r.requiredAmount,
+            ),
+        ], mode: InsertMode.insertOrIgnore);
       });
     });
   }
@@ -38,9 +34,9 @@ class RentRecordRepository implements RentRecordRepositoryInterface {
     int requiredAmount,
   ) {
     return guard(() async {
-      await (_db.update(_db.rentRecords)
-            ..where(
-                (r) => r.tenantUuid.equals(tenantUuid) & r.month.equals(month)))
+      await (_db.update(_db.rentRecords)..where(
+            (r) => r.tenantUuid.equals(tenantUuid) & r.month.equals(month),
+          ))
           .write(RentRecordsCompanion(requiredAmount: Value(requiredAmount)));
     });
   }
@@ -80,9 +76,9 @@ class RentRecordRepository implements RentRecordRepositoryInterface {
   }
 
   RentRecordModel _fromRow(RentRecordRow r) => RentRecordModel(
-        uuid: r.uuid,
-        tenantUuid: r.tenantUuid,
-        month: r.month,
-        requiredAmount: r.requiredAmount,
-      );
+    uuid: r.uuid,
+    tenantUuid: r.tenantUuid,
+    month: r.month,
+    requiredAmount: r.requiredAmount,
+  );
 }
