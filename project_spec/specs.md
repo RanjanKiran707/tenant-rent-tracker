@@ -23,6 +23,7 @@ A tenant is either **Active** or **Deleted**.
 - **Month end**: inclusive of the last day of the month.
 - All dates use one fixed timezone.
 - **Payments** are stored individually with their date (not only as a running total). Completed vs Late Completed depends on the date the total reached the required amount.
+- A recorded payment can be corrected later: its **amount** and **date received** can be changed (not the month it is for). The month's status and balance are recomputed, so a correction can change them, for example lowering an amount can turn Completed into Partial, and moving the date past the due day can turn it into Late Completed. A payment cannot be dated after today. Payments of an archived tenant are read-only. A payment is never deleted except by the immediate Undo.
 
 ## Monthly States
 

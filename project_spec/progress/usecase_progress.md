@@ -15,9 +15,17 @@ Decisions: missing monthly records are created by `EnsureRentRecordsUsecase` (a 
 | 5 | UI use cases (+ tests) | done |
 | 6 | wiring in `AppDependencies`, architecture doc note, final analyze + test run | done |
 | 7 | Tenant Groups: group use cases, group-aware Home, `WatchGroupUsecase` (see `groups_progress.md`) | done |
+| 8 | Edit a recorded payment: `EditPaymentUsecase`, `PaymentRepository.getPayment/updatePayment`, tappable payment lines on Tenant Detail (branch `feature/edit-payment`) | done, tests written not run |
 
 ## Log
 
+
+### Step 8 – edit a recorded payment (done; tests written, not run by the assistant)
+- Only the **amount** and the **date received** can be changed. The month a payment is for, its uuid and `createdOn` stay, so the order of payments received on the same day is kept. No delete button: the immediate Undo is still the only way a payment is removed.
+- `EditPaymentUsecase(payments, clock)`: `amount_invalid`, `date_invalid`, `date_in_future` (today is allowed), `payment_not_found`. New data-layer methods `getPayment` and `updatePayment`; the payment streams re-emit, so statuses and balances follow by themselves (Completed can become Partial, Late Completed or Backlog, and a fully paid month moves back from History to the top card).
+- Tenant Detail: each payment line is tappable (with a pencil) and opens an "Edit payment" dialog (amount field, date picker up to today). Payment lines are now also listed on the top "this month" card, because a part-paid current month is not in History. Archived tenants stay read-only.
+- New string `errPaymentNotFound` and three dialog strings in en and kn (the Kannada was written by the assistant and needs a check). Spec, data model and mockup are updated.
+- Tests: use case, repository and view-model tests added; `flutter analyze` is clean.
 ### Steps 5 and 6 – UI use cases, wiring, docs (done)
 - In `lib/domain/use_cases/ui/`: `WatchHomeUsecase`, `WatchTenantDetailUsecase` (active and archived), `WatchArchivedTenantsUsecase`, `LoadPaymentOptionsUsecase`, `LoadRentChangeInfoUsecase`, `LoadAddTenantFormUsecase`, plus `month_status/tenant_dues.dart` (old dues, oldest owing month).
 - `LoadAddTenantFormUsecase` has no I/O and cannot fail, so it returns its model directly instead of a `Result` (a change from the plan).

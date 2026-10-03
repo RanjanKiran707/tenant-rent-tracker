@@ -28,6 +28,29 @@ class PaymentRepository implements PaymentRepositoryInterface {
   }
 
   @override
+  Future<Result<PaymentModel?>> getPayment(String uuid) {
+    return guard(() async {
+      final row = await (_db.select(
+        _db.payments,
+      )..where((p) => p.uuid.equals(uuid))).getSingleOrNull();
+      return row == null ? null : _fromRow(row);
+    });
+  }
+
+  @override
+  Future<Result<void>> updatePayment(
+    String uuid, {
+    required int amount,
+    required String paidOn,
+  }) {
+    return guard(() async {
+      await (_db.update(_db.payments)..where((p) => p.uuid.equals(uuid))).write(
+        PaymentsCompanion(amount: Value(amount), paidOn: Value(paidOn)),
+      );
+    });
+  }
+
+  @override
   Future<Result<void>> deletePayment(String uuid) {
     return guard(() async {
       await (_db.delete(_db.payments)..where((p) => p.uuid.equals(uuid))).go();

@@ -16,6 +16,7 @@ String failureMessage(AppLocalizations l, Failure failure) {
     'date_in_future' => l.errDateFuture,
     'tenant_not_found' => l.errTenantNotFound,
     'tenant_deleted' => l.errTenantDeleted,
+    'payment_not_found' => l.errPaymentNotFound,
     'group_name_required' => l.errGroupName,
     'group_name_taken' => l.errGroupNameTaken,
     'group_not_found' => l.errGroupNotFound,

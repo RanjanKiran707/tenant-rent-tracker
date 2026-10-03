@@ -47,6 +47,7 @@
   "errDateFuture": "The date cannot be in the future.",
   "errTenantNotFound": "This tenant could not be found.",
   "errTenantDeleted": "This tenant has been removed.",
+  "errPaymentNotFound": "This payment could not be found.",
   "errGroupName": "Please type a group name.",
   "errGroupNameTaken": "A group with this name already exists.",
   "errGroupNotFound": "This group could not be found.",
@@ -93,6 +94,9 @@
   "@payExtra": {"placeholders": {"amount": {}}},
   "paymentSaved": "₹{amount} saved",
   "@paymentSaved": {"placeholders": {"amount": {}}},
+  "editPaymentTitle": "Edit payment",
+  "paymentUpdated": "Payment updated",
+  "editPaymentTooltip": "Edit this payment",
 
   "rentTitle": "Change rent",
   "rentCurrent": "Current rent: ₹{amount}",

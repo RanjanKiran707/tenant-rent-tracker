@@ -5,6 +5,7 @@ import 'package:tenant_tracker/core/errors/failure.dart';
 import 'package:tenant_tracker/core/errors/result.dart';
 import 'package:tenant_tracker/core/utils/view_state.dart';
 import 'package:tenant_tracker/domain/use_cases/business/delete_tenant/delete_tenant_usecase.dart';
+import 'package:tenant_tracker/domain/use_cases/business/edit_payment/edit_payment_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/business/ensure_rent_records/ensure_rent_records_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/business/move_tenant_to_group/move_tenant_to_group_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/business/rename_tenant/rename_tenant_usecase.dart';
@@ -29,6 +30,7 @@ class TenantDetailViewModel {
   final RenameTenantUsecase _renameTenant;
   final MoveTenantToGroupUsecase _moveTenantToGroup;
   final WatchGroupsUsecase _watchGroups;
+  final EditPaymentUsecase _editPayment;
   final UndoPaymentUsecase _undoPayment;
 
   final ValueNotifier<ViewState<WatchTenantDetailReturnModel>> state =
@@ -51,6 +53,7 @@ class TenantDetailViewModel {
     required RenameTenantUsecase renameTenant,
     required MoveTenantToGroupUsecase moveTenantToGroup,
     required WatchGroupsUsecase watchGroups,
+    required EditPaymentUsecase editPayment,
     required UndoPaymentUsecase undoPayment,
   }) : _ensureRentRecords = ensureRentRecords,
        _watchTenantDetail = watchTenantDetail,
@@ -58,6 +61,7 @@ class TenantDetailViewModel {
        _renameTenant = renameTenant,
        _moveTenantToGroup = moveTenantToGroup,
        _watchGroups = watchGroups,
+       _editPayment = editPayment,
        _undoPayment = undoPayment;
 
   /// Creates this tenant's missing monthly records, then (re)subscribes.
@@ -110,6 +114,21 @@ class TenantDetailViewModel {
   /// worked; the "Group:" line updates by itself because the tenant is watched.
   Future<Failure?> moveToGroup(String groupUuid) async {
     final result = await _moveTenantToGroup(bundle.tenantUuid, groupUuid);
+    return result.fold((failure) => failure, (_) => null);
+  }
+
+  /// Corrects a payment's amount and date. Returns the failure, or null when
+  /// it worked; the month's status and balance update by themselves.
+  Future<Failure?> editPayment(
+    String paymentUuid, {
+    required int amount,
+    required String paidOn,
+  }) async {
+    final result = await _editPayment(
+      paymentUuid,
+      amount: amount,
+      paidOn: paidOn,
+    );
     return result.fold((failure) => failure, (_) => null);
   }
 

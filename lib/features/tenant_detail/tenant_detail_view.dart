@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:tenant_tracker/core/di/app_dependencies.dart';
 import 'package:tenant_tracker/core/errors/failure.dart';
 import 'package:tenant_tracker/core/utils/display_format.dart';
@@ -51,6 +52,7 @@ class _TenantDetailViewState extends State<TenantDetailView>
       renameTenant: deps.renameTenant,
       moveTenantToGroup: deps.moveTenantToGroup,
       watchGroups: deps.watchGroups,
+      editPayment: deps.editPayment,
       undoPayment: deps.undoPayment,
     );
     ctrl.deleteState.addListener(_onDeleteStateChanged);
@@ -136,6 +138,23 @@ class _TenantDetailViewState extends State<TenantDetailView>
       ..showSnackBar(
         SnackBar(content: Text(l.rentSaved(formatMonth(l, from)))),
       );
+  }
+
+  Future<void> _openEditPayment(PaymentItem payment) async {
+    final saved = await showDialog<bool>(
+      context: context,
+      builder: (_) => _EditPaymentDialog(
+        payment: payment,
+        today: AppDependencies.instance.clock.today(),
+        onSave: (amount, paidOn) =>
+            ctrl.editPayment(payment.uuid, amount: amount, paidOn: paidOn),
+      ),
+    );
+    if (saved != true || !mounted) return;
+    final l = AppLocalizations.of(context);
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(l.paymentUpdated)));
   }
 
   Future<void> _openMove(WatchTenantDetailReturnModel data) async {
@@ -242,6 +261,7 @@ class _TenantDetailViewState extends State<TenantDetailView>
                 onRent: _openRent,
                 onEditName: () => _openEditName(data.name),
                 onMove: () => _openMove(data),
+                onEditPayment: _openEditPayment,
                 onDelete: () => _askDelete(data),
               ),
             ),
@@ -262,6 +282,9 @@ class _DetailBody extends StatelessWidget {
   final VoidCallback onMove;
   final VoidCallback onDelete;
 
+  /// Opens the edit dialog for a payment.
+  final void Function(PaymentItem payment) onEditPayment;
+
   const _DetailBody({
     required this.data,
     required this.busy,
@@ -271,6 +294,7 @@ class _DetailBody extends StatelessWidget {
     required this.onEditName,
     required this.onMove,
     required this.onDelete,
+    required this.onEditPayment,
   });
 
   @override
@@ -278,6 +302,8 @@ class _DetailBody extends StatelessWidget {
     final l = AppLocalizations.of(context);
     final top = data.topMonth;
     final noPendingDue = top == null && !data.readOnly && data.oldDues == 0;
+    // An archived tenant is read-only: its payments cannot be edited.
+    final editPayment = data.readOnly ? null : onEditPayment;
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
       children: [
@@ -329,7 +355,8 @@ class _DetailBody extends StatelessWidget {
           key: const Key('tenantGroupLine'),
           style: const TextStyle(fontSize: 16, color: Color(0xFF5B6675)),
         ),
-        if (top != null) _TopMonthCard(month: top),
+        if (top != null)
+          _TopMonthCard(month: top, onEditPayment: editPayment),
         if (noPendingDue)
           SectionCard(
             child: Text(
@@ -406,6 +433,7 @@ class _DetailBody extends StatelessWidget {
                         month: month,
                         canPay: !data.readOnly,
                         onPay: () => onPay(month.rentRecordUuid),
+                        onEditPayment: editPayment,
                       ),
                   ],
                 ),
@@ -625,10 +653,193 @@ class _EditNameDialogState extends State<_EditNameDialog> {
   }
 }
 
+/// One received payment, "₹3,000 · 4 Jan". Tapping it (and the pencil) opens
+/// the edit dialog; when [onEdit] is null the line is plain text.
+class _PaymentLine extends StatelessWidget {
+  final PaymentItem payment;
+  final void Function(PaymentItem payment)? onEdit;
+
+  const _PaymentLine({required this.payment, required this.onEdit});
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    const style = TextStyle(fontSize: 16, color: Color(0xFF5B6675));
+    final text = Text(
+      '₹${formatMoney(payment.amount)} · ${formatDayMonth(l, payment.paidOn)}',
+      style: style,
+    );
+    final edit = onEdit;
+    if (edit == null) return text;
+    return InkWell(
+      key: Key('payment-${payment.uuid}'),
+      borderRadius: BorderRadius.circular(8),
+      onTap: () => edit(payment),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          children: [
+            Expanded(child: text),
+            Tooltip(
+              message: l.editPaymentTooltip,
+              child: const Icon(Icons.edit, size: 18, color: Color(0xFF5B6675)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Edits the amount and the date received of one payment, full screen. Pops
+/// with true once saved, or null when cancelled. A failed save is shown on the
+/// screen.
+class _EditPaymentDialog extends StatefulWidget {
+  final PaymentItem payment;
+
+  /// `YYYY-MM-DD`; a payment cannot be dated after today.
+  final String today;
+  final Future<Failure?> Function(int amount, String paidOn) onSave;
+
+  const _EditPaymentDialog({
+    required this.payment,
+    required this.today,
+    required this.onSave,
+  });
+
+  @override
+  State<_EditPaymentDialog> createState() => _EditPaymentDialogState();
+}
+
+class _EditPaymentDialogState extends State<_EditPaymentDialog> {
+  late final TextEditingController _amount = TextEditingController(
+    text: '${widget.payment.amount}',
+  );
+  late String _date = widget.payment.paidOn;
+  Failure? _failure;
+  bool _saving = false;
+
+  @override
+  void dispose() {
+    _amount.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.parse(_date),
+      firstDate: DateTime(2000),
+      lastDate: DateTime.parse(widget.today),
+    );
+    if (picked == null || !mounted) return;
+    setState(() {
+      _date =
+          '${picked.year.toString().padLeft(4, '0')}-'
+          '${picked.month.toString().padLeft(2, '0')}-'
+          '${picked.day.toString().padLeft(2, '0')}';
+    });
+  }
+
+  Future<void> _save() async {
+    if (_saving) return; // blocking rule: ignore re-entry
+    // An empty or non-numeric amount becomes 0, which the use case rejects.
+    final amount = int.tryParse(_amount.text.trim()) ?? 0;
+    setState(() => _saving = true);
+    final failure = await widget.onSave(amount, _date);
+    if (!mounted) return;
+    if (failure == null) {
+      Navigator.pop(context, true);
+    } else {
+      setState(() {
+        _saving = false;
+        _failure = failure;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    return Dialog.fullscreen(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(l.editPaymentTitle),
+          leading: IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: _saving ? null : () => Navigator.pop(context),
+          ),
+        ),
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        FormLabel(label: l.payAmount),
+                        TextField(
+                          key: const Key('editPaymentAmount'),
+                          controller: _amount,
+                          enabled: !_saving,
+                          autofocus: true,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                        ),
+                        FormLabel(label: l.payDate),
+                        InkWell(
+                          key: const Key('editPaymentDate'),
+                          onTap: _saving ? null : _pickDate,
+                          child: InputDecorator(
+                            decoration: const InputDecoration(),
+                            child: Text(
+                              formatDate(l, _date),
+                              style: const TextStyle(fontSize: 18),
+                            ),
+                          ),
+                        ),
+                        if (_failure != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Text(
+                              failureMessage(l, _failure!),
+                              style: const TextStyle(color: Color(0xFFB3261E)),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+                BigButton(label: l.save, busy: _saving, onPressed: _save),
+                const SizedBox(height: 8),
+                BigButton(
+                  label: l.cancel,
+                  kind: BigButtonKind.secondary,
+                  onPressed: _saving ? null : () => Navigator.pop(context),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _TopMonthCard extends StatelessWidget {
   final MonthDetail month;
 
-  const _TopMonthCard({required this.month});
+  /// Opens the edit dialog for a payment; null when payments cannot be edited
+  /// (an archived tenant).
+  final void Function(PaymentItem payment)? onEditPayment;
+
+  const _TopMonthCard({required this.month, required this.onEditPayment});
 
   @override
   Widget build(BuildContext context) {
@@ -677,6 +888,8 @@ class _TopMonthCard extends StatelessWidget {
               formatMoney(month.requiredAmount),
             ),
           ),
+          for (final p in month.payments)
+            _PaymentLine(payment: p, onEdit: onEditPayment),
           if (month.balance > 0)
             Padding(
               padding: const EdgeInsets.only(top: 6),
@@ -711,10 +924,15 @@ class _HistoryMonth extends StatelessWidget {
   final bool canPay;
   final VoidCallback onPay;
 
+  /// Opens the edit dialog for a payment; null when payments cannot be edited
+  /// (an archived tenant).
+  final void Function(PaymentItem payment)? onEditPayment;
+
   const _HistoryMonth({
     required this.month,
     required this.canPay,
     required this.onPay,
+    required this.onEditPayment,
   });
 
   @override
@@ -748,10 +966,7 @@ class _HistoryMonth extends StatelessWidget {
             style: sub,
           ),
           for (final p in month.payments)
-            Text(
-              '₹${formatMoney(p.amount)} · ${formatDayMonth(l, p.paidOn)}',
-              style: sub,
-            ),
+            _PaymentLine(payment: p, onEdit: onEditPayment),
           if (canPay && month.balance > 0) ...[
             Text(
               l.balance(formatMoney(month.balance)),

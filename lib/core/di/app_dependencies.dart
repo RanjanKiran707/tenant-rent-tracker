@@ -13,6 +13,7 @@ import 'package:tenant_tracker/domain/use_cases/business/add_tenant/add_tenant_u
 import 'package:tenant_tracker/domain/use_cases/business/change_rent/change_rent_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/business/delete_group/delete_group_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/business/delete_tenant/delete_tenant_usecase.dart';
+import 'package:tenant_tracker/domain/use_cases/business/edit_payment/edit_payment_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/business/ensure_rent_records/ensure_rent_records_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/business/move_tenant_to_group/move_tenant_to_group_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/business/record_payment/record_payment_usecase.dart';
@@ -40,6 +41,7 @@ class AppDependencies {
   final AddTenantUsecase addTenant;
   final EnsureRentRecordsUsecase ensureRentRecords;
   final RecordPaymentUsecase recordPayment;
+  final EditPaymentUsecase editPayment;
   final UndoPaymentUsecase undoPayment;
   final ChangeRentUsecase changeRent;
   final DeleteTenantUsecase deleteTenant;
@@ -72,6 +74,7 @@ class AppDependencies {
     required this.addTenant,
     required this.ensureRentRecords,
     required this.recordPayment,
+    required this.editPayment,
     required this.undoPayment,
     required this.changeRent,
     required this.deleteTenant,
@@ -138,6 +141,7 @@ class AppDependencies {
       addTenant: AddTenantUsecase(tenants, groups, ensureRentRecords, appClock),
       ensureRentRecords: ensureRentRecords,
       recordPayment: RecordPaymentUsecase(payments, appClock),
+      editPayment: EditPaymentUsecase(payments, appClock),
       undoPayment: UndoPaymentUsecase(payments),
       changeRent: ChangeRentUsecase(tenants, history, appClock),
       deleteTenant: DeleteTenantUsecase(tenants, appClock),

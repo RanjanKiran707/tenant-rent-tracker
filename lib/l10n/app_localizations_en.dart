@@ -138,6 +138,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errTenantDeleted => 'This tenant has been removed.';
 
   @override
+  String get errPaymentNotFound => 'This payment could not be found.';
+
+  @override
   String get errGroupName => 'Please type a group name.';
 
   @override
@@ -261,6 +264,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String paymentSaved(Object amount) {
     return '₹$amount saved';
   }
+
+  @override
+  String get editPaymentTitle => 'Edit payment';
+
+  @override
+  String get paymentUpdated => 'Payment updated';
+
+  @override
+  String get editPaymentTooltip => 'Edit this payment';
 
   @override
   String get rentTitle => 'Change rent';

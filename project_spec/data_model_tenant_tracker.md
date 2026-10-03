@@ -77,6 +77,7 @@ Changes from the first draft: **`rentAmount` removed** (moves to RentHistory, pe
 | createdOn | DateTime | audit only |
 
 - Undo = delete this row (the only hard delete, used only for the immediate Undo).
+- Edit = change `amount` and `paidOn` of an existing row. `rentRecordUuid` (the month it pays for), `uuid` and `createdOn` never change, so the order of payments received on the same day is kept. The same rules apply as when recording: amount above 0, a real date, not after today.
 - Overpayment is stored as is; the extra is not carried to the next month (v1).
 
 ## Relationships
@@ -92,6 +93,7 @@ TenantGroup 1 ──< Tenant 1 ──< RentHistory
 |---|---|
 | Rent change applies from next month | `RentHistoryRepository.changeRent(...)`: one transaction that upserts RentHistory at the month and, if that month's RentRecord already exists, updates its `requiredAmount`. The repository does not check the month: the **use case** must pass next month only (it knows today's date) |
 | Past, current and backlog amounts unchanged | RentRecord snapshot, never rewritten except next month |
+| Correct a payment | `PaymentRepository.updatePayment(uuid, amount, paidOn)` updates those two columns only. Status, balance and old dues are computed, so they follow the edit by themselves. The use case checks the payment exists (`payment_not_found`) and validates amount and date |
 | Completed vs Late Completed vs Backlog Cleared | walk the month's Payments in `paidOn` order; the date the running total reaches `requiredAmount` is compared with the due date and month end |
 | Due date | `min(dueDay, daysInMonth)` of the record's month |
 | Delete tenant | set `deletedMonth`; keep all rows; list queries filter `deletedMonth IS NULL` |

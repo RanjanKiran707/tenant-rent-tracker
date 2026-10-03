@@ -331,11 +331,54 @@ void main() {
       watchTenantDetail: deps.watchTenantDetail,
       deleteTenant: deps.deleteTenant,
       renameTenant: deps.renameTenant,
+      editPayment: deps.editPayment,
       moveTenantToGroup: deps.moveTenantToGroup,
       watchGroups: deps.watchGroups,
       undoPayment: deps.undoPayment,
     );
 
+
+    test('editPayment changes the month by itself', () async {
+      await seedTenant(h, id: 'a', start: '2026-03', rent: 6000);
+      final id = await payTo(h, 'a', '2026-03', 6000, '2026-03-05');
+      final vm = build('a');
+      await vm.refresh();
+      final paidUp = loaded(
+        await waitFor(vm.state, (s) => s is ViewStateLoaded),
+      );
+      expect(paidUp.topMonth, isNull); // fully paid: in History
+      expect(paidUp.months.first.payments.single.uuid, id);
+
+      expect(
+        await vm.editPayment(id, amount: 2000, paidOn: '2026-03-08'),
+        isNull,
+      );
+
+      // No longer fully paid, so March moves back to the top card.
+      final data = loaded(
+        await waitFor(
+          vm.state,
+          (s) =>
+              s is ViewStateLoaded<WatchTenantDetailReturnModel> &&
+              s.data.topMonth?.paid == 2000,
+        ),
+      );
+      expect(data.topMonth!.balance, 4000);
+      expect(data.topMonth!.payments.single.paidOn, '2026-03-08');
+      vm.dispose();
+    });
+
+    test('editPayment with a bad amount returns the failure', () async {
+      await seedTenant(h, id: 'a', start: '2026-03', rent: 6000);
+      final id = await payTo(h, 'a', '2026-03', 1000, '2026-03-05');
+      final vm = build('a');
+
+      final failure = await vm.editPayment(id, amount: 0, paidOn: '2026-03-05');
+
+      expect(failure, isA<ValidationFailure>());
+      expect(failure!.message, 'amount_invalid');
+      vm.dispose();
+    });
     test('loadGroups lists the groups to move to', () async {
       await seedTenant(h, id: 'a', start: '2026-02', rent: 6000);
       await seedGroup(h, id: 'g', name: 'Block A');

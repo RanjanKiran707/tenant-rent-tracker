@@ -42,6 +42,7 @@
   "errDateFuture": "ದಿನಾಂಕ ಮುಂದಿನ ದಿನವಾಗಿರಬಾರದು.",
   "errTenantNotFound": "ಈ ಬಾಡಿಗೆದಾರರು ಸಿಗಲಿಲ್ಲ.",
   "errTenantDeleted": "ಈ ಬಾಡಿಗೆದಾರರನ್ನು ತೆಗೆಯಲಾಗಿದೆ.",
+  "errPaymentNotFound": "ಈ ಪಾವತಿ ಸಿಗಲಿಲ್ಲ.",
   "errGroupName": "ದಯವಿಟ್ಟು ಗುಂಪಿನ ಹೆಸರು ಬರೆಯಿರಿ.",
   "errGroupNameTaken": "ಈ ಹೆಸರಿನ ಗುಂಪು ಈಗಾಗಲೇ ಇದೆ.",
   "errGroupNotFound": "ಈ ಗುಂಪು ಸಿಗಲಿಲ್ಲ.",
@@ -78,6 +79,9 @@
   "payAfterDone": "ಇದರ ನಂತರ ಈ ತಿಂಗಳ ಬಾಡಿಗೆ ಪೂರ್ಣವಾಗಿ ಬಂದಿರುತ್ತದೆ",
   "payExtra": "₹{amount} ಹೆಚ್ಚುವರಿ ಎಂದು ಬರೆದಿಡಲಾಗುತ್ತದೆ. ಮುಂದಿನ ತಿಂಗಳಿಗೆ ಸೇರಿಸುವುದಿಲ್ಲ.",
   "paymentSaved": "₹{amount} ಉಳಿಸಲಾಗಿದೆ",
+  "editPaymentTitle": "ಪಾವತಿ ಬದಲಿಸಿ",
+  "paymentUpdated": "ಪಾವತಿಯನ್ನು ಬದಲಿಸಲಾಗಿದೆ",
+  "editPaymentTooltip": "ಈ ಪಾವತಿಯನ್ನು ಬದಲಿಸಿ",
 
   "rentTitle": "ಬಾಡಿಗೆ ಬದಲಿಸಿ",
   "rentCurrent": "ಈಗಿನ ಬಾಡಿಗೆ: ₹{amount}",
