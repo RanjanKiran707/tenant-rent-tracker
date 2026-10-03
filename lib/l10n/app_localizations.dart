@@ -170,6 +170,12 @@ abstract class AppLocalizations {
   /// **'People who need attention are at the top.'**
   String get sortNote;
 
+  /// No description provided for @sortNoteGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'Groups who need attention are at the top.'**
+  String get sortNoteGroups;
+
   /// No description provided for @noTenants.
   ///
   /// In en, this message translates to:
@@ -881,7 +887,7 @@ abstract class AppLocalizations {
   /// No description provided for @version.
   ///
   /// In en, this message translates to:
-  /// **'Version 1.0'**
+  /// **'Version 2.0'**
   String get version;
 
   /// No description provided for @archTitle.

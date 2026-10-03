@@ -15,6 +15,7 @@
   "tenantsCount": "Tenants ({count})",
   "@tenantsCount": {"placeholders": {"count": {}}},
   "sortNote": "People who need attention are at the top.",
+  "sortNoteGroups": "Groups who need attention are at the top.",
   "noTenants": "No tenants yet. Tap the big blue button to add your first tenant.",
   "addTenantBtn": "+ Add a tenant",
   "rentPerMonth": "₹{amount} per month",
@@ -173,7 +174,7 @@
   "setTips": "Show tips",
   "setWelcome": "Show the welcome guide again",
   "setAbout": "About",
-  "version": "Version 1.0",
+  "version": "Version 2.0",
 
   "archTitle": "Archive",
   "archNote": "Removed tenants are kept here. You can only look, you cannot change anything.",

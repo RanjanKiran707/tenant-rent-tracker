@@ -454,8 +454,9 @@ class _DetailBody extends StatelessWidget {
   }
 }
 
-/// Lists the groups; tapping one moves the tenant there. Pops with the chosen
-/// group, or null when cancelled. A failed move is shown inside the dialog.
+/// Full-screen list of the groups; tapping one moves the tenant there. Pops
+/// with the chosen group, or null when cancelled. A failed move is shown on the
+/// screen.
 class _MoveGroupDialog extends StatefulWidget {
   final String tenantName;
   final String currentGroupUuid;
@@ -514,62 +515,81 @@ class _MoveGroupDialogState extends State<_MoveGroupDialog> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final groups = _groups;
-    return AlertDialog(
-      title: Text(l.moveTitle(widget.tenantName)),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(l.moveBody, style: const TextStyle(fontSize: 18)),
-            const SizedBox(height: 8),
-            if (!_loaded)
-              const Center(child: CircularProgressIndicator())
-            else if (groups == null)
-              Text(l.errGeneric)
-            else
-              RadioGroup<String>(
-                groupValue: widget.currentGroupUuid,
-                onChanged: (uuid) {
-                  if (_moving || uuid == null) return;
-                  _move(groups.firstWhere((g) => g.groupUuid == uuid));
-                },
-                child: Column(
-                  children: [
-                    for (final g in groups)
-                      RadioListTile<String>(
-                        key: Key('moveGroup-${g.groupUuid}'),
-                        value: g.groupUuid,
-                        enabled: !_moving,
-                        title: Text(
-                          groupDisplayName(l, g.groupUuid, g.name),
-                          style: const TextStyle(
-                            fontSize: 19,
-                            fontWeight: FontWeight.w700,
+    return Dialog.fullscreen(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(l.moveTitle(widget.tenantName)),
+          leading: IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: _moving ? null : () => Navigator.pop(context),
+          ),
+        ),
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(l.moveBody, style: const TextStyle(fontSize: 18)),
+                        const SizedBox(height: 8),
+                        if (!_loaded)
+                          const Center(child: CircularProgressIndicator())
+                        else if (groups == null)
+                          Text(l.errGeneric)
+                        else
+                          RadioGroup<String>(
+                            groupValue: widget.currentGroupUuid,
+                            onChanged: (uuid) {
+                              if (_moving || uuid == null) return;
+                              _move(
+                                groups.firstWhere((g) => g.groupUuid == uuid),
+                              );
+                            },
+                            child: Column(
+                              children: [
+                                for (final g in groups)
+                                  RadioListTile<String>(
+                                    key: Key('moveGroup-${g.groupUuid}'),
+                                    value: g.groupUuid,
+                                    enabled: !_moving,
+                                    title: Text(
+                                      groupDisplayName(l, g.groupUuid, g.name),
+                                      style: const TextStyle(
+                                        fontSize: 19,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ),
-                  ],
+                        if (_failure != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Text(
+                              failureMessage(l, _failure!),
+                              style: const TextStyle(color: Color(0xFFB3261E)),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-            if (_failure != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Text(
-                  failureMessage(l, _failure!),
-                  style: const TextStyle(color: Color(0xFFB3261E)),
+                BigButton(
+                  label: l.cancel,
+                  kind: BigButtonKind.secondary,
+                  onPressed: _moving ? null : () => Navigator.pop(context),
                 ),
-              ),
-          ],
+              ],
+            ),
+          ),
         ),
       ),
-      actions: [
-        BigButton(
-          label: l.cancel,
-          kind: BigButtonKind.secondary,
-          onPressed: _moving ? null : () => Navigator.pop(context),
-        ),
-      ],
     );
   }
 }

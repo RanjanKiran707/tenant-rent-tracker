@@ -49,6 +49,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sortNote => 'People who need attention are at the top.';
 
   @override
+  String get sortNoteGroups => 'Groups who need attention are at the top.';
+
+  @override
   String get noTenants =>
       'No tenants yet. Tap the big blue button to add your first tenant.';
 
@@ -477,7 +480,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get setAbout => 'About';
 
   @override
-  String get version => 'Version 1.0';
+  String get version => 'Version 2.0';
 
   @override
   String get archTitle => 'Archive';

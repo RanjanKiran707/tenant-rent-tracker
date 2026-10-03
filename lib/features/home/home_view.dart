@@ -132,7 +132,7 @@ class _HomeBody extends StatelessWidget {
           style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w700),
         ),
         Text(
-          l.sortNote,
+          l.sortNoteGroups,
           style: const TextStyle(fontSize: 15, color: Color(0xFF5B6675)),
         ),
         if (data.groups.isEmpty)

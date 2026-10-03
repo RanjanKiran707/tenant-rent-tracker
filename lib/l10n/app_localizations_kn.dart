@@ -49,6 +49,9 @@ class AppLocalizationsKn extends AppLocalizations {
   String get sortNote => 'ಗಮನ ಬೇಕಾದವರು ಮೇಲೆ ಇದ್ದಾರೆ.';
 
   @override
+  String get sortNoteGroups => 'ಗಮನ ಬೇಕಾದ ಗುಂಪುಗಳು ಮೇಲೆ ಇವೆ.';
+
+  @override
   String get noTenants =>
       'ಇನ್ನೂ ಯಾರೂ ಇಲ್ಲ. ಮೊದಲ ಬಾಡಿಗೆದಾರರನ್ನು ಸೇರಿಸಲು ದೊಡ್ಡ ನೀಲಿ ಬಟನ್ ಒತ್ತಿ.';
 
@@ -475,7 +478,7 @@ class AppLocalizationsKn extends AppLocalizations {
   String get setAbout => 'ಬಗ್ಗೆ';
 
   @override
-  String get version => 'ಆವೃತ್ತಿ 1.0';
+  String get version => 'ಆವೃತ್ತಿ 2.0';
 
   @override
   String get archTitle => 'ಆರ್ಕೈವ್';

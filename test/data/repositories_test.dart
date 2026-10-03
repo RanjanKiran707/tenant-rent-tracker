@@ -384,7 +384,8 @@ void main() {
       expect(p1.amount, 3500);
       expect(p1.paidOn, '2026-01-09');
       expect(p1.rentRecordUuid, 'r1');
-      expect(p1.createdOn, DateTime.utc(2026, 1, 1));
+      // drift hands back local time; compare the instant, not the zone.
+      expect(p1.createdOn.isAtSameMomentAs(DateTime.utc(2026, 1, 1)), isTrue);
       // The other payment is untouched.
       expect(ok(await payments.getPayment('p2'))!.amount, 1000);
     });

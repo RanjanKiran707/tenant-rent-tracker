@@ -142,6 +142,7 @@ en: {
   nav_home:"Home", nav_add:"Add", nav_settings:"Settings",
   thisMonth:"This month – {m}", collected:"Money received", toCollect:"Still to receive",
   tenants:"Tenants", sortNote:"People who need attention are at the top.",
+  sortNoteGroups:"Groups who need attention are at the top.",
   noTenants:"No tenants yet. Tap the big blue button to add your first tenant.",
   addTenantBtn:"+ Add a tenant", rentPerMonth:"₹{a} per month", dueOn:"Pay by {d}", oldDues:"Old dues: ₹{a}",
   addTitle:"Add a tenant",
@@ -215,6 +216,7 @@ kn: {
   nav_home:"ಮುಖಪುಟ", nav_add:"ಸೇರಿಸಿ", nav_settings:"ಸೆಟ್ಟಿಂಗ್ಸ್",
   thisMonth:"ಈ ತಿಂಗಳು – {m}", collected:"ಬಂದ ಹಣ", toCollect:"ಇನ್ನೂ ಬರಬೇಕು",
   tenants:"ಬಾಡಿಗೆದಾರರು", sortNote:"ಗಮನ ಬೇಕಾದವರು ಮೇಲೆ ಇದ್ದಾರೆ.",
+  sortNoteGroups:"ಗಮನ ಬೇಕಾದ ಗುಂಪುಗಳು ಮೇಲೆ ಇವೆ.",
   noTenants:"ಇನ್ನೂ ಯಾರೂ ಇಲ್ಲ. ಮೊದಲ ಬಾಡಿಗೆದಾರರನ್ನು ಸೇರಿಸಲು ದೊಡ್ಡ ನೀಲಿ ಬಟನ್ ಒತ್ತಿ.",
   addTenantBtn:"+ ಬಾಡಿಗೆದಾರರನ್ನು ಸೇರಿಸಿ", rentPerMonth:"ತಿಂಗಳಿಗೆ ₹{a}", dueOn:"{d} ರೊಳಗೆ ಕೊಡಬೇಕು", oldDues:"ಹಳೆಯ ಬಾಕಿ: ₹{a}",
   addTitle:"ಬಾಡಿಗೆದಾರರನ್ನು ಸೇರಿಸಿ",
@@ -452,7 +454,7 @@ function screenHome(){
       <div class="box amber"><div class="lbl">${t("toCollect")}</div><div class="val">₹${num(sumDue(all))}</div></div>
     </div>
     <h2 class="sec">${t("groups")} (${groups.length})</h2>
-    <div class="hint">${t("sortNote")}</div>
+    <div class="hint">${t("sortNoteGroups")}</div>
     ${groups.length ? groups.map(x=>`
       <button class="card tap" onclick="go('group',${x.g.id})">
         <div class="row"><span class="name">${esc(groupLabel(x.g))}</span>${x.worst ? chip(x.worst.st) : ""}</div>
