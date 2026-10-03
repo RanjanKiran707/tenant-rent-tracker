@@ -68,7 +68,12 @@ class _MyAppState extends State<MyApp> {
           data: MediaQuery.of(
             context,
           ).copyWith(textScaler: TextScaler.linear(_textScale)),
-          child: AppScope(app: app, child: child!),
+          // A tap anywhere else closes the keyboard.
+          child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+            child: AppScope(app: app, child: child!),
+          ),
         ),
         home: _Root(app: app),
       ),
