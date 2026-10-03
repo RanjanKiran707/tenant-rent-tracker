@@ -57,8 +57,9 @@
   "btnEditName": "ಹೆಸರು ಬದಲಿಸಿ",
   "editNameTitle": "ಬಾಡಿಗೆದಾರರ ಹೆಸರು ಬದಲಿಸಿ",
   "nameSaved": "ಹೆಸರನ್ನು {name} ಎಂದು ಬದಲಿಸಲಾಗಿದೆ",
-  "history": "ಹಿಂದಿನ ತಿಂಗಳುಗಳು",
-  "noHistory": "ಹಿಂದಿನ ತಿಂಗಳುಗಳು ಇನ್ನೂ ಇಲ್ಲ.",
+  "history": "ಇತಿಹಾಸ",
+  "noHistory": "ಇತಿಹಾಸ ಇನ್ನೂ ಇಲ್ಲ.",
+  "noPendingDue": "ಯಾವುದೇ ಬಾಕಿ ಇಲ್ಲ",
   "pendingRentNote": "{month} ತಿಂಗಳಿನಿಂದ ಬಾಡಿಗೆ ₹{amount} ಆಗುತ್ತದೆ.",
   "extraNote": "ಹೆಚ್ಚುವರಿ ₹{amount} ಬಂದಿದೆ (ಬರೆದಿಡಲಾಗಿದೆ ಅಷ್ಟೇ).",
 

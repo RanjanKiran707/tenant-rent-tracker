@@ -34,8 +34,12 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
       watchHome: deps.watchHome,
     );
     WidgetsBinding.instance.addObserver(this);
+    deps.clock.addListener(_onDateChanged);
     ctrl.refresh();
   }
+
+  /// The simulated date changed: reload so the statuses match the new today.
+  void _onDateChanged() => ctrl.refresh();
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -45,6 +49,7 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    AppDependencies.instance.clock.removeListener(_onDateChanged);
     ctrl.dispose();
     super.dispose();
   }

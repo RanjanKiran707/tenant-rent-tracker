@@ -213,7 +213,7 @@ void main() {
     setUp(() => seedMockup());
 
     test(
-      'active tenant: this month on top, earlier months newest first',
+      'active tenant: this month on top, history newest first',
       () async {
         final d = ok(await watchDetail('farida').first);
 
@@ -228,6 +228,24 @@ void main() {
       },
     );
 
+    test('a fully paid current month moves to History', () async {
+      await payTo(h, 'farida', '2026-10', 9000, '2026-10-03');
+
+      final d = ok(await watchDetail('farida').first);
+      expect(d.topMonth, isNull);
+      expect(d.months.map((m) => m.month), ['2026-10', '2026-09', '2026-08']);
+      expect(d.months.first.balance, 0);
+      expect(d.currentRent, 9000);
+    });
+
+    test('a part-paid current month stays on top', () async {
+      await payTo(h, 'farida', '2026-10', 4000, '2026-10-03');
+
+      final d = ok(await watchDetail('farida').first);
+      expect(d.topMonth!.month, '2026-10');
+      expect(d.topMonth!.balance, 5000);
+      expect(d.months.map((m) => m.month), ['2026-09', '2026-08']);
+    });
     test('old dues, the oldest month owing, and the total owed', () async {
       final d = ok(await watchDetail('farida').first);
 
@@ -262,7 +280,9 @@ void main() {
     test('overpayment shows as extra and the balance stays zero', () async {
       await payTo(h, 'anita', '2026-10', 9000, '2026-10-10'); // 12000 of 7000
 
-      final top = ok(await watchDetail('anita').first).topMonth!;
+      final d = ok(await watchDetail('anita').first);
+      expect(d.topMonth, isNull);
+      final top = d.months.firstWhere((m) => m.month == '2026-10');
       expect(top.paid, 12000);
       expect(top.balance, 0);
       expect(top.extra, 5000);

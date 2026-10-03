@@ -52,8 +52,12 @@ class _TenantDetailViewState extends State<TenantDetailView>
     );
     ctrl.deleteState.addListener(_onDeleteStateChanged);
     WidgetsBinding.instance.addObserver(this);
+    deps.clock.addListener(_onDateChanged);
     ctrl.refresh();
   }
+
+  /// The simulated date changed: reload so the statuses match the new today.
+  void _onDateChanged() => ctrl.refresh();
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -80,6 +84,7 @@ class _TenantDetailViewState extends State<TenantDetailView>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    AppDependencies.instance.clock.removeListener(_onDateChanged);
     ctrl.deleteState.removeListener(_onDeleteStateChanged);
     ctrl.dispose();
     super.dispose();
@@ -240,6 +245,7 @@ class _DetailBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final top = data.topMonth;
+    final noPendingDue = top == null && !data.readOnly && data.oldDues == 0;
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
       children: [
@@ -287,6 +293,14 @@ class _DetailBody extends StatelessWidget {
           style: const TextStyle(fontSize: 16, color: Color(0xFF5B6675)),
         ),
         if (top != null) _TopMonthCard(month: top),
+        if (noPendingDue)
+          SectionCard(
+            child: Text(
+              l.noPendingDue,
+              key: const Key('noPendingDue'),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+            ),
+          ),
         if (!data.readOnly && data.oldDues > 0)
           InfoBox(
             background: const Color(0xFFF6ECFD),
@@ -316,7 +330,8 @@ class _DetailBody extends StatelessWidget {
             ),
           ),
         if (!data.readOnly) ...[
-          BigButton(label: l.btnPay, onPressed: () => onPay(null)),
+          if (!noPendingDue)
+            BigButton(label: l.btnPay, onPressed: () => onPay(null)),
           BigButton(
             label: l.btnRent,
             kind: BigButtonKind.secondary,

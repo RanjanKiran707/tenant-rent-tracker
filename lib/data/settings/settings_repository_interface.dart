@@ -8,4 +8,7 @@ abstract interface class SettingsRepositoryInterface {
   Future<Result<void>> setLanguage(String languageCode);
   Future<Result<void>> setShowTips(bool value);
   Future<Result<void>> setSeenWelcome(bool value);
+
+  /// Developer setting: the simulated "today" (`YYYY-MM-DD`), or null for none.
+  Future<Result<void>> setSimulatedDate(String? date);
 }

@@ -113,12 +113,23 @@ class WatchTenantDetailUsecase {
       );
     }
 
+    final currentRecord = visible.where((r) => r.month == current).firstOrNull;
+    final currentMonthDetail = currentRecord == null
+        ? null
+        : detailOf(currentRecord);
+
+    // Once this month is fully paid it moves down to History and the top card
+    // is empty ("No pending due"). An archived tenant keeps its latest month.
+    final currentPaidUp =
+        currentMonthDetail != null && currentMonthDetail.balance == 0;
     final top = readOnly
         ? (visible.isEmpty ? null : visible.first)
-        : visible.where((r) => r.month == current).firstOrNull;
+        : (currentPaidUp ? null : currentRecord);
     final listed = readOnly
         ? visible
-        : visible.where((r) => r.month != current).toList();
+        : visible
+              .where((r) => r.month != current || currentPaidUp)
+              .toList();
 
     final oldest = oldestOwingRecord(
       records: visible,
@@ -133,10 +144,6 @@ class WatchTenantDetailUsecase {
       today: today,
     );
     final topDetail = top == null ? null : detailOf(top);
-    final currentMonthDetail = visible
-        .where((r) => r.month == current)
-        .map(detailOf)
-        .firstOrNull;
 
     final pending = history.where(
       (h) => h.effectiveFromMonth.compareTo(current) > 0,
@@ -149,7 +156,9 @@ class WatchTenantDetailUsecase {
       readOnly: readOnly,
       deletedMonth: tenant.deletedMonth,
       currentRent:
-          topDetail?.requiredAmount ?? _rentFromHistory(history, current),
+          topDetail?.requiredAmount ??
+          currentMonthDetail?.requiredAmount ??
+          _rentFromHistory(history, current),
       topMonth: topDetail,
       oldDues: oldDues,
       oldestOwingMonth: oldest?.month,

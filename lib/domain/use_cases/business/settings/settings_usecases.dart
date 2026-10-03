@@ -1,5 +1,7 @@
 import 'package:tenant_tracker/core/errors/failure.dart';
 import 'package:tenant_tracker/core/errors/result.dart';
+import 'package:tenant_tracker/core/utils/clock.dart';
+import 'package:tenant_tracker/core/utils/month_utils.dart';
 import 'package:tenant_tracker/data/settings/app_settings.dart';
 import 'package:tenant_tracker/data/settings/settings_repository_interface.dart';
 
@@ -43,4 +45,24 @@ class MarkWelcomeSeenUsecase {
   MarkWelcomeSeenUsecase(this._settings);
 
   Future<Result<void>> call() => _settings.setSeenWelcome(true);
+}
+
+/// Developer setting: pretend today is [date] (`YYYY-MM-DD`), or pass null to
+/// use the real date again. The date is saved and applied to the app's clock.
+///
+/// Validation error: `date_invalid`.
+class SetSimulatedDateUsecase {
+  final SettingsRepositoryInterface _settings;
+  final SimulatedClock _clock;
+
+  SetSimulatedDateUsecase(this._settings, this._clock);
+
+  Future<Result<void>> call(String? date) async {
+    if (date != null && !isValidDate(date)) {
+      return const Err(ValidationFailure('date_invalid'));
+    }
+    final saved = await _settings.setSimulatedDate(date);
+    if (saved is Ok<void>) _clock.simulatedDate = date;
+    return saved;
+  }
 }

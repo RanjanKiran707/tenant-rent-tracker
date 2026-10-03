@@ -189,10 +189,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get history => 'Earlier months';
+  String get history => 'History';
 
   @override
-  String get noHistory => 'No earlier months yet.';
+  String get noHistory => 'Nothing in history yet.';
+
+  @override
+  String get noPendingDue => 'No pending due';
 
   @override
   String pendingRentNote(Object month, Object amount) {

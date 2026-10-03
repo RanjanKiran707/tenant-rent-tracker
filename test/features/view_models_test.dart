@@ -302,7 +302,9 @@ void main() {
       final vm = build('a');
       await vm.refresh();
       await waitFor(vm.state, (s) => s is ViewStateLoaded);
-      expect(loaded(vm.state.value).topMonth!.paid, 6000);
+      final paidUp = loaded(vm.state.value);
+      expect(paidUp.topMonth, isNull);
+      expect(paidUp.months.first.paid, 6000);
 
       expect(await vm.undoPayment(id), isNull);
       final data = loaded(

@@ -66,7 +66,8 @@ class WatchTenantDetailReturnModel {
   final int currentRent;
 
   /// The big card: this month for an active tenant, the latest month for an
-  /// archived one. Null when the tenant has no record yet.
+  /// archived one. Null when the tenant has no record yet, and for an active
+  /// tenant whose current month is fully paid (it is in [months] instead).
   final MonthDetail? topMonth;
 
   /// Owed for months before the current one.
@@ -86,7 +87,8 @@ class WatchTenantDetailReturnModel {
   final int? pendingRentAmount;
 
   /// The History list, newest first. For an active tenant it leaves out the
-  /// month shown in [topMonth]; for an archived tenant it has every month.
+  /// month shown in [topMonth] and includes the current month once paid; for
+  /// an archived tenant it has every month.
   final List<MonthDetail> months;
 
   const WatchTenantDetailReturnModel({

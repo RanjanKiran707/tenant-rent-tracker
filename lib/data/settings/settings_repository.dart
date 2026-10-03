@@ -8,6 +8,7 @@ class SettingsRepository implements SettingsRepositoryInterface {
   static const _languageKey = 'language';
   static const _showTipsKey = 'show_tips';
   static const _seenWelcomeKey = 'seen_welcome';
+  static const _simulatedDateKey = 'dev_simulated_date';
 
   final SharedPreferences _prefs;
 
@@ -36,4 +37,14 @@ class SettingsRepository implements SettingsRepositoryInterface {
   @override
   Future<Result<void>> setSeenWelcome(bool value) =>
       guard(() => _prefs.setBool(_seenWelcomeKey, value));
+
+  /// The saved simulated date, read at startup to build the app's clock.
+  String? get simulatedDate => _prefs.getString(_simulatedDateKey);
+
+  @override
+  Future<Result<void>> setSimulatedDate(String? date) => guard(
+    () => date == null
+        ? _prefs.remove(_simulatedDateKey)
+        : _prefs.setString(_simulatedDateKey, date),
+  );
 }

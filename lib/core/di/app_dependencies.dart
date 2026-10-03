@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tenant_tracker/core/utils/clock.dart';
 import 'package:tenant_tracker/data/database/app_database.dart';
@@ -40,6 +41,11 @@ class AppDependencies {
   final SetLanguageUsecase setLanguage;
   final SetShowTipsUsecase setShowTips;
   final MarkWelcomeSeenUsecase markWelcomeSeen;
+  final SetSimulatedDateUsecase setSimulatedDate;
+
+  /// The app's clock. Developer tools change its date; screens listen to it to
+  /// reload.
+  final SimulatedClock clock;
 
   // UI use cases: they only read, for presentation.
   final WatchHomeUsecase watchHome;
@@ -61,6 +67,8 @@ class AppDependencies {
     required this.setLanguage,
     required this.setShowTips,
     required this.markWelcomeSeen,
+    required this.setSimulatedDate,
+    required this.clock,
     required this.watchHome,
     required this.watchTenantDetail,
     required this.watchArchivedTenants,
@@ -84,50 +92,59 @@ class AppDependencies {
     required SharedPreferences prefs,
     required Clock clock,
   }) {
+    // The app's clock: [clock], unless a developer-simulated date is saved.
+    // The saved date is ignored outside debug builds.
+    final settings = SettingsRepository(prefs);
+    final appClock = SimulatedClock(
+      clock,
+      simulatedDate: kDebugMode ? settings.simulatedDate : null,
+    );
+
     // 1. Data layer (the only place that knows the real implementations).
     final tenants = TenantRepository(db);
     final history = RentHistoryRepository(db);
     final records = RentRecordRepository(db);
     final payments = PaymentRepository(db);
-    final settings = SettingsRepository(prefs);
 
     // 2. Domain layer.
     final ensureRentRecords = EnsureRentRecordsUsecase(
       tenants,
       history,
       records,
-      clock,
+      appClock,
     );
 
     return AppDependencies._(
-      addTenant: AddTenantUsecase(tenants, ensureRentRecords, clock),
+      addTenant: AddTenantUsecase(tenants, ensureRentRecords, appClock),
       ensureRentRecords: ensureRentRecords,
-      recordPayment: RecordPaymentUsecase(payments, clock),
+      recordPayment: RecordPaymentUsecase(payments, appClock),
       undoPayment: UndoPaymentUsecase(payments),
-      changeRent: ChangeRentUsecase(tenants, history, clock),
-      deleteTenant: DeleteTenantUsecase(tenants, clock),
+      changeRent: ChangeRentUsecase(tenants, history, appClock),
+      deleteTenant: DeleteTenantUsecase(tenants, appClock),
       renameTenant: RenameTenantUsecase(tenants),
       loadSettings: LoadSettingsUsecase(settings),
       setLanguage: SetLanguageUsecase(settings),
       setShowTips: SetShowTipsUsecase(settings),
       markWelcomeSeen: MarkWelcomeSeenUsecase(settings),
-      watchHome: WatchHomeUsecase(tenants, records, payments, clock),
+      setSimulatedDate: SetSimulatedDateUsecase(settings, appClock),
+      clock: appClock,
+      watchHome: WatchHomeUsecase(tenants, records, payments, appClock),
       watchTenantDetail: WatchTenantDetailUsecase(
         tenants,
         records,
         payments,
         history,
-        clock,
+        appClock,
       ),
       watchArchivedTenants: WatchArchivedTenantsUsecase(tenants, records),
       loadPaymentOptions: LoadPaymentOptionsUsecase(
         tenants,
         records,
         payments,
-        clock,
+        appClock,
       ),
-      loadRentChangeInfo: LoadRentChangeInfoUsecase(tenants, history, clock),
-      loadAddTenantForm: LoadAddTenantFormUsecase(clock),
+      loadRentChangeInfo: LoadRentChangeInfoUsecase(tenants, history, appClock),
+      loadAddTenantForm: LoadAddTenantFormUsecase(appClock),
     );
   }
 }

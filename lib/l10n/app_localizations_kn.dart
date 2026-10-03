@@ -187,10 +187,13 @@ class AppLocalizationsKn extends AppLocalizations {
   }
 
   @override
-  String get history => 'ಹಿಂದಿನ ತಿಂಗಳುಗಳು';
+  String get history => 'ಇತಿಹಾಸ';
 
   @override
-  String get noHistory => 'ಹಿಂದಿನ ತಿಂಗಳುಗಳು ಇನ್ನೂ ಇಲ್ಲ.';
+  String get noHistory => 'ಇತಿಹಾಸ ಇನ್ನೂ ಇಲ್ಲ.';
+
+  @override
+  String get noPendingDue => 'ಯಾವುದೇ ಬಾಕಿ ಇಲ್ಲ';
 
   @override
   String pendingRentNote(Object month, Object amount) {

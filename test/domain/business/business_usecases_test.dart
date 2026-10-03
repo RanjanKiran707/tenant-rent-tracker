@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tenant_tracker/core/errors/failure.dart';
 import 'package:tenant_tracker/core/errors/result.dart';
+import 'package:tenant_tracker/core/utils/clock.dart';
 import 'package:tenant_tracker/data/rent_record/rent_record_model.dart';
 import 'package:tenant_tracker/data/settings/settings_repository.dart';
 import 'package:tenant_tracker/domain/use_cases/business/add_tenant/add_tenant_argument_model.dart';
@@ -538,6 +539,30 @@ void main() {
         'language_unsupported',
       );
       expect(ok(await LoadSettingsUsecase(settings)()).languageCode, 'en');
+    });
+
+    test('a simulated date changes the clock and can be cleared', () async {
+      final clock = SimulatedClock(h.clock);
+      final setDate = SetSimulatedDateUsecase(settings, clock);
+      expect(clock.today(), '2026-03-15');
+
+      ok(await setDate('2026-04-12'));
+      expect(clock.today(), '2026-04-12');
+      expect(clock.currentMonth(), '2026-04');
+      expect(settings.simulatedDate, '2026-04-12');
+
+      ok(await setDate(null));
+      expect(clock.today(), '2026-03-15');
+      expect(settings.simulatedDate, isNull);
+    });
+
+    test('an invalid simulated date is rejected and not applied', () async {
+      final clock = SimulatedClock(h.clock);
+      final setDate = SetSimulatedDateUsecase(settings, clock);
+
+      expect(errorOf(await setDate('2026-02-30')), 'date_invalid');
+      expect(clock.simulatedDate, isNull);
+      expect(settings.simulatedDate, isNull);
     });
   });
 }

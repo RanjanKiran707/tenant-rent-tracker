@@ -1,4 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:tenant_tracker/core/di/app_dependencies.dart';
+import 'package:tenant_tracker/core/utils/display_format.dart';
+import 'package:tenant_tracker/core/utils/failure_message.dart';
 import 'package:tenant_tracker/core/utils/view_state.dart';
 import 'package:tenant_tracker/core/widgets/app_bar_actions.dart';
 import 'package:tenant_tracker/core/widgets/big_button.dart';
@@ -110,6 +114,7 @@ class SettingsView extends StatelessWidget {
                 ],
               ),
             ),
+            if (kDebugMode) const _DevSection(),
             ErrorLine(state: state),
           ],
         ),
@@ -171,6 +176,97 @@ class _LanguageChoice extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Debug builds only: pretend today is another date, to test due dates, late
+/// payments and new months by hand.
+class _DevSection extends StatelessWidget {
+  const _DevSection();
+
+  Future<void> _pick(BuildContext context) async {
+    final deps = AppDependencies.instance;
+    final current = DateTime.parse(deps.clock.today());
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: current,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (picked == null) return;
+    final date =
+        '${picked.year.toString().padLeft(4, '0')}-'
+        '${picked.month.toString().padLeft(2, '0')}-'
+        '${picked.day.toString().padLeft(2, '0')}';
+    if (context.mounted) await _save(context, date);
+  }
+
+  Future<void> _save(BuildContext context, String? date) async {
+    final l = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final result = await AppDependencies.instance.setSimulatedDate(date);
+    result.fold(
+      (failure) => messenger.showSnackBar(
+        SnackBar(content: Text(failureMessage(l, failure))),
+      ),
+      (_) {},
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final clock = AppDependencies.instance.clock;
+    return ListenableBuilder(
+      listenable: clock,
+      builder: (context, _) {
+        final simulated = clock.simulatedDate;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 22),
+            const Text(
+              'Developer',
+              style: TextStyle(fontSize: 19, fontWeight: FontWeight.w700),
+            ),
+            SectionCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Simulated date',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    simulated == null
+                        ? 'Using the real date: ${formatDate(l, clock.today())}'
+                        : 'Pretending today is ${formatDate(l, simulated)}',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Color(0xFF5B6675),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            BigButton(
+              key: const Key('simulateDateButton'),
+              label: 'Choose date',
+              kind: BigButtonKind.secondary,
+              onPressed: () => _pick(context),
+            ),
+            if (simulated != null)
+              BigButton(
+                key: const Key('resetDateButton'),
+                label: 'Use real date',
+                kind: BigButtonKind.secondary,
+                onPressed: () => _save(context, null),
+              ),
+          ],
+        );
+      },
     );
   }
 }

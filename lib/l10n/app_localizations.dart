@@ -419,14 +419,20 @@ abstract class AppLocalizations {
   /// No description provided for @history.
   ///
   /// In en, this message translates to:
-  /// **'Earlier months'**
+  /// **'History'**
   String get history;
 
   /// No description provided for @noHistory.
   ///
   /// In en, this message translates to:
-  /// **'No earlier months yet.'**
+  /// **'Nothing in history yet.'**
   String get noHistory;
+
+  /// No description provided for @noPendingDue.
+  ///
+  /// In en, this message translates to:
+  /// **'No pending due'**
+  String get noPendingDue;
 
   /// No description provided for @pendingRentNote.
   ///
