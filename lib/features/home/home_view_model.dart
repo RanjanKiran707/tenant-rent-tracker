@@ -1,14 +1,17 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:tenant_tracker/core/errors/failure.dart';
 import 'package:tenant_tracker/core/errors/result.dart';
 import 'package:tenant_tracker/core/utils/view_state.dart';
+import 'package:tenant_tracker/domain/use_cases/business/add_group/add_group_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/business/ensure_rent_records/ensure_rent_records_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/ui/watch_home/watch_home_return_model.dart';
 import 'package:tenant_tracker/domain/use_cases/ui/watch_home/watch_home_usecase.dart';
 
 class HomeViewModel {
   final EnsureRentRecordsUsecase _ensureRentRecords;
+  final AddGroupUsecase _addGroup;
   final WatchHomeUsecase _watchHome;
 
   final ValueNotifier<ViewState<WatchHomeReturnModel>> state = ValueNotifier(
@@ -24,8 +27,10 @@ class HomeViewModel {
 
   HomeViewModel({
     required EnsureRentRecordsUsecase ensureRentRecords,
+    required AddGroupUsecase addGroup,
     required WatchHomeUsecase watchHome,
   }) : _ensureRentRecords = ensureRentRecords,
+       _addGroup = addGroup,
        _watchHome = watchHome;
 
   /// Creates any missing monthly records, then (re)subscribes to the home
@@ -49,6 +54,13 @@ class HomeViewModel {
         (data) => ViewStateLoaded(data),
       );
     });
+  }
+
+  /// Adds a group. Returns the failure (an empty or taken name), or null when
+  /// it worked; the group list updates by itself.
+  Future<Failure?> addGroup(String name) async {
+    final result = await _addGroup(name);
+    return result.fold((failure) => failure, (_) => null);
   }
 
   void dispose() {

@@ -179,6 +179,22 @@ en: {
   help_rent:"The new rent starts from next month. This month's rent does not change.",
   help_settings:"Change the language here. Choose English or ಕನ್ನಡ.",
   help_archive:"Removed tenants are kept here for your records. You can only look.",
+  groups:"Groups", grpCount:"{n} tenants", grpOne:"1 tenant", uncategorized:"Uncategorized", grpNoTenants:"No tenants yet",
+  grpToReceive:"To receive: ₹{a}", noGroups:"No groups yet. Add a group, or add a tenant and it will be kept under Uncategorized.",
+  noTenantsInGroup:"No tenants in this group yet.", defaultGroupNote:"Tenants without a group are kept here.",
+  addGroupBtn:"+ Add a group", addGroupTitle:"Add a group",
+  f_gname:"Group name", f_gname_h:"For example: Block A or Ground floor.",
+  err_gname:"Please type a group name.", err_gname_taken:"A group with this name already exists.",
+  groupAdded:"{n} group added ", renameGroupTitle:"Rename group", btn_renameGroup:"Rename group", groupRenamed:"Group renamed to {n}",
+  btn_deleteGroup:"Delete this group",
+  delg_title:"Delete {n}?", delg_body:"This group has no tenants. It will be removed.",
+  delg_notEmpty:"This group still has tenants. Move them to another group first, then delete it.",
+  delg_yes:"Yes, delete", delg_no:"No, keep", groupDeleted:"{n} group deleted",
+  f_group:"Group", f_group_h:"Choose where this tenant should be listed.",
+  inGroup:"Group: {g}", btn_moveGroup:"Move to another group", move_title:"Move {n}", move_body:"Choose the group for this tenant.", movedTo:"{n} moved to {g}",
+  help_group:"These are the tenants in this group. Tap a name for details. You can also rename or delete the group here.",
+  help_addGroup:"Type a name for the group and press Save. You can change the name later.",
+  help_renameGroup:"Type the new name and press Save. Tenants stay in the group.",
   legendTitle:"What do the tags mean?",
   st_pending:"Pending", st_completed:"Paid on time", st_lateCompleted:"Paid late", st_partial:"Part paid",
   st_partialOverdue:"Part paid, late", st_overdue:"Overdue", st_backlog:"Old due", st_backlogCleared:"Old due paid",
@@ -235,6 +251,22 @@ kn: {
   help_rent:"ಹೊಸ ಬಾಡಿಗೆ ಮುಂದಿನ ತಿಂಗಳಿಂದ ಶುರುವಾಗುತ್ತದೆ. ಈ ತಿಂಗಳ ಬಾಡಿಗೆ ಬದಲಾಗುವುದಿಲ್ಲ.",
   help_settings:"ಇಲ್ಲಿ ಭಾಷೆ ಬದಲಿಸಬಹುದು. English ಅಥವಾ ಕನ್ನಡ ಆಯ್ಕೆಮಾಡಿ.",
   help_archive:"ತೆಗೆದ ಬಾಡಿಗೆದಾರರು ನಿಮ್ಮ ದಾಖಲೆಗಾಗಿ ಇಲ್ಲಿ ಇರುತ್ತಾರೆ. ನೋಡಬಹುದು ಅಷ್ಟೇ.",
+  groups:"ಗುಂಪುಗಳು", grpCount:"{n} ಬಾಡಿಗೆದಾರರು", grpOne:"1 ಬಾಡಿಗೆದಾರರು", uncategorized:"ವರ್ಗೀಕರಿಸದವರು", grpNoTenants:"ಇನ್ನೂ ಯಾರೂ ಇಲ್ಲ",
+  grpToReceive:"ಬರಬೇಕಾದದ್ದು: ₹{a}", noGroups:"ಇನ್ನೂ ಗುಂಪುಗಳಿಲ್ಲ. ಗುಂಪು ಸೇರಿಸಿ, ಅಥವಾ ಬಾಡಿಗೆದಾರರನ್ನು ಸೇರಿಸಿದರೆ ಅವರು 'ವರ್ಗೀಕರಿಸದವರು' ನಲ್ಲಿ ಇರುತ್ತಾರೆ.",
+  noTenantsInGroup:"ಈ ಗುಂಪಿನಲ್ಲಿ ಇನ್ನೂ ಬಾಡಿಗೆದಾರರು ಇಲ್ಲ.", defaultGroupNote:"ಗುಂಪು ಇಲ್ಲದ ಬಾಡಿಗೆದಾರರು ಇಲ್ಲಿ ಇರುತ್ತಾರೆ.",
+  addGroupBtn:"+ ಗುಂಪು ಸೇರಿಸಿ", addGroupTitle:"ಗುಂಪು ಸೇರಿಸಿ",
+  f_gname:"ಗುಂಪಿನ ಹೆಸರು", f_gname_h:"ಉದಾ: ಬ್ಲಾಕ್ ಎ ಅಥವಾ ನೆಲ ಮಹಡಿ.",
+  err_gname:"ದಯವಿಟ್ಟು ಗುಂಪಿನ ಹೆಸರು ಬರೆಯಿರಿ.", err_gname_taken:"ಈ ಹೆಸರಿನ ಗುಂಪು ಈಗಾಗಲೇ ಇದೆ.",
+  groupAdded:"{n} ಗುಂಪು ಸೇರಿಸಲಾಗಿದೆ ", renameGroupTitle:"ಗುಂಪಿನ ಹೆಸರು ಬದಲಿಸಿ", btn_renameGroup:"ಗುಂಪಿನ ಹೆಸರು ಬದಲಿಸಿ", groupRenamed:"ಗುಂಪಿನ ಹೆಸರನ್ನು {n} ಎಂದು ಬದಲಿಸಲಾಗಿದೆ",
+  btn_deleteGroup:"ಈ ಗುಂಪನ್ನು ತೆಗೆಯಿರಿ",
+  delg_title:"{n} ಗುಂಪನ್ನು ತೆಗೆಯಬೇಕೇ?", delg_body:"ಈ ಗುಂಪಿನಲ್ಲಿ ಯಾರೂ ಇಲ್ಲ. ಗುಂಪನ್ನು ತೆಗೆಯಲಾಗುತ್ತದೆ.",
+  delg_notEmpty:"ಈ ಗುಂಪಿನಲ್ಲಿ ಇನ್ನೂ ಬಾಡಿಗೆದಾರರು ಇದ್ದಾರೆ. ಮೊದಲು ಅವರನ್ನು ಬೇರೆ ಗುಂಪಿಗೆ ಸರಿಸಿ, ನಂತರ ಗುಂಪನ್ನು ತೆಗೆಯಿರಿ.",
+  delg_yes:"ಹೌದು, ತೆಗೆಯಿರಿ", delg_no:"ಇಲ್ಲ, ಇರಲಿ", groupDeleted:"{n} ಗುಂಪನ್ನು ತೆಗೆಯಲಾಗಿದೆ",
+  f_group:"ಗುಂಪು", f_group_h:"ಈ ಬಾಡಿಗೆದಾರರು ಯಾವ ಗುಂಪಿನಲ್ಲಿ ಇರಬೇಕು ಎಂದು ಆರಿಸಿ.",
+  inGroup:"ಗುಂಪು: {g}", btn_moveGroup:"ಬೇರೆ ಗುಂಪಿಗೆ ಸರಿಸಿ", move_title:"{n} ಅವರನ್ನು ಸರಿಸಿ", move_body:"ಈ ಬಾಡಿಗೆದಾರರಿಗೆ ಗುಂಪು ಆರಿಸಿ.", movedTo:"{n} ಅವರನ್ನು {g} ಗುಂಪಿಗೆ ಸರಿಸಲಾಗಿದೆ",
+  help_group:"ಈ ಗುಂಪಿನ ಬಾಡಿಗೆದಾರರು ಇಲ್ಲಿ ಇದ್ದಾರೆ. ವಿವರಕ್ಕಾಗಿ ಹೆಸರನ್ನು ಒತ್ತಿ. ಇಲ್ಲಿಂದಲೇ ಗುಂಪಿನ ಹೆಸರು ಬದಲಿಸಬಹುದು ಅಥವಾ ಗುಂಪನ್ನು ತೆಗೆಯಬಹುದು.",
+  help_addGroup:"ಗುಂಪಿಗೆ ಒಂದು ಹೆಸರು ಬರೆದು 'ಉಳಿಸಿ' ಒತ್ತಿ. ಹೆಸರನ್ನು ನಂತರ ಬದಲಿಸಬಹುದು.",
+  help_renameGroup:"ಹೊಸ ಹೆಸರು ಬರೆದು 'ಉಳಿಸಿ' ಒತ್ತಿ. ಬಾಡಿಗೆದಾರರು ಅದೇ ಗುಂಪಿನಲ್ಲಿ ಇರುತ್ತಾರೆ.",
   legendTitle:"ಲೇಬಲ್‌ಗಳ ಅರ್ಥವೇನು?",
   st_pending:"ಕಾಯುತ್ತಿದೆ", st_completed:"ಸಮಯಕ್ಕೆ ಪೂರ್ಣ", st_lateCompleted:"ತಡವಾಗಿ ಪೂರ್ಣ", st_partial:"ಸ್ವಲ್ಪ ಬಂದಿದೆ",
   st_partialOverdue:"ಸ್ವಲ್ಪ ಬಂದಿದೆ, ತಡ", st_overdue:"ತಡವಾಗಿದೆ", st_backlog:"ಹಳೆಯ ಬಾಕಿ", st_backlogCleared:"ಹಳೆಯ ಬಾಕಿ ಬಂದಿದೆ",
@@ -287,33 +319,42 @@ function computeState(m, dueDay, today){
 function sampleData(){
   const P = (date,amount)=>({date,amount});
   return {
+    /* Groups. id 0 is the built-in "Uncategorized" group: it cannot be renamed or deleted.
+       Tenants from the old version (no group) are placed here when the app is updated. */
+    groups:[
+      {id:1,name:"Block A"},
+      {id:2,name:"Block B"},
+      {id:3,name:"Block C"},
+      {id:0,name:"Uncategorized",locked:true}
+    ],
+    nextGroupId:4,
     tenants:[
-      {id:1,name:"Ramesh Kumar",dueDay:15,rent:8000,pendingRent:null,start:"2026-08",months:[
+      {id:1,groupId:1,name:"Ramesh Kumar",dueDay:15,rent:8000,pendingRent:null,start:"2026-08",months:[
         {ym:"2026-08",required:8000,payments:[P("2026-08-10",8000)]},
         {ym:"2026-09",required:8000,payments:[P("2026-09-14",8000)]},
         {ym:"2026-10",required:8000,payments:[]}]},
-      {id:2,name:"Lakshmi Devi",dueDay:5,rent:6500,pendingRent:null,start:"2026-07",months:[
+      {id:2,groupId:1,name:"Lakshmi Devi",dueDay:5,rent:6500,pendingRent:null,start:"2026-07",months:[
         {ym:"2026-07",required:6500,payments:[P("2026-07-03",6500)]},
         {ym:"2026-08",required:6500,payments:[P("2026-08-04",6500)]},
         {ym:"2026-09",required:6500,payments:[P("2026-09-05",6500)]},
         {ym:"2026-10",required:6500,payments:[P("2026-10-03",6500)]}]},
-      {id:3,name:"Suresh Gowda",dueDay:5,rent:12000,pendingRent:null,start:"2026-09",months:[
+      {id:3,groupId:2,name:"Suresh Gowda",dueDay:5,rent:12000,pendingRent:null,start:"2026-09",months:[
         {ym:"2026-09",required:12000,payments:[P("2026-09-04",12000)]},
         {ym:"2026-10",required:12000,payments:[P("2026-10-09",12000)]}]},
-      {id:4,name:"Anita Rao",dueDay:20,rent:7000,pendingRent:null,start:"2026-09",months:[
+      {id:4,groupId:2,name:"Anita Rao",dueDay:20,rent:7000,pendingRent:null,start:"2026-09",months:[
         {ym:"2026-09",required:7000,payments:[P("2026-09-18",7000)]},
         {ym:"2026-10",required:7000,payments:[P("2026-10-06",3000)]}]},
-      {id:5,name:"Manjunath S",dueDay:5,rent:5500,pendingRent:null,start:"2026-08",months:[
+      {id:5,groupId:0,name:"Manjunath S",dueDay:5,rent:5500,pendingRent:null,start:"2026-08",months:[
         {ym:"2026-08",required:5500,payments:[P("2026-08-04",3000),P("2026-09-12",2500)]},
         {ym:"2026-09",required:5500,payments:[P("2026-09-05",5500)]},
         {ym:"2026-10",required:5500,payments:[P("2026-10-02",2000)]}]},
-      {id:6,name:"Farida Begum",dueDay:5,rent:9000,pendingRent:null,start:"2026-08",months:[
+      {id:6,groupId:1,name:"Farida Begum",dueDay:5,rent:9000,pendingRent:null,start:"2026-08",months:[
         {ym:"2026-08",required:9000,payments:[P("2026-08-03",9000)]},
         {ym:"2026-09",required:9000,payments:[P("2026-09-06",4000)]},
         {ym:"2026-10",required:9000,payments:[]}]}
     ],
     archived:[
-      {id:7,name:"Venkatesh Murthy",dueDay:10,rent:7500,pendingRent:null,start:"2026-04",removedOn:"2026-06",months:[
+      {id:7,groupId:1,name:"Venkatesh Murthy",dueDay:10,rent:7500,pendingRent:null,start:"2026-04",removedOn:"2026-06",months:[
         {ym:"2026-04",required:7500,payments:[P("2026-04-08",7500)]},
         {ym:"2026-05",required:7500,payments:[P("2026-05-09",7500)]},
         {ym:"2026-06",required:7500,payments:[P("2026-06-10",7500)]}]}
@@ -334,6 +375,11 @@ const S = Object.assign({
 const t = (k, v={}) => { let s = (T[S.lang][k] ?? T.en[k] ?? k); for (const x in v) s = s.split("{"+x+"}").join(v[x]); return s; };
 const curYm = () => ymOf(S.today);
 const findTenant = id => S.tenants.find(x=>x.id===id) || S.archived.find(x=>x.id===id);
+const findGroup = id => S.groups.find(g=>g.id===id);                          // includes deleted groups (archived tenants still point at them)
+const liveGroups = () => S.groups.filter(g=>!g.deleted);
+const groupLabel = g => g.locked ? t("uncategorized") : g.name;          // Uncategorized is translated, the others show what the user typed
+const tenantsOf = gid => S.tenants.filter(tn=>tn.groupId===gid);          // active tenants only
+const sameName = (a,b) => a.trim().toLowerCase() === b.trim().toLowerCase();
 
 function ensureMonths(tn){
   const cur = curYm();
@@ -354,7 +400,9 @@ function oldDues(tn){ return visibleMonths(tn).filter(m=>m.ym<curYm()).reduce((s
 function go(screen, param=null, opts={}){
   if (opts.reset) S.stack = []; else S.stack.push({screen:S.screen, param:S.param});
   S.screen = screen; S.param = param; S.err = "";
-  if (screen==="add") S.f = {name:"", rent:"", due:"5", start:curYm()};
+  if (screen==="add") S.f = {name:"", rent:"", due:"5", start:curYm(), group: param ?? 0};   // default = the group you came from
+  if (screen==="addGroup") S.f = {gname:""};
+  if (screen==="renameGroup") S.f = {gname: findGroup(param).name};
   if (screen==="pay") initPay(param);
   if (screen==="rent") S.f = {rent:""};
   render(); const m = document.querySelector("main.screen"); if (m) m.scrollTop = 0;
@@ -372,26 +420,114 @@ function setToday(v){ if (v){ S.today = v; render(); } }
 function resetDemo(){ Object.assign(S, sampleData(), {stack:[], screen:"home", param:null, toast:null, dialog:null}); render(); }
 
 /* =========================== SCREENS =========================== */
+/* One row per tenant of [list], most urgent first (the same order Home used before groups). */
+function tenantRows(list){
+  list.forEach(ensureMonths);
+  const rows = list.map(tn => { const m = monthOf(tn, curYm()); return {tn, m, st:stateOf(tn,m), old:oldDues(tn)}; });
+  const rank = r => RANK[r.st] - (r.old>0 ? 0.5 : 0);
+  rows.sort((a,b)=> rank(a) - rank(b) || a.tn.name.localeCompare(b.tn.name));
+  return rows;
+}
+const sumPaid = rows => rows.reduce((s,r)=>s+paidAsOf(r.m,S.today),0);
+const sumDue  = rows => rows.reduce((s,r)=>s+remaining(r.m),0);
+
+/* HOME: groups instead of tenants. The totals on top still cover every tenant. */
 function screenHome(){
-  S.tenants.forEach(ensureMonths);
-  const rows = S.tenants.map(tn => { const m = monthOf(tn, curYm()); return {tn, m, st:stateOf(tn,m), old:oldDues(tn)}; });
-  rows.sort((a,b)=> (RANK[a.st] - (a.old>0?0.5:0)) - (RANK[b.st] - (b.old>0?0.5:0)) || a.tn.name.localeCompare(b.tn.name));
-  const got = rows.reduce((s,r)=>s+paidAsOf(r.m,S.today),0);
-  const due = rows.reduce((s,r)=>s+remaining(r.m),0);
+  const all = tenantRows(S.tenants);
+  // Uncategorized is only listed while it has tenants; every other group is listed even when empty.
+  const groups = liveGroups().filter(g => !g.locked || tenantsOf(g.id).length).map(g => {
+    const rows = tenantRows(tenantsOf(g.id));
+    return {g, rows, worst: rows[0] || null, due: sumDue(rows)};      // rows[0] is the most urgent tenant
+  });
+  const rank = x => x.worst ? RANK[x.worst.st] - (x.worst.old>0 ? 0.5 : 0) : 99;   // empty groups go last
+  groups.sort((a,b)=> rank(a) - rank(b) || groupLabel(a.g).localeCompare(groupLabel(b.g)));
   return `${tip("help_home")}
     <h2 class="sec" style="margin-top:8px">${t("thisMonth",{m:monthName(curYm())})}</h2>
     <div class="sum" style="margin-top:10px">
-      <div class="box green"><div class="lbl">${t("collected")}</div><div class="val">₹${num(got)}</div></div>
-      <div class="box amber"><div class="lbl">${t("toCollect")}</div><div class="val">₹${num(due)}</div></div>
+      <div class="box green"><div class="lbl">${t("collected")}</div><div class="val">₹${num(sumPaid(all))}</div></div>
+      <div class="box amber"><div class="lbl">${t("toCollect")}</div><div class="val">₹${num(sumDue(all))}</div></div>
+    </div>
+    <h2 class="sec">${t("groups")} (${groups.length})</h2>
+    <div class="hint">${t("sortNote")}</div>
+    ${groups.length ? groups.map(x=>`
+      <button class="card tap" onclick="go('group',${x.g.id})">
+        <div class="row"><span class="name">${esc(groupLabel(x.g))}</span>${x.worst ? chip(x.worst.st) : ""}</div>
+        <div class="sub">${x.rows.length===1 ? t("grpOne") : x.rows.length ? t("grpCount",{n:x.rows.length}) : t("grpNoTenants")}${x.rows.length ? " · " + t("grpToReceive",{a:num(x.due)}) : ""}</div>
+        ${x.rows.some(r=>r.old>0) ? `<span class="olddue"> ${t("oldDues",{a:num(x.rows.reduce((s,r)=>s+r.old,0))})}</span>` : ""}
+      </button>`).join("") : `<div class="empty">${t("noGroups")}</div>`}
+    <button class="btn" onclick="go('addGroup')">${t("addGroupBtn")}</button>
+    <button class="btn secondary" onclick="go('add')">${t("addTenantBtn")}</button>`;
+}
+
+/* GROUP: the tenants of one group (this is the list Home used to show). */
+function screenGroup(){
+  const g = findGroup(S.param); if (!g) return "";
+  const rows = tenantRows(tenantsOf(g.id));
+  return `${tip("help_group")}
+    ${g.locked ? `<div class="info">${t("defaultGroupNote")}</div>` : ""}
+    <h2 class="sec" style="margin-top:8px">${t("thisMonth",{m:monthName(curYm())})}</h2>
+    <div class="sum" style="margin-top:10px">
+      <div class="box green"><div class="lbl">${t("collected")}</div><div class="val">₹${num(sumPaid(rows))}</div></div>
+      <div class="box amber"><div class="lbl">${t("toCollect")}</div><div class="val">₹${num(sumDue(rows))}</div></div>
     </div>
     <h2 class="sec">${t("tenants")} (${rows.length})</h2>
-    <div class="hint">${t("sortNote")}</div>
+    ${rows.length ? `<div class="hint">${t("sortNote")}</div>` : ""}
     ${rows.length ? rows.map(r=>`
       <button class="card tap" onclick="go('detail',${r.tn.id})">
         <div class="row"><span class="name">${esc(r.tn.name)}</span>${chip(r.st)}</div>
         ${r.old>0 ? `<span class="olddue"> ${t("oldDues",{a:num(r.old)})}</span>` : ""}
-      </button>`).join("") : `<div class="empty">${t("noTenants")}</div>`}
-    <button class="btn" onclick="go('add')">${t("addTenantBtn")}</button>`;
+      </button>`).join("") : `<div class="empty">${t("noTenantsInGroup")}</div>`}
+    <button class="btn" onclick="go('add',${g.id})">${t("addTenantBtn")}</button>
+    ${g.locked ? "" : `<button class="btn secondary" onclick="go('renameGroup',${g.id})">${t("btn_renameGroup")}</button>
+    <button class="btn danger small" style="margin-top:28px" onclick="askDeleteGroup(${g.id})">${t("btn_deleteGroup")}</button>`}`;
+}
+
+/* ----- Add / rename / delete a group ----- */
+function groupNameHtml(){
+  return `<label class="f" for="g_name">${t("f_gname")}</label><div class="hint">${t("f_gname_h")}</div>
+    <input class="in" id="g_name" type="text" autocomplete="off" value="${esc(S.f.gname)}" oninput="S.f.gname=this.value">
+    ${S.err==="gname" ? `<div class="err">${t("err_gname")}</div>`:""}
+    ${S.err==="gnameTaken" ? `<div class="err">${t("err_gname_taken")}</div>`:""}`;
+}
+function screenAddGroup(){
+  return `${tip("help_addGroup")}${groupNameHtml()}
+    <button class="btn" onclick="saveGroup()"> ${t("save")}</button>
+    <button class="btn secondary" onclick="back()">${t("cancel")}</button>`;
+}
+function screenRenameGroup(){
+  return `${tip("help_renameGroup")}${groupNameHtml()}
+    <button class="btn" onclick="saveGroupName()"> ${t("save")}</button>
+    <button class="btn secondary" onclick="back()">${t("cancel")}</button>`;
+}
+function checkGroupName(except){      // returns an error code or ""
+  const name = (S.f.gname||"").trim();
+  if (!name) return "gname";
+  if (liveGroups().some(g => g.id!==except && sameName(g.name, name))) return "gnameTaken";
+  return "";
+}
+function saveGroup(){
+  const bad = checkGroupName(-1); if (bad){ S.err = bad; render(); return; }
+  const g = {id:S.nextGroupId++, name:S.f.gname.trim()};
+  S.groups.push(g);
+  toast(t("groupAdded",{n:g.name})); back();
+}
+function saveGroupName(){
+  const g = findGroup(S.param), bad = checkGroupName(g.id); if (bad){ S.err = bad; render(); return; }
+  g.name = S.f.gname.trim();
+  toast(t("groupRenamed",{n:g.name})); back();
+}
+function askDeleteGroup(id){ S.dialog = {type:"deleteGroup", id}; render(); }
+function doDeleteGroup(id){
+  const g = findGroup(id);
+  g.deleted = true;                            // soft delete, like tenants: archived tenants still point at it
+  S.dialog = null; toast(t("groupDeleted",{n:g.name})); go("home", null, {reset:true});
+}
+
+/* ----- Move a tenant to another group ----- */
+function askMove(id){ S.dialog = {type:"move", id}; render(); }
+function doMove(id, gid){
+  const tn = findTenant(id), g = findGroup(gid);
+  tn.groupId = gid; S.dialog = null; toast(t("movedTo",{n:tn.name,g:groupLabel(g)})); render();
 }
 
 function screenAdd(){
@@ -401,6 +537,8 @@ function screenAdd(){
     <label class="f" for="f_name">${t("f_name")}</label><div class="hint">${t("f_name_h")}</div>
     <input class="in" id="f_name" type="text" autocomplete="off" value="${esc(S.f.name)}" oninput="S.f.name=this.value">
     ${S.err==="name" ? `<div class="err">${t("err_name")}</div>`:""}
+    <label class="f" for="f_group">${t("f_group")}</label><div class="hint">${t("f_group_h")}</div>
+    <select class="in" id="f_group" onchange="S.f.group=+this.value">${liveGroups().map(g=>`<option value="${g.id}" ${+S.f.group===g.id?"selected":""}>${esc(groupLabel(g))}</option>`).join("")}</select>
     <label class="f" for="f_rent">${t("f_rent")}</label><div class="hint">${t("f_rent_h")}</div>
     <input class="in" id="f_rent" type="text" inputmode="numeric" pattern="[0-9]*" value="${esc(S.f.rent)}" oninput="this.value=this.value.replace(/[^0-9]/g,'');S.f.rent=this.value">
     ${S.err==="rent" ? `<div class="err">${t("err_rent")}</div>`:""}
@@ -415,9 +553,11 @@ function saveTenant(){
   const name = (S.f.name||"").trim(), rent = parseInt(S.f.rent,10);
   if (!name){ S.err="name"; render(); return; }
   if (!rent || rent<=0){ S.err="rent"; render(); return; }
-  const tn = {id:S.nextId++, name, dueDay:+S.f.due, rent, pendingRent:null, start:S.f.start, months:[{ym:S.f.start, required:rent, payments:[]}]};
+  const tn = {id:S.nextId++, groupId:+S.f.group, name, dueDay:+S.f.due, rent, pendingRent:null, start:S.f.start, months:[{ym:S.f.start, required:rent, payments:[]}]};
   ensureMonths(tn); S.tenants.push(tn);
-  toast(t("tenantAdded",{n:name})); go("detail", tn.id, {reset:true});
+  // Replace the form with the tenant page, so Back returns to the screen the user came from (Home or the group).
+  const prev = S.stack.pop(); if (prev){ S.screen = prev.screen; S.param = prev.param; }
+  toast(t("tenantAdded",{n:name})); go("detail", tn.id);
 }
 
 function screenDetail(readonly=false){
@@ -449,11 +589,13 @@ function screenDetail(readonly=false){
   return `${readonly ? `<div class="banner"> ${t("arch_removedOn",{m:monthName(tn.removedOn)})}</div>` : tip("help_detail")}
     <div class="name" style="font-size:26px;margin-top:10px">${esc(tn.name)}</div>
     <div class="sub">${t("rentPerMonth",{a:num(cur?cur.required:tn.rent)})}</div>
+    <div class="sub">${t("inGroup",{g:esc(groupLabel(findGroup(tn.groupId)))})}</div>
     ${top}
     ${!readonly && old>0 ? `<div class="info" style="background:#f6ecfd;border-color:#dbbdf2"><b>${t("oldDues",{a:num(old)})}</b><button class="btn small" style="margin-top:10px" onclick="payFor(${tn.id},'${oldestOwing(tn)}')">${t("btn_payOld")}</button></div>` : ""}
     ${!readonly && tn.pendingRent ? `<div class="info"> ${t("pendingRentNote",{m:monthName(tn.pendingRent.from),a:num(tn.pendingRent.amount)})}</div>` : ""}
     ${readonly ? "" : `<button class="btn" onclick="go('pay',${tn.id})"> ${t("btn_pay")}</button>
-      <button class="btn secondary" onclick="go('rent',${tn.id})"> ${t("btn_rent")}</button>`}
+      <button class="btn secondary" onclick="go('rent',${tn.id})"> ${t("btn_rent")}</button>
+      <button class="btn secondary" onclick="askMove(${tn.id})"> ${t("btn_moveGroup")}</button>`}
     <h2 class="sec">${t("history")}</h2><div class="card" style="margin-top:8px;padding-top:4px;padding-bottom:4px">${histHtml}</div>
     ${readonly ? "" : `<button class="btn danger small" style="margin-top:28px" onclick="askDelete(${tn.id})"> ${t("btn_delete")}</button>`}`;
 }
@@ -535,8 +677,8 @@ function saveRent(){
 function askDelete(id){ S.dialog = {type:"delete", id}; render(); }
 function doDelete(id){
   const i = S.tenants.findIndex(x=>x.id===id), tn = S.tenants[i];
-  S.tenants.splice(i,1); tn.removedOn = curYm(); S.archived.push(tn);
-  S.dialog = null; toast(t("removed",{n:tn.name})); go("home", null, {reset:true});
+  S.tenants.splice(i,1); tn.removedOn = curYm(); S.archived.push(tn);       // an archived tenant keeps its group
+  S.dialog = null; toast(t("removed",{n:tn.name})); back();                 // back to the group the tenant was in
 }
 
 /* ----- Settings / Archive / Welcome ----- */
@@ -580,7 +722,7 @@ function dialogHtml(){
   const d = S.dialog; if (!d) return "";
   if (d.type==="help"){
     const key = {archiveDetail:"detail"}[d.screen] || d.screen;
-    const legend = (d.screen==="home"||d.screen==="detail"||d.screen==="archiveDetail") ? `<h3 style="font-size:18px;margin-top:14px">${t("legendTitle")}</h3>
+    const legend = (d.screen==="home"||d.screen==="group"||d.screen==="detail"||d.screen==="archiveDetail") ? `<h3 style="font-size:18px;margin-top:14px">${t("legendTitle")}</h3>
       <div class="legend">${Object.keys(RANK).map(s=>`<div>${chip(s)}<br>${t("sd_"+s)}</div>`).join("")}</div>` : "";
     return `<div class="overlay" onclick="S.dialog=null;render()"><div class="dialog" onclick="event.stopPropagation()">
       <h3> ${t("help")}</h3><p>${t("help_"+key)}</p>${legend}
@@ -594,17 +736,36 @@ function dialogHtml(){
       <button class="btn secondary" onclick="S.dialog=null;render()">${t("del_no")}</button>
       <button class="btn danger" onclick="doDelete(${tn.id})">${t("del_yes")}</button></div></div>`;
   }
+  if (d.type==="deleteGroup"){
+    const g = findGroup(d.id), n = g ? tenantsOf(g.id).length : 0;
+    // A group that still has tenants cannot be deleted: explain instead of asking.
+    if (n>0) return `<div class="overlay"><div class="dialog">
+      <h3> ${t("delg_title",{n:esc(g.name)})}</h3><div class="info" style="background:#fdeec2;border-color:#f0d27a">${t("delg_notEmpty")}</div>
+      <button class="btn" onclick="S.dialog=null;render()">${t("close")}</button></div></div>`;
+    return `<div class="overlay"><div class="dialog">
+      <h3> ${t("delg_title",{n:esc(g.name)})}</h3><p>${t("delg_body")}</p>
+      <button class="btn secondary" onclick="S.dialog=null;render()">${t("delg_no")}</button>
+      <button class="btn danger" onclick="doDeleteGroup(${g.id})">${t("delg_yes")}</button></div></div>`;
+  }
+  if (d.type==="move"){
+    const tn = findTenant(d.id);
+    return `<div class="overlay" onclick="S.dialog=null;render()"><div class="dialog" onclick="event.stopPropagation()">
+      <h3> ${t("move_title",{n:esc(tn.name)})}</h3><p>${t("move_body")}</p>
+      ${liveGroups().map(g=>`<button class="choice ${g.id===tn.groupId?"on":""}" onclick="doMove(${tn.id},${g.id})"><span class="dot"></span>${esc(groupLabel(g))}</button>`).join("")}
+      <button class="btn secondary" onclick="S.dialog=null;render()">${t("cancel")}</button></div></div>`;
+  }
   return "";
 }
 
 /* =========================== RENDER =========================== */
 function render(){
   const sc = S.screen;
-  const titles = {home:t("appName"), add:t("addTitle"), detail:"", pay:t("pay_title"), rent:t("rent_title"), settings:t("set_title"), archive:t("arch_title"), archiveDetail:t("arch_title"), welcome:""};
-  const bodies = {home:screenHome, add:screenAdd, detail:()=>screenDetail(false), pay:screenPay, rent:screenRent, settings:screenSettings, archive:screenArchive, archiveDetail:()=>screenDetail(true), welcome:screenWelcome};
+  const titles = {home:t("appName"), group:"", addGroup:t("addGroupTitle"), renameGroup:t("renameGroupTitle"), add:t("addTitle"), detail:"", pay:t("pay_title"), rent:t("rent_title"), settings:t("set_title"), archive:t("arch_title"), archiveDetail:t("arch_title"), welcome:""};
+  const bodies = {home:screenHome, group:screenGroup, addGroup:screenAddGroup, renameGroup:screenRenameGroup, add:screenAdd, detail:()=>screenDetail(false), pay:screenPay, rent:screenRent, settings:screenSettings, archive:screenArchive, archiveDetail:()=>screenDetail(true), welcome:screenWelcome};
   const tabs = ["home","settings"], isTab = tabs.includes(sc);
   let title = titles[sc];
   if (sc==="detail"||sc==="archiveDetail"){ const tn = findTenant(S.param); title = tn ? esc(tn.name) : ""; }
+  if (sc==="group"){ const g = findGroup(S.param); title = g ? esc(groupLabel(g)) : ""; }
   const titleAttr = sc==="home" ? `onclick="homeTap()"` : "";
   const header = sc==="welcome" ? `<header class="top"><div class="title"></div><button class="icon-btn lang" onclick="toggleLang()">${t("langBtn")}</button></header>` :
     `<header class="top">

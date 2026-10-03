@@ -137,6 +137,26 @@ class AppLocalizationsKn extends AppLocalizations {
   String get errTenantDeleted => 'ಈ ಬಾಡಿಗೆದಾರರನ್ನು ತೆಗೆಯಲಾಗಿದೆ.';
 
   @override
+  String get errGroupName => 'ದಯವಿಟ್ಟು ಗುಂಪಿನ ಹೆಸರು ಬರೆಯಿರಿ.';
+
+  @override
+  String get errGroupNameTaken => 'ಈ ಹೆಸರಿನ ಗುಂಪು ಈಗಾಗಲೇ ಇದೆ.';
+
+  @override
+  String get errGroupNotFound => 'ಈ ಗುಂಪು ಸಿಗಲಿಲ್ಲ.';
+
+  @override
+  String get errGroupDeleted => 'ಈ ಗುಂಪನ್ನು ತೆಗೆಯಲಾಗಿದೆ.';
+
+  @override
+  String get errGroupLocked =>
+      '\'ವರ್ಗೀಕರಿಸದವರು\' ಗುಂಪನ್ನು ಬದಲಿಸಲು ಅಥವಾ ತೆಗೆಯಲು ಆಗುವುದಿಲ್ಲ.';
+
+  @override
+  String get errGroupNotEmpty =>
+      'ಈ ಗುಂಪಿನಲ್ಲಿ ಇನ್ನೂ ಬಾಡಿಗೆದಾರರು ಇದ್ದಾರೆ. ಮೊದಲು ಅವರನ್ನು ಬೇರೆ ಗುಂಪಿಗೆ ಸರಿಸಿ.';
+
+  @override
   String get errLanguage => 'ಈ ಭಾಷೆ ಲಭ್ಯವಿಲ್ಲ.';
 
   @override
@@ -301,6 +321,133 @@ class AppLocalizationsKn extends AppLocalizations {
   }
 
   @override
+  String get uncategorized => 'ವರ್ಗೀಕರಿಸದವರು';
+
+  @override
+  String groupsCount(Object count) {
+    return 'ಗುಂಪುಗಳು ($count)';
+  }
+
+  @override
+  String get noGroups =>
+      'ಇನ್ನೂ ಗುಂಪುಗಳಿಲ್ಲ. ಗುಂಪು ಸೇರಿಸಿ, ಅಥವಾ ಬಾಡಿಗೆದಾರರನ್ನು ಸೇರಿಸಿದರೆ ಅವರು \'ವರ್ಗೀಕರಿಸದವರು\' ನಲ್ಲಿ ಇರುತ್ತಾರೆ.';
+
+  @override
+  String groupTenantsCount(Object count) {
+    return '$count ಬಾಡಿಗೆದಾರರು';
+  }
+
+  @override
+  String get groupOneTenant => '1 ಬಾಡಿಗೆದಾರರು';
+
+  @override
+  String get groupNoTenants => 'ಇನ್ನೂ ಯಾರೂ ಇಲ್ಲ';
+
+  @override
+  String groupToReceive(Object amount) {
+    return 'ಬರಬೇಕಾದದ್ದು: ₹$amount';
+  }
+
+  @override
+  String get noTenantsInGroup => 'ಈ ಗುಂಪಿನಲ್ಲಿ ಇನ್ನೂ ಬಾಡಿಗೆದಾರರು ಇಲ್ಲ.';
+
+  @override
+  String get defaultGroupNote => 'ಗುಂಪು ಇಲ್ಲದ ಬಾಡಿಗೆದಾರರು ಇಲ್ಲಿ ಇರುತ್ತಾರೆ.';
+
+  @override
+  String get addGroupBtn => '+ ಗುಂಪು ಸೇರಿಸಿ';
+
+  @override
+  String get addGroupTitle => 'ಗುಂಪು ಸೇರಿಸಿ';
+
+  @override
+  String get fGroupName => 'ಗುಂಪಿನ ಹೆಸರು';
+
+  @override
+  String get fGroupNameHint => 'ಉದಾ: ಬ್ಲಾಕ್ ಎ ಅಥವಾ ನೆಲ ಮಹಡಿ.';
+
+  @override
+  String groupAdded(Object name) {
+    return '$name ಗುಂಪು ಸೇರಿಸಲಾಗಿದೆ';
+  }
+
+  @override
+  String get renameGroupTitle => 'ಗುಂಪಿನ ಹೆಸರು ಬದಲಿಸಿ';
+
+  @override
+  String get btnRenameGroup => 'ಗುಂಪಿನ ಹೆಸರು ಬದಲಿಸಿ';
+
+  @override
+  String groupRenamed(Object name) {
+    return 'ಗುಂಪಿನ ಹೆಸರನ್ನು $name ಎಂದು ಬದಲಿಸಲಾಗಿದೆ';
+  }
+
+  @override
+  String get btnDeleteGroup => 'ಈ ಗುಂಪನ್ನು ತೆಗೆಯಿರಿ';
+
+  @override
+  String delGroupTitle(Object name) {
+    return '$name ಗುಂಪನ್ನು ತೆಗೆಯಬೇಕೇ?';
+  }
+
+  @override
+  String get delGroupBody => 'ಈ ಗುಂಪಿನಲ್ಲಿ ಯಾರೂ ಇಲ್ಲ. ಗುಂಪನ್ನು ತೆಗೆಯಲಾಗುತ್ತದೆ.';
+
+  @override
+  String get delGroupNotEmpty =>
+      'ಈ ಗುಂಪಿನಲ್ಲಿ ಇನ್ನೂ ಬಾಡಿಗೆದಾರರು ಇದ್ದಾರೆ. ಮೊದಲು ಅವರನ್ನು ಬೇರೆ ಗುಂಪಿಗೆ ಸರಿಸಿ, ನಂತರ ಗುಂಪನ್ನು ತೆಗೆಯಿರಿ.';
+
+  @override
+  String get delGroupYes => 'ಹೌದು, ತೆಗೆಯಿರಿ';
+
+  @override
+  String get delGroupNo => 'ಇಲ್ಲ, ಇರಲಿ';
+
+  @override
+  String groupDeleted(Object name) {
+    return '$name ಗುಂಪನ್ನು ತೆಗೆಯಲಾಗಿದೆ';
+  }
+
+  @override
+  String get fGroup => 'ಗುಂಪು';
+
+  @override
+  String get fGroupHint => 'ಈ ಬಾಡಿಗೆದಾರರು ಯಾವ ಗುಂಪಿನಲ್ಲಿ ಇರಬೇಕು ಎಂದು ಆರಿಸಿ.';
+
+  @override
+  String inGroup(Object name) {
+    return 'ಗುಂಪು: $name';
+  }
+
+  @override
+  String get btnMoveGroup => 'ಬೇರೆ ಗುಂಪಿಗೆ ಸರಿಸಿ';
+
+  @override
+  String moveTitle(Object name) {
+    return '$name ಅವರನ್ನು ಸರಿಸಿ';
+  }
+
+  @override
+  String get moveBody => 'ಈ ಬಾಡಿಗೆದಾರರಿಗೆ ಗುಂಪು ಆರಿಸಿ.';
+
+  @override
+  String movedTo(Object name, Object group) {
+    return '$name ಅವರನ್ನು $group ಗುಂಪಿಗೆ ಸರಿಸಲಾಗಿದೆ';
+  }
+
+  @override
+  String get helpGroup =>
+      'ಈ ಗುಂಪಿನ ಬಾಡಿಗೆದಾರರು ಇಲ್ಲಿ ಇದ್ದಾರೆ. ವಿವರಕ್ಕಾಗಿ ಹೆಸರನ್ನು ಒತ್ತಿ. ಇಲ್ಲಿಂದಲೇ ಗುಂಪಿನ ಹೆಸರು ಬದಲಿಸಬಹುದು ಅಥವಾ ಗುಂಪನ್ನು ತೆಗೆಯಬಹುದು.';
+
+  @override
+  String get helpAddGroup =>
+      'ಗುಂಪಿಗೆ ಒಂದು ಹೆಸರು ಬರೆದು \'ಉಳಿಸಿ\' ಒತ್ತಿ. ಹೆಸರನ್ನು ನಂತರ ಬದಲಿಸಬಹುದು.';
+
+  @override
+  String get helpRenameGroup =>
+      'ಹೊಸ ಹೆಸರು ಬರೆದು \'ಉಳಿಸಿ\' ಒತ್ತಿ. ಬಾಡಿಗೆದಾರರು ಅದೇ ಗುಂಪಿನಲ್ಲಿ ಇರುತ್ತಾರೆ.';
+
+  @override
   String get setTitle => 'ಸೆಟ್ಟಿಂಗ್ಸ್';
 
   @override
@@ -364,7 +511,7 @@ class AppLocalizationsKn extends AppLocalizations {
 
   @override
   String get helpHome =>
-      'ಬಾಡಿಗೆದಾರರ ಹೆಸರನ್ನು ಒತ್ತಿದರೆ ಅವರ ವಿವರ ಕಾಣುತ್ತದೆ, ಅಲ್ಲಿ ಬಂದ ಹಣ ಬರೆಯಬಹುದು. ಬಣ್ಣದ ಲೇಬಲ್‌ಗಳು ಯಾರು ಕೊಟ್ಟಿದ್ದಾರೆ ಎಂದು ತೋರಿಸುತ್ತವೆ.';
+      'ಗುಂಪನ್ನು ಒತ್ತಿದರೆ ಅದರ ಬಾಡಿಗೆದಾರರು ಕಾಣುತ್ತಾರೆ. ಗುಂಪಿನ ಮೇಲಿನ ಬಣ್ಣದ ಲೇಬಲ್ ಅತಿ ತುರ್ತಿನ ಬಾಡಿಗೆದಾರರನ್ನು ತೋರಿಸುತ್ತದೆ. ಬಂದ ಹಣ ಬರೆಯಲು ಬಾಡಿಗೆದಾರರನ್ನು ತೆರೆಯಿರಿ.';
 
   @override
   String get helpAdd =>

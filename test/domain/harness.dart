@@ -1,5 +1,6 @@
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tenant_tracker/core/constants.dart';
 import 'package:tenant_tracker/core/errors/failure.dart';
 import 'package:tenant_tracker/core/errors/result.dart';
 import 'package:tenant_tracker/core/utils/clock.dart';
@@ -10,6 +11,8 @@ import 'package:tenant_tracker/data/rent_history/rent_history_repository.dart';
 import 'package:tenant_tracker/data/rent_record/rent_record_repository.dart';
 import 'package:tenant_tracker/data/tenant/tenant_model.dart';
 import 'package:tenant_tracker/data/tenant/tenant_repository.dart';
+import 'package:tenant_tracker/data/tenant_group/tenant_group_model.dart';
+import 'package:tenant_tracker/data/tenant_group/tenant_group_repository.dart';
 import 'package:tenant_tracker/domain/use_cases/business/ensure_rent_records/ensure_rent_records_usecase.dart';
 
 /// A clock the test moves by hand.
@@ -32,13 +35,15 @@ class FakeClock implements Clock {
 class Harness {
   final AppDatabase db;
   final FakeClock clock;
+  final TenantGroupRepository groups;
   final TenantRepository tenants;
   final RentHistoryRepository history;
   final RentRecordRepository records;
   final PaymentRepository payments;
 
   Harness._(this.db, this.clock)
-    : tenants = TenantRepository(db),
+    : groups = TenantGroupRepository(db),
+      tenants = TenantRepository(db),
       history = RentHistoryRepository(db),
       records = RentRecordRepository(db),
       payments = PaymentRepository(db);
@@ -60,11 +65,13 @@ Future<String> seedTenant(
   required String start,
   required int rent,
   int dueDay = 10,
+  String group = uncategorizedGroupUuid,
 }) async {
   ok(
     await h.tenants.addTenant(
       TenantModel(
         uuid: id,
+        groupUuid: group,
         name: name ?? id,
         createdOn: h.clock.nowUtc(),
         dueDay: dueDay,
@@ -76,6 +83,20 @@ Future<String> seedTenant(
   ok(
     await EnsureRentRecordsUsecase(h.tenants, h.history, h.records, h.clock)(
       tenantUuid: id,
+    ),
+  );
+  return id;
+}
+
+/// Adds an active group. Returns the group uuid (equal to [id]).
+Future<String> seedGroup(Harness h, {required String id, String? name}) async {
+  ok(
+    await h.groups.addGroup(
+      TenantGroupModel(
+        uuid: id,
+        name: name ?? id,
+        createdOn: h.clock.nowUtc(),
+      ),
     ),
   );
   return id;

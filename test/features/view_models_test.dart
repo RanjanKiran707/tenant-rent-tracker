@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tenant_tracker/core/constants.dart';
 import 'package:tenant_tracker/core/errors/failure.dart';
 import 'package:tenant_tracker/core/di/app_dependencies.dart';
 import 'package:tenant_tracker/core/utils/view_state.dart';
@@ -94,8 +95,52 @@ void main() {
   group('HomeViewModel', () {
     HomeViewModel build() => HomeViewModel(
       ensureRentRecords: deps.ensureRentRecords,
+      addGroup: deps.addGroup,
       watchHome: deps.watchHome,
     );
+
+    test('addGroup adds a card and returns no failure', () async {
+      final vm = build();
+      await vm.refresh();
+      await waitFor(vm.state, (s) => s is ViewStateLoaded);
+      expect(loaded(vm.state.value).groups, isEmpty);
+
+      expect(await vm.addGroup('  Block A '), isNull);
+
+      final data = loaded(
+        await waitFor(
+          vm.state,
+          (s) =>
+              s is ViewStateLoaded<WatchHomeReturnModel> &&
+              s.data.groups.isNotEmpty,
+        ),
+      );
+      expect(data.groups.single.name, 'Block A');
+      expect(data.groups.single.tenantCount, 0);
+      vm.dispose();
+    });
+
+    test('addGroup with an empty or a taken name returns the failure', () async {
+      final vm = build();
+      expect(
+        (await vm.addGroup('  '))!,
+        isA<ValidationFailure>().having(
+          (f) => f.message,
+          'message',
+          'group_name_required',
+        ),
+      );
+      expect(await vm.addGroup('Block A'), isNull);
+      expect(
+        (await vm.addGroup('block a'))!,
+        isA<ValidationFailure>().having(
+          (f) => f.message,
+          'message',
+          'group_name_taken',
+        ),
+      );
+      vm.dispose();
+    });
 
     test(
       'starts Loading, then lists tenants after creating missing records',
@@ -114,11 +159,11 @@ void main() {
           await waitFor(vm.state, (s) => s is ViewStateLoaded),
         );
         expect(data.currentMonth, '2026-03');
-        expect(data.rows.single.name, 'a');
+        expect(data.groups.single.name, 'Uncategorized');
         // 15 March, due day 10, nothing paid.
-        expect(data.rows.single.status, MonthStatus.overdue);
+        expect(data.groups.single.worstStatus, MonthStatus.overdue);
         // January and February were created and are owed.
-        expect(data.rows.single.oldDues, 16000);
+        expect(data.groups.single.oldDues, 16000);
         vm.dispose();
       },
     );
@@ -140,7 +185,7 @@ void main() {
         ),
       );
       expect(data.toReceive, 0);
-      expect(data.rows.single.status, MonthStatus.completed);
+      expect(data.groups.single.worstStatus, MonthStatus.completed);
       vm.dispose();
     });
 
@@ -161,7 +206,7 @@ void main() {
               s.data.currentMonth == '2026-04',
         ),
       );
-      expect(data.rows.single.oldDues, 5000); // March is now an old due
+      expect(data.groups.single.oldDues, 5000); // March is now an old due
       vm.dispose();
     });
 
@@ -188,10 +233,51 @@ void main() {
   });
 
   group('AddTenantViewModel', () {
-    AddTenantViewModel build() => AddTenantViewModel(
+    AddTenantViewModel build({String? group}) => AddTenantViewModel(
       loadForm: deps.loadAddTenantForm,
       addTenant: deps.addTenant,
+      watchGroups: deps.watchGroups,
+      initialGroupUuid: group ?? uncategorizedGroupUuid,
     );
+
+    test('the group defaults to Uncategorized, or to the group opened from', () async {
+      expect(build().groupUuid.value, uncategorizedGroupUuid);
+
+      await seedGroup(h, id: 'a', name: 'Block A');
+      final vm = build(group: 'a');
+      expect(vm.groupUuid.value, 'a');
+      vm.dispose();
+    });
+
+    test('the group list loads, and a save puts the tenant in the group', () async {
+      await seedGroup(h, id: 'a', name: 'Block A');
+      final vm = build(group: 'a');
+      await waitFor(vm.groups, (g) => g.length == 2);
+      expect(vm.groups.value.map((g) => g.groupUuid), [
+        uncategorizedGroupUuid,
+        'a',
+      ]);
+
+      await vm.onSave(name: 'Ravi', rentText: '8000');
+      final id = (vm.saveState.value as ViewStateLoaded<String>).data;
+
+      expect(ok(await h.tenants.getTenant(id))!.groupUuid, 'a');
+      vm.dispose();
+    });
+
+    test('a chosen group that gets deleted falls back to Uncategorized', () async {
+      await seedGroup(h, id: 'a', name: 'Block A');
+      final vm = build(group: 'a');
+      await waitFor(vm.groups, (g) => g.length == 2);
+
+      ok(await h.groups.deleteGroup('a', '2026-03'));
+
+      await waitFor(vm.groupUuid, (g) => g == uncategorizedGroupUuid);
+      expect(vm.groups.value.map((g) => g.groupUuid), [
+        uncategorizedGroupUuid,
+      ]);
+      vm.dispose();
+    });
 
     test('form defaults: due day 10, current month, 12 months', () {
       final vm = build();
@@ -245,8 +331,56 @@ void main() {
       watchTenantDetail: deps.watchTenantDetail,
       deleteTenant: deps.deleteTenant,
       renameTenant: deps.renameTenant,
+      moveTenantToGroup: deps.moveTenantToGroup,
+      watchGroups: deps.watchGroups,
       undoPayment: deps.undoPayment,
     );
+
+    test('loadGroups lists the groups to move to', () async {
+      await seedTenant(h, id: 'a', start: '2026-02', rent: 6000);
+      await seedGroup(h, id: 'g', name: 'Block A');
+      final vm = build('a');
+
+      final groups = await vm.loadGroups();
+
+      expect(groups!.map((g) => g.groupUuid), [uncategorizedGroupUuid, 'g']);
+      vm.dispose();
+    });
+
+    test('moveToGroup updates the detail by itself', () async {
+      await seedTenant(h, id: 'a', start: '2026-02', rent: 6000);
+      await seedGroup(h, id: 'g', name: 'Block A');
+      final vm = build('a');
+      await vm.refresh();
+      final before = loaded(
+        await waitFor(vm.state, (s) => s is ViewStateLoaded),
+      );
+      expect(before.groupUuid, uncategorizedGroupUuid);
+
+      expect(await vm.moveToGroup('g'), isNull);
+
+      final data = loaded(
+        await waitFor(
+          vm.state,
+          (s) =>
+              s is ViewStateLoaded<WatchTenantDetailReturnModel> &&
+              s.data.groupUuid == 'g',
+        ),
+      );
+      expect(data.groupName, 'Block A');
+      vm.dispose();
+    });
+
+    test('moveToGroup to an unknown group returns the failure', () async {
+      await seedTenant(h, id: 'a', start: '2026-02', rent: 6000);
+      final vm = build('a');
+
+      final failure = await vm.moveToGroup('nope');
+
+      expect(failure, isA<ValidationFailure>());
+      expect(failure!.message, 'group_not_found');
+      vm.dispose();
+    });
 
     test('rename updates the loaded name', () async {
       await seedTenant(h, id: 'a', start: '2026-02', rent: 6000);

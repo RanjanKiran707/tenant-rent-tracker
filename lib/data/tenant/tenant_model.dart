@@ -1,5 +1,10 @@
+import 'package:tenant_tracker/core/constants.dart';
+
 class TenantModel {
   final String uuid;
+
+  /// The group this tenant is listed under; Uncategorized unless chosen.
+  final String groupUuid;
   final String name;
   final DateTime createdOn;
 
@@ -14,6 +19,7 @@ class TenantModel {
 
   const TenantModel({
     required this.uuid,
+    this.groupUuid = uncategorizedGroupUuid,
     required this.name,
     required this.createdOn,
     required this.dueDay,

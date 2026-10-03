@@ -13,18 +13,33 @@ Reference for the database tables. Rules come from `specs.md`. Storage is drift 
 
 ## Tables
 
+### TenantGroup (shown to the user as just "Group")
+
+| Field | Type | Notes |
+|---|---|---|
+| uuid | String PK | the built-in Uncategorized group uses the fixed uuid `uncategorized` (constant `uncategorizedGroupUuid` in `core/`), so a fresh install and the migration agree |
+| name | String | trimmed, not empty. Unique among non-deleted groups, ignoring case (checked by the use case) |
+| createdOn | DateTime | audit only; groups are listed oldest first |
+| deletedMonth | String? `YYYY-MM` | null = active. Set = deleted (soft delete, like Tenant) |
+
+- Every tenant belongs to exactly one group. **Uncategorized** is a real row, so `Tenant.groupUuid` is never null.
+- Uncategorized cannot be renamed or deleted. Its stored name is `Uncategorized`; the app shows the translated text (English / Kannada) for that uuid.
+- A group can be deleted only when it has **no active tenants**. It is a soft delete because archived tenants still point at it.
+- Home shows Uncategorized only while it has tenants. Every other active group is shown, even when empty.
+
 ### Tenant
 
 | Field | Type | Notes |
 |---|---|---|
 | uuid | String PK | |
+| groupUuid | String FK -> TenantGroup | not null, default `uncategorized`. Changed only by "Move to group"; rent, records and payments are not touched |
 | name | String | trimmed, not empty |
 | createdOn | DateTime | audit only (when the row was added) |
 | dueDay | int | 1-31, default **10**. If a month is shorter, use its last day. Not editable in v1 (changing it would change past statuses). |
 | startMonth | String `YYYY-MM` | first month with a record. Differs from createdOn: the user picks it. |
 | deletedMonth | String? `YYYY-MM` | null = Active. Set = Deleted (archived). No records generated after this month. |
 
-Changes from the first draft: **`rentAmount` removed** (moves to RentHistory, per the spec rule "never overwrite a rent field that past months depend on"); `startMonth` and `deletedMonth` added.
+Changes from the first draft: **`rentAmount` removed** (moves to RentHistory, per the spec rule "never overwrite a rent field that past months depend on"); `startMonth` and `deletedMonth` added. Later: `groupUuid` added with the Groups feature (schema version 2).
 
 ### RentHistory (each rent change)
 
@@ -67,8 +82,8 @@ Changes from the first draft: **`rentAmount` removed** (moves to RentHistory, pe
 ## Relationships
 
 ```
-Tenant 1 ──< RentHistory
-Tenant 1 ──< RentRecord 1 ──< Payment
+TenantGroup 1 ──< Tenant 1 ──< RentHistory
+                  Tenant 1 ──< RentRecord 1 ──< Payment
 ```
 
 ## Behaviours the model must support
@@ -80,7 +95,23 @@ Tenant 1 ──< RentRecord 1 ──< Payment
 | Completed vs Late Completed vs Backlog Cleared | walk the month's Payments in `paidOn` order; the date the running total reaches `requiredAmount` is compared with the due date and month end |
 | Due date | `min(dueDay, daysInMonth)` of the record's month |
 | Delete tenant | set `deletedMonth`; keep all rows; list queries filter `deletedMonth IS NULL` |
-| Archived view | `deletedMonth IS NOT NULL`, read-only, opened from the **Archived** tile in Settings |
+| Archived view | `deletedMonth IS NOT NULL`, read-only, opened from the **Archived** tile in Settings. Stays a flat list (not grouped) in v1 |
+| Home shows groups | list active `TenantGroup` rows (`deletedMonth IS NULL`); each card is computed from that group's active tenants: count, most urgent status, money still to receive. The totals at the top of Home still cover every tenant |
+| Group screen | the active tenants whose `groupUuid` is that group (the list Home showed before groups) |
+| Add tenant | the form picks a group; default = the group the user came from, else Uncategorized. The use case checks the group exists and is not deleted |
+| Move tenant | `TenantRepository.setTenantGroup(uuid, groupUuid)`: updates one column. The use case rejects archived tenants and unknown or deleted groups |
+| Delete group | soft delete (`deletedMonth`). Rejected for Uncategorized (`group_default_locked`) and when any active tenant is in it (`group_not_empty`) |
+| Rename group | name only; rejected for Uncategorized, empty names, and names used by another active group |
+| Archived tenant | keeps its `groupUuid`, even if the group is deleted later |
+
+## Migration: schema version 1 -> 2 (Groups)
+
+Users of the first release have tenants with no group. On upgrade:
+
+1. Create the `TenantGroup` table and insert the Uncategorized row (`uuid = 'uncategorized'`).
+2. Add `Tenant.groupUuid`, filled with `'uncategorized'` for every existing tenant (archived ones too).
+
+SQLite will not add a NOT NULL column that has a REFERENCES clause while foreign keys are on, so the `tenants` table is rebuilt with drift's `TableMigration` and a column transformer, with foreign keys off for the rebuild and checked afterwards. A fresh install runs `onCreate`: all tables plus the Uncategorized row. No other table changes, so rent records and payments are untouched.
 
 ## Not in the database
 
@@ -93,3 +124,4 @@ Tenant 1 ──< RentRecord 1 ──< Payment
 2. Money as `int`, not `double`.
 3. `dueDay` and `startMonth` are fixed after creation in v1.
 4. Still open in the spec: first-month proration, restoring a deleted tenant, and the months skipped while deleted.
+5. Groups: Uncategorized is a real row with a fixed uuid (not a null `groupUuid`); group delete is a soft delete; one group per tenant; the Archived list is not grouped in v1.

@@ -9,6 +9,8 @@ Source of truth for the tables: `../data_model_tenant_tracker.md`. Architecture 
 | Item | Files | State |
 |---|---|---|
 | drift tables (Tenants, RentHistories, RentRecords, Payments) | `lib/data/database/tables.dart` | done |
+| `TenantGroups` table and `Tenants.groupUuid` (schema version 2, migration) | `lib/data/database/tables.dart`, `app_database.dart`; see `groups_progress.md` | done |
+| Tenant group repository, `setTenantGroup` | `lib/data/tenant_group/*`, `lib/data/tenant/*` | done |
 | Database class, `PRAGMA foreign_keys = ON`, schema version 1 | `lib/data/database/app_database.dart` (+ generated `.g.dart`) | done |
 | Exception -> `Err(StorageFailure)` helpers (`guard`, `guardStream`) | `lib/data/database/repository_guard.dart` | done |
 | Tenant: model, interface, repository | `lib/data/tenant/` | done |

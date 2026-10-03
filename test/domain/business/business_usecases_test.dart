@@ -1,17 +1,22 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tenant_tracker/core/constants.dart';
 import 'package:tenant_tracker/core/errors/failure.dart';
 import 'package:tenant_tracker/core/errors/result.dart';
 import 'package:tenant_tracker/core/utils/clock.dart';
 import 'package:tenant_tracker/data/rent_record/rent_record_model.dart';
 import 'package:tenant_tracker/data/settings/settings_repository.dart';
+import 'package:tenant_tracker/domain/use_cases/business/add_group/add_group_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/business/add_tenant/add_tenant_argument_model.dart';
 import 'package:tenant_tracker/domain/use_cases/business/add_tenant/add_tenant_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/business/change_rent/change_rent_usecase.dart';
+import 'package:tenant_tracker/domain/use_cases/business/delete_group/delete_group_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/business/delete_tenant/delete_tenant_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/business/ensure_rent_records/ensure_rent_records_usecase.dart';
+import 'package:tenant_tracker/domain/use_cases/business/move_tenant_to_group/move_tenant_to_group_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/business/record_payment/record_payment_argument_model.dart';
 import 'package:tenant_tracker/domain/use_cases/business/record_payment/record_payment_usecase.dart';
+import 'package:tenant_tracker/domain/use_cases/business/rename_group/rename_group_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/business/rename_tenant/rename_tenant_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/business/settings/settings_usecases.dart';
 import 'package:tenant_tracker/domain/use_cases/business/undo_payment/undo_payment_usecase.dart';
@@ -26,12 +31,20 @@ void main() {
   late UndoPaymentUsecase undoPayment;
   late ChangeRentUsecase changeRent;
   late DeleteTenantUsecase deleteTenant;
+  late AddGroupUsecase addGroup;
+  late RenameGroupUsecase renameGroup;
+  late DeleteGroupUsecase deleteGroup;
+  late MoveTenantToGroupUsecase moveTenant;
 
   // Today is 2026-03-15 unless a test moves the clock.
   setUp(() {
     h = Harness();
     ensure = EnsureRentRecordsUsecase(h.tenants, h.history, h.records, h.clock);
-    addTenant = AddTenantUsecase(h.tenants, ensure, h.clock);
+    addTenant = AddTenantUsecase(h.tenants, h.groups, ensure, h.clock);
+    addGroup = AddGroupUsecase(h.groups, h.clock);
+    renameGroup = RenameGroupUsecase(h.groups);
+    deleteGroup = DeleteGroupUsecase(h.groups, h.tenants, h.clock);
+    moveTenant = MoveTenantToGroupUsecase(h.tenants, h.groups);
     recordPayment = RecordPaymentUsecase(h.payments, h.clock);
     undoPayment = UndoPaymentUsecase(h.payments);
     changeRent = ChangeRentUsecase(h.tenants, h.history, h.clock);
@@ -45,12 +58,14 @@ void main() {
     int rent = 5000,
     int dueDay = 10,
     String start = '2026-01',
+    String group = uncategorizedGroupUuid,
   }) => addTenant(
     AddTenantArgumentModel(
       name: name,
       rent: rent,
       dueDay: dueDay,
       startMonth: start,
+      groupUuid: group,
     ),
   );
 
@@ -512,6 +527,234 @@ void main() {
     });
   });
 
+
+  group('AddTenantUsecase groups', () {
+    test('a new tenant goes to Uncategorized unless a group is chosen', () async {
+      final id = ok(await add());
+
+      expect(
+        ok(await h.tenants.getTenant(id))!.groupUuid,
+        uncategorizedGroupUuid,
+      );
+    });
+
+    test('the chosen group is saved on the tenant', () async {
+      final group = ok(await addGroup('Block A'));
+      final id = ok(await add(group: group));
+
+      expect(ok(await h.tenants.getTenant(id))!.groupUuid, group);
+    });
+
+    test('an unknown group is rejected and nothing is saved', () async {
+      expect(errorOf(await add(group: 'nope')), 'group_not_found');
+      expect(ok(await h.tenants.getActiveTenants()), isEmpty);
+    });
+
+    test('a deleted group is rejected', () async {
+      final group = ok(await addGroup('Block A'));
+      ok(await deleteGroup(group));
+
+      expect(errorOf(await add(group: group)), 'group_deleted');
+      expect(ok(await h.tenants.getActiveTenants()), isEmpty);
+    });
+  });
+
+  group('AddGroupUsecase', () {
+    test('saves the group with a trimmed name', () async {
+      final id = ok(await addGroup('  Block A  '));
+
+      final group = ok(await h.groups.getGroup(id))!;
+      expect(group.name, 'Block A');
+      expect(group.isDeleted, isFalse);
+      expect(group.isUncategorized, isFalse);
+      expect(ok(await h.groups.getActiveGroups()).map((g) => g.uuid), [
+        uncategorizedGroupUuid,
+        id,
+      ]);
+    });
+
+    test('an empty name is rejected', () async {
+      expect(errorOf(await addGroup('   ')), 'group_name_required');
+    });
+
+    test(
+      'a name used by another active group is rejected, ignoring case',
+      () async {
+        ok(await addGroup('Block A'));
+
+        expect(errorOf(await addGroup('  block a ')), 'group_name_taken');
+        // Block A and the built-in Uncategorized; nothing was added.
+        expect(ok(await h.groups.getActiveGroups()), hasLength(2));
+      },
+    );
+
+    test('the name of a deleted group can be used again', () async {
+      final first = ok(await addGroup('Block A'));
+      ok(await deleteGroup(first));
+
+      ok(await addGroup('Block A'));
+    });
+  });
+
+  group('RenameGroupUsecase', () {
+    test('changes only the name, trimmed; tenants stay', () async {
+      final group = ok(await addGroup('Block A'));
+      final tenant = ok(await add(group: group));
+
+      ok(await renameGroup(group, '  Block B '));
+
+      expect(ok(await h.groups.getGroup(group))!.name, 'Block B');
+      expect(ok(await h.tenants.getTenant(tenant))!.groupUuid, group);
+    });
+
+    test(
+      'empty, taken, unknown, deleted and Uncategorized are rejected',
+      () async {
+        final a = ok(await addGroup('Block A'));
+        final b = ok(await addGroup('Block B'));
+
+        expect(errorOf(await renameGroup(a, '  ')), 'group_name_required');
+        expect(errorOf(await renameGroup(a, 'block b')), 'group_name_taken');
+        expect(errorOf(await renameGroup('nope', 'X')), 'group_not_found');
+        expect(
+          errorOf(await renameGroup(uncategorizedGroupUuid, 'X')),
+          'group_default_locked',
+        );
+        ok(await deleteGroup(b));
+        expect(errorOf(await renameGroup(b, 'Y')), 'group_deleted');
+        expect(ok(await h.groups.getGroup(a))!.name, 'Block A');
+      },
+    );
+
+    test('keeping the same name, with other capitals, is allowed', () async {
+      final a = ok(await addGroup('Block A'));
+
+      ok(await renameGroup(a, 'BLOCK A'));
+      expect(ok(await h.groups.getGroup(a))!.name, 'BLOCK A');
+    });
+  });
+
+  group('DeleteGroupUsecase', () {
+    test('an empty group is soft deleted with the current month', () async {
+      final group = ok(await addGroup('Block A'));
+
+      ok(await deleteGroup(group));
+
+      final saved = ok(await h.groups.getGroup(group))!; // the row is kept
+      expect(saved.deletedMonth, '2026-03');
+      expect(saved.isDeleted, isTrue);
+      expect(ok(await h.groups.getActiveGroups()).map((g) => g.uuid), [
+        uncategorizedGroupUuid,
+      ]);
+    });
+
+    test('a group with an active tenant cannot be deleted', () async {
+      final group = ok(await addGroup('Block A'));
+      ok(await add(group: group));
+
+      expect(errorOf(await deleteGroup(group)), 'group_not_empty');
+      expect(ok(await h.groups.getGroup(group))!.isDeleted, isFalse);
+    });
+
+    test('after the tenant is moved out, the group can be deleted', () async {
+      final group = ok(await addGroup('Block A'));
+      final tenant = ok(await add(group: group));
+      ok(await moveTenant(tenant, uncategorizedGroupUuid));
+
+      ok(await deleteGroup(group));
+    });
+
+    test('an archived tenant does not block it and keeps its group', () async {
+      final group = ok(await addGroup('Block A'));
+      final tenant = ok(await add(group: group));
+      ok(await deleteTenant(tenant));
+
+      ok(await deleteGroup(group));
+
+      expect(ok(await h.tenants.getTenant(tenant))!.groupUuid, group);
+    });
+
+    test(
+      'Uncategorized, unknown and already deleted groups are rejected',
+      () async {
+        expect(
+          errorOf(await deleteGroup(uncategorizedGroupUuid)),
+          'group_default_locked',
+        );
+        expect(errorOf(await deleteGroup('nope')), 'group_not_found');
+
+        final group = ok(await addGroup('Block A'));
+        ok(await deleteGroup(group));
+        h.clock.setToday('2026-05-01');
+        expect(errorOf(await deleteGroup(group)), 'group_deleted');
+        expect(ok(await h.groups.getGroup(group))!.deletedMonth, '2026-03');
+      },
+    );
+  });
+
+  group('MoveTenantToGroupUsecase', () {
+    test('changes only the group', () async {
+      final group = ok(await addGroup('Block A'));
+      final id = ok(await add(start: '2026-01', rent: 5000));
+      final first = ok(await h.records.getRecords(id)).first;
+      ok(
+        await recordPayment(
+          RecordPaymentArgumentModel(
+            rentRecordUuid: first.uuid,
+            amount: 1000,
+            paidOn: '2026-01-05',
+          ),
+        ),
+      );
+      final before = ok(await h.tenants.getTenant(id))!;
+
+      ok(await moveTenant(id, group));
+
+      final after = ok(await h.tenants.getTenant(id))!;
+      expect(after.groupUuid, group);
+      expect(after.name, before.name);
+      expect(after.dueDay, before.dueDay);
+      expect(after.startMonth, before.startMonth);
+      expect(await monthsOf(id), ['2026-01', '2026-02', '2026-03']);
+      expect(ok(await h.history.getHistory(id)), hasLength(1));
+      expect(
+        ok(await h.payments.getPaymentsOfRecord(first.uuid)),
+        hasLength(1),
+      );
+    });
+
+    test('moving to the group it is already in succeeds', () async {
+      final id = ok(await add());
+
+      ok(await moveTenant(id, uncategorizedGroupUuid));
+      expect(
+        ok(await h.tenants.getTenant(id))!.groupUuid,
+        uncategorizedGroupUuid,
+      );
+    });
+
+    test(
+      'unknown or deleted tenant, unknown or deleted group are rejected',
+      () async {
+        final group = ok(await addGroup('Block A'));
+        final id = ok(await add());
+
+        expect(errorOf(await moveTenant('nope', group)), 'tenant_not_found');
+        expect(errorOf(await moveTenant(id, 'nope')), 'group_not_found');
+
+        ok(await deleteGroup(group));
+        expect(errorOf(await moveTenant(id, group)), 'group_deleted');
+
+        final other = ok(await addGroup('Block B'));
+        ok(await deleteTenant(id));
+        expect(errorOf(await moveTenant(id, other)), 'tenant_deleted');
+        expect(
+          ok(await h.tenants.getTenant(id))!.groupUuid,
+          uncategorizedGroupUuid,
+        );
+      },
+    );
+  });
   group('settings use cases', () {
     late SettingsRepository settings;
 

@@ -8,11 +8,13 @@ import 'package:tenant_tracker/core/widgets/form_parts.dart';
 import 'package:tenant_tracker/core/widgets/obx_value.dart';
 import 'package:tenant_tracker/core/widgets/status_chip.dart';
 import 'package:tenant_tracker/core/widgets/tip_banner.dart';
+import 'package:tenant_tracker/core/widgets/total_box.dart';
 import 'package:tenant_tracker/domain/use_cases/ui/watch_home/watch_home_return_model.dart';
 import 'package:tenant_tracker/features/add_tenant/add_tenant_view.dart';
+import 'package:tenant_tracker/features/group/group_name_dialog.dart';
+import 'package:tenant_tracker/features/group/group_view.dart';
+import 'package:tenant_tracker/features/group/group_view_model.dart';
 import 'package:tenant_tracker/features/home/home_view_model.dart';
-import 'package:tenant_tracker/features/tenant_detail/tenant_detail_view.dart';
-import 'package:tenant_tracker/features/tenant_detail/tenant_detail_view_model.dart';
 import 'package:tenant_tracker/l10n/app_localizations.dart';
 
 class HomeView extends StatefulWidget {
@@ -31,6 +33,7 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
     final deps = AppDependencies.instance;
     ctrl = HomeViewModel(
       ensureRentRecords: deps.ensureRentRecords,
+      addGroup: deps.addGroup,
       watchHome: deps.watchHome,
     );
     WidgetsBinding.instance.addObserver(this);
@@ -54,6 +57,19 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
     super.dispose();
   }
 
+  Future<void> _openAddGroup() async {
+    final l = AppLocalizations.of(context);
+    final name = await GroupNameDialog.show(
+      context,
+      title: l.addGroupTitle,
+      onSave: ctrl.addGroup,
+    );
+    if (name == null || !mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(l.groupAdded(name))));
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
@@ -68,7 +84,7 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (failure) =>
               LoadError(failure: failure, onRetry: ctrl.refresh),
-          loaded: (data) => _HomeBody(data: data),
+          loaded: (data) => _HomeBody(data: data, onAddGroup: _openAddGroup),
         ),
       ),
     );
@@ -77,8 +93,9 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
 
 class _HomeBody extends StatelessWidget {
   final WatchHomeReturnModel data;
+  final VoidCallback onAddGroup;
 
-  const _HomeBody({required this.data});
+  const _HomeBody({required this.data, required this.onAddGroup});
 
   @override
   Widget build(BuildContext context) {
@@ -96,38 +113,34 @@ class _HomeBody extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: _TotalBox(
+              child: TotalBox.received(
                 label: l.collected,
                 amount: data.received,
-                ink: const Color(0xFF14683A),
-                background: const Color(0xFFD9F5E4),
               ),
             ),
             const SizedBox(width: 10),
             Expanded(
-              child: _TotalBox(
+              child: TotalBox.toReceive(
                 label: l.toCollect,
                 amount: data.toReceive,
-                ink: const Color(0xFF8A5A00),
-                background: const Color(0xFFFDEEC2),
               ),
             ),
           ],
         ),
         const SizedBox(height: 22),
         Text(
-          l.tenantsCount(data.rows.length),
+          l.groupsCount(data.groups.length),
           style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w700),
         ),
         Text(
           l.sortNote,
           style: const TextStyle(fontSize: 15, color: Color(0xFF5B6675)),
         ),
-        if (data.rows.isEmpty)
+        if (data.groups.isEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 10),
             child: Text(
-              l.noTenants,
+              l.noGroups,
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 18,
@@ -137,9 +150,16 @@ class _HomeBody extends StatelessWidget {
             ),
           )
         else
-          for (final row in data.rows) _TenantCard(row: row),
+          for (final group in data.groups) _GroupCard(group: group),
         BigButton(
+          key: const Key('addGroupButton'),
+          label: l.addGroupBtn,
+          onPressed: onAddGroup,
+        ),
+        BigButton(
+          key: const Key('addTenantButton'),
           label: l.addTenantBtn,
+          kind: BigButtonKind.secondary,
           onPressed: () => AddTenantView.open(context),
         ),
       ],
@@ -147,61 +167,20 @@ class _HomeBody extends StatelessWidget {
   }
 }
 
-class _TotalBox extends StatelessWidget {
-  final String label;
-  final int amount;
-  final Color ink;
-  final Color background;
+class _GroupCard extends StatelessWidget {
+  final HomeGroupRow group;
 
-  const _TotalBox({
-    required this.label,
-    required this.amount,
-    required this.ink,
-    required this.background,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: background,
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              color: ink,
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            '₹${formatMoney(amount)}',
-            style: TextStyle(
-              color: ink,
-              fontSize: 26,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _TenantCard extends StatelessWidget {
-  final HomeTenantRow row;
-
-  const _TenantCard({required this.row});
+  const _GroupCard({required this.group});
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
+    final status = group.worstStatus;
+    final count = switch (group.tenantCount) {
+      0 => l.groupNoTenants,
+      1 => l.groupOneTenant,
+      final n => l.groupTenantsCount(n),
+    };
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: Material(
@@ -212,9 +191,9 @@ class _TenantCard extends StatelessWidget {
         ),
         child: InkWell(
           borderRadius: BorderRadius.circular(18),
-          onTap: () => TenantDetailView.open(
+          onTap: () => GroupView.open(
             context,
-            TenantDetailBundle(tenantUuid: row.tenantUuid),
+            GroupBundle(groupUuid: group.groupUuid),
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -225,22 +204,34 @@ class _TenantCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        row.name,
+                        groupDisplayName(l, group.groupUuid, group.name),
                         style: const TextStyle(
                           fontSize: 21,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    StatusChip(status: row.status),
+                    if (status != null) ...[
+                      const SizedBox(width: 8),
+                      StatusChip(status: status),
+                    ],
                   ],
                 ),
-                if (row.oldDues > 0)
+                const SizedBox(height: 2),
+                Text(
+                  group.tenantCount == 0
+                      ? count
+                      : '$count · ${l.groupToReceive(formatMoney(group.toReceive))}',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Color(0xFF5B6675),
+                  ),
+                ),
+                if (group.oldDues > 0)
                   Padding(
                     padding: const EdgeInsets.only(top: 6),
                     child: Text(
-                      l.oldDues(formatMoney(row.oldDues)),
+                      l.oldDues(formatMoney(group.oldDues)),
                       style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,

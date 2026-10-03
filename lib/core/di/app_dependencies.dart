@@ -7,11 +7,16 @@ import 'package:tenant_tracker/data/rent_history/rent_history_repository.dart';
 import 'package:tenant_tracker/data/rent_record/rent_record_repository.dart';
 import 'package:tenant_tracker/data/settings/settings_repository.dart';
 import 'package:tenant_tracker/data/tenant/tenant_repository.dart';
+import 'package:tenant_tracker/data/tenant_group/tenant_group_repository.dart';
+import 'package:tenant_tracker/domain/use_cases/business/add_group/add_group_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/business/add_tenant/add_tenant_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/business/change_rent/change_rent_usecase.dart';
+import 'package:tenant_tracker/domain/use_cases/business/delete_group/delete_group_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/business/delete_tenant/delete_tenant_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/business/ensure_rent_records/ensure_rent_records_usecase.dart';
+import 'package:tenant_tracker/domain/use_cases/business/move_tenant_to_group/move_tenant_to_group_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/business/record_payment/record_payment_usecase.dart';
+import 'package:tenant_tracker/domain/use_cases/business/rename_group/rename_group_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/business/rename_tenant/rename_tenant_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/business/settings/settings_usecases.dart';
 import 'package:tenant_tracker/domain/use_cases/business/undo_payment/undo_payment_usecase.dart';
@@ -19,6 +24,8 @@ import 'package:tenant_tracker/domain/use_cases/ui/load_add_tenant_form/load_add
 import 'package:tenant_tracker/domain/use_cases/ui/load_payment_options/load_payment_options_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/ui/load_rent_change_info/load_rent_change_info_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/ui/watch_archived_tenants/watch_archived_tenants_usecase.dart';
+import 'package:tenant_tracker/domain/use_cases/ui/watch_group/watch_group_usecase.dart';
+import 'package:tenant_tracker/domain/use_cases/ui/watch_groups/watch_groups_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/ui/watch_home/watch_home_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/ui/watch_tenant_detail/watch_tenant_detail_usecase.dart';
 
@@ -37,6 +44,10 @@ class AppDependencies {
   final ChangeRentUsecase changeRent;
   final DeleteTenantUsecase deleteTenant;
   final RenameTenantUsecase renameTenant;
+  final AddGroupUsecase addGroup;
+  final RenameGroupUsecase renameGroup;
+  final DeleteGroupUsecase deleteGroup;
+  final MoveTenantToGroupUsecase moveTenantToGroup;
   final LoadSettingsUsecase loadSettings;
   final SetLanguageUsecase setLanguage;
   final SetShowTipsUsecase setShowTips;
@@ -49,6 +60,8 @@ class AppDependencies {
 
   // UI use cases: they only read, for presentation.
   final WatchHomeUsecase watchHome;
+  final WatchGroupUsecase watchGroup;
+  final WatchGroupsUsecase watchGroups;
   final WatchTenantDetailUsecase watchTenantDetail;
   final WatchArchivedTenantsUsecase watchArchivedTenants;
   final LoadPaymentOptionsUsecase loadPaymentOptions;
@@ -63,6 +76,10 @@ class AppDependencies {
     required this.changeRent,
     required this.deleteTenant,
     required this.renameTenant,
+    required this.addGroup,
+    required this.renameGroup,
+    required this.deleteGroup,
+    required this.moveTenantToGroup,
     required this.loadSettings,
     required this.setLanguage,
     required this.setShowTips,
@@ -70,6 +87,8 @@ class AppDependencies {
     required this.setSimulatedDate,
     required this.clock,
     required this.watchHome,
+    required this.watchGroup,
+    required this.watchGroups,
     required this.watchTenantDetail,
     required this.watchArchivedTenants,
     required this.loadPaymentOptions,
@@ -102,6 +121,7 @@ class AppDependencies {
 
     // 1. Data layer (the only place that knows the real implementations).
     final tenants = TenantRepository(db);
+    final groups = TenantGroupRepository(db);
     final history = RentHistoryRepository(db);
     final records = RentRecordRepository(db);
     final payments = PaymentRepository(db);
@@ -115,22 +135,29 @@ class AppDependencies {
     );
 
     return AppDependencies._(
-      addTenant: AddTenantUsecase(tenants, ensureRentRecords, appClock),
+      addTenant: AddTenantUsecase(tenants, groups, ensureRentRecords, appClock),
       ensureRentRecords: ensureRentRecords,
       recordPayment: RecordPaymentUsecase(payments, appClock),
       undoPayment: UndoPaymentUsecase(payments),
       changeRent: ChangeRentUsecase(tenants, history, appClock),
       deleteTenant: DeleteTenantUsecase(tenants, appClock),
       renameTenant: RenameTenantUsecase(tenants),
+      addGroup: AddGroupUsecase(groups, appClock),
+      renameGroup: RenameGroupUsecase(groups),
+      deleteGroup: DeleteGroupUsecase(groups, tenants, appClock),
+      moveTenantToGroup: MoveTenantToGroupUsecase(tenants, groups),
       loadSettings: LoadSettingsUsecase(settings),
       setLanguage: SetLanguageUsecase(settings),
       setShowTips: SetShowTipsUsecase(settings),
       markWelcomeSeen: MarkWelcomeSeenUsecase(settings),
       setSimulatedDate: SetSimulatedDateUsecase(settings, appClock),
       clock: appClock,
-      watchHome: WatchHomeUsecase(tenants, records, payments, appClock),
+      watchHome: WatchHomeUsecase(groups, tenants, records, payments, appClock),
+      watchGroup: WatchGroupUsecase(groups, tenants, records, payments, appClock),
+      watchGroups: WatchGroupsUsecase(groups),
       watchTenantDetail: WatchTenantDetailUsecase(
         tenants,
+        groups,
         records,
         payments,
         history,

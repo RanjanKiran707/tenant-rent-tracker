@@ -93,6 +93,15 @@ class TenantRepository implements TenantRepositoryInterface {
   }
 
   @override
+  Future<Result<void>> setTenantGroup(String uuid, String groupUuid) {
+    return guard(() async {
+      await (_db.update(_db.tenants)..where((t) => t.uuid.equals(uuid))).write(
+        TenantsCompanion(groupUuid: Value(groupUuid)),
+      );
+    });
+  }
+
+  @override
   Future<Result<void>> deleteTenant(String uuid, String deletedMonth) {
     return guard(() async {
       await (_db.update(_db.tenants)..where((t) => t.uuid.equals(uuid))).write(
@@ -103,6 +112,7 @@ class TenantRepository implements TenantRepositoryInterface {
 
   TenantsCompanion _toCompanion(TenantModel t) => TenantsCompanion.insert(
     uuid: t.uuid,
+    groupUuid: Value(t.groupUuid),
     name: t.name,
     createdOn: t.createdOn,
     dueDay: Value(t.dueDay),
@@ -112,6 +122,7 @@ class TenantRepository implements TenantRepositoryInterface {
 
   TenantModel _fromRow(TenantRow r) => TenantModel(
     uuid: r.uuid,
+    groupUuid: r.groupUuid,
     name: r.name,
     createdOn: r.createdOn,
     dueDay: r.dueDay,

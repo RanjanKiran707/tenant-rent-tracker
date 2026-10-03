@@ -11,6 +11,8 @@ import 'package:tenant_tracker/data/rent_record/rent_record_model.dart';
 import 'package:tenant_tracker/data/rent_record/rent_record_repository_interface.dart';
 import 'package:tenant_tracker/data/tenant/tenant_model.dart';
 import 'package:tenant_tracker/data/tenant/tenant_repository_interface.dart';
+import 'package:tenant_tracker/data/tenant_group/tenant_group_model.dart';
+import 'package:tenant_tracker/data/tenant_group/tenant_group_repository_interface.dart';
 import 'package:tenant_tracker/domain/use_cases/ui/month_status/month_status.dart';
 import 'package:tenant_tracker/domain/use_cases/ui/month_status/tenant_dues.dart';
 import 'package:tenant_tracker/domain/use_cases/ui/watch_tenant_detail/watch_tenant_detail_return_model.dart';
@@ -21,9 +23,10 @@ import 'package:tenant_tracker/domain/use_cases/ui/watch_tenant_detail/watch_ten
 /// Presentation only: it never writes. Emits `Err(ValidationFailure(
 /// 'tenant_not_found'))` once if the uuid is unknown. Re-emits when the
 /// tenant itself (a rename or a delete) or its records, payments or rent
-/// history change.
+/// history change, or when its group changes (a move or a group rename).
 class WatchTenantDetailUsecase {
   final TenantRepositoryInterface _tenants;
+  final TenantGroupRepositoryInterface _groups;
   final RentRecordRepositoryInterface _records;
   final PaymentRepositoryInterface _payments;
   final RentHistoryRepositoryInterface _history;
@@ -31,6 +34,7 @@ class WatchTenantDetailUsecase {
 
   WatchTenantDetailUsecase(
     this._tenants,
+    this._groups,
     this._records,
     this._payments,
     this._history,
@@ -58,17 +62,24 @@ class WatchTenantDetailUsecase {
       _history.watchHistory(tenantUuid),
       (records, payments, history) => (records, payments, history),
     );
+    // Every group, deleted ones too: an archived tenant may point at one.
+    final withGroups = combineLatest2(
+      _groups.watchAllGroups(),
+      others,
+      (groups, o) => (groups, o.$1, o.$2, o.$3),
+    );
     yield* combineLatest2(
       _tenants.watchTenant(tenantUuid),
-      others,
+      withGroups,
       // Tenants are never erased, so the latest row is only null if the first
       // read above raced with it; fall back to the tenant read at the start.
-      (latest, o) => _build(latest ?? tenant, o.$1, o.$2, o.$3),
+      (latest, w) => _build(latest ?? tenant, w.$1, w.$2, w.$3, w.$4),
     );
   }
 
   WatchTenantDetailReturnModel _build(
     TenantModel tenant,
+    List<TenantGroupModel> groups,
     List<RentRecordModel> records,
     List<PaymentModel> payments,
     List<RentHistoryModel> history,
@@ -156,6 +167,11 @@ class WatchTenantDetailUsecase {
     return WatchTenantDetailReturnModel(
       tenantUuid: tenant.uuid,
       name: tenant.name,
+      groupUuid: tenant.groupUuid,
+      groupName: groups
+          .where((g) => g.uuid == tenant.groupUuid)
+          .map((g) => g.name)
+          .firstOrNull ?? '',
       dueDay: tenant.dueDay,
       readOnly: readOnly,
       deletedMonth: tenant.deletedMonth,

@@ -14,6 +14,7 @@ Decisions: missing monthly records are created by `EnsureRentRecordsUsecase` (a 
 | 4 | business use cases (+ tests) | done |
 | 5 | UI use cases (+ tests) | done |
 | 6 | wiring in `AppDependencies`, architecture doc note, final analyze + test run | done |
+| 7 | Tenant Groups: group use cases, group-aware Home, `WatchGroupUsecase` (see `groups_progress.md`) | done |
 
 ## Log
 

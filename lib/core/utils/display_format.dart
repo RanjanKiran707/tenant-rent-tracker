@@ -1,4 +1,5 @@
 import 'package:intl/intl.dart';
+import 'package:tenant_tracker/core/constants.dart';
 import 'package:tenant_tracker/l10n/app_localizations.dart';
 
 final NumberFormat _money = NumberFormat.decimalPattern('en_IN');
@@ -19,3 +20,8 @@ String formatDayMonth(AppLocalizations l, String date) =>
 /// `2026-10-05` -> `5 Oct 2026`.
 String formatDate(AppLocalizations l, String date) =>
     '${formatDayMonth(l, date)} ${date.substring(0, 4)}';
+
+/// The name to show for a group. The built-in Uncategorized group is stored
+/// with an English name, so its translated text is used instead.
+String groupDisplayName(AppLocalizations l, String groupUuid, String name) =>
+    groupUuid == uncategorizedGroupUuid ? l.uncategorized : name;

@@ -3,13 +3,34 @@
 // ignore_for_file: recursive_getters
 
 import 'package:drift/drift.dart';
+import 'package:tenant_tracker/core/constants.dart';
 
 /// Table definitions. See project_spec/data_model_tenant_tracker.md.
 /// Months are text `YYYY-MM`, dates are text `YYYY-MM-DD`, money is int rupees.
 
+/// Shown to the user as just "Group".
+@DataClassName('TenantGroupRow')
+class TenantGroups extends Table {
+  TextColumn get uuid => text()();
+  TextColumn get name => text()();
+  DateTimeColumn get createdOn => dateTime()();
+
+  /// null = active, set = deleted (`YYYY-MM`). Archived tenants may still
+  /// point at a deleted group, so rows are never erased.
+  TextColumn get deletedMonth => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {uuid};
+}
+
 @DataClassName('TenantRow')
 class Tenants extends Table {
   TextColumn get uuid => text()();
+
+  /// Every tenant is in exactly one group; Uncategorized by default.
+  TextColumn get groupUuid => text()
+      .references(TenantGroups, #uuid)
+      .withDefault(const Constant(uncategorizedGroupUuid))();
   TextColumn get name => text()();
   DateTimeColumn get createdOn => dateTime()();
   IntColumn get dueDay => integer()

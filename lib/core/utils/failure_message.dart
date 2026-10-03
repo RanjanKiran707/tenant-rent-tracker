@@ -16,6 +16,12 @@ String failureMessage(AppLocalizations l, Failure failure) {
     'date_in_future' => l.errDateFuture,
     'tenant_not_found' => l.errTenantNotFound,
     'tenant_deleted' => l.errTenantDeleted,
+    'group_name_required' => l.errGroupName,
+    'group_name_taken' => l.errGroupNameTaken,
+    'group_not_found' => l.errGroupNotFound,
+    'group_deleted' => l.errGroupDeleted,
+    'group_default_locked' => l.errGroupLocked,
+    'group_not_empty' => l.errGroupNotEmpty,
     'language_unsupported' => l.errLanguage,
     _ => l.errGeneric,
   };

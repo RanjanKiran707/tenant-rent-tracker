@@ -54,6 +54,11 @@ class MonthDetail {
 class WatchTenantDetailReturnModel {
   final String tenantUuid;
   final String name;
+
+  /// The tenant's group (Uncategorized unless moved), and its name as stored.
+  /// For Uncategorized the screen shows its translated name instead.
+  final String groupUuid;
+  final String groupName;
   final int dueDay;
 
   /// True for a deleted (archived) tenant: no actions, latest month on top.
@@ -94,6 +99,8 @@ class WatchTenantDetailReturnModel {
   const WatchTenantDetailReturnModel({
     required this.tenantUuid,
     required this.name,
+    required this.groupUuid,
+    required this.groupName,
     required this.dueDay,
     required this.readOnly,
     required this.deletedMonth,

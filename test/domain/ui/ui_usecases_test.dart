@@ -1,10 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tenant_tracker/core/constants.dart';
 import 'package:tenant_tracker/data/tenant/tenant_model.dart';
 import 'package:tenant_tracker/domain/use_cases/ui/load_add_tenant_form/load_add_tenant_form_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/ui/load_payment_options/load_payment_options_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/ui/load_rent_change_info/load_rent_change_info_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/ui/month_status/month_status.dart';
 import 'package:tenant_tracker/domain/use_cases/ui/watch_archived_tenants/watch_archived_tenants_usecase.dart';
+import 'package:tenant_tracker/domain/use_cases/ui/watch_group/watch_group_usecase.dart';
+import 'package:tenant_tracker/domain/use_cases/ui/watch_groups/watch_groups_usecase.dart';
+import 'package:tenant_tracker/domain/use_cases/ui/watch_home/watch_home_return_model.dart';
 import 'package:tenant_tracker/domain/use_cases/ui/watch_home/watch_home_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/ui/watch_tenant_detail/watch_tenant_detail_usecase.dart';
 
@@ -13,6 +17,8 @@ import '../harness.dart';
 void main() {
   late Harness h;
   late WatchHomeUsecase watchHome;
+  late WatchGroupUsecase watchGroup;
+  late WatchGroupsUsecase watchGroups;
   late WatchTenantDetailUsecase watchDetail;
   late WatchArchivedTenantsUsecase watchArchived;
   late LoadPaymentOptionsUsecase paymentOptions;
@@ -21,9 +27,24 @@ void main() {
   // The mockup's "today".
   setUp(() async {
     h = Harness(today: '2026-10-12');
-    watchHome = WatchHomeUsecase(h.tenants, h.records, h.payments, h.clock);
+    watchHome = WatchHomeUsecase(
+      h.groups,
+      h.tenants,
+      h.records,
+      h.payments,
+      h.clock,
+    );
+    watchGroup = WatchGroupUsecase(
+      h.groups,
+      h.tenants,
+      h.records,
+      h.payments,
+      h.clock,
+    );
+    watchGroups = WatchGroupsUsecase(h.groups);
     watchDetail = WatchTenantDetailUsecase(
       h.tenants,
+      h.groups,
       h.records,
       h.payments,
       h.history,
@@ -40,6 +61,11 @@ void main() {
   });
 
   tearDown(() => h.close());
+
+  /// The tenant rows (most urgent first) of the Uncategorized group, where
+  /// [seedTenant] puts tenants unless told otherwise.
+  Future<List<HomeTenantRow>> uncategorizedRows() async =>
+      ok(await watchGroup(uncategorizedGroupUuid).first).rows;
 
   /// The mockup's tenants (the ones needed here).
   Future<void> seedMockup() async {
@@ -95,7 +121,7 @@ void main() {
       final home = ok(await watchHome().first);
 
       expect(home.currentMonth, '2026-10');
-      expect(home.rows, isEmpty);
+      expect(home.groups, isEmpty);
       expect(home.received, 0);
       expect(home.toReceive, 0);
     });
@@ -104,15 +130,15 @@ void main() {
       'needs-attention first, old dues move a tenant up, then by name',
       () async {
         await seedMockup();
-        final home = ok(await watchHome().first);
+        final rows = await uncategorizedRows();
 
-        expect(home.rows.map((r) => r.name), [
+        expect(rows.map((r) => r.name), [
           'Farida Begum', // overdue, plus old dues
           'Manjunath S', // partial overdue
           'Anita Rao', // partial
           'Ramesh Kumar', // pending
         ]);
-        expect(home.rows.map((r) => r.status), [
+        expect(rows.map((r) => r.status), [
           MonthStatus.overdue,
           MonthStatus.partialOverdue,
           MonthStatus.partial,
@@ -125,8 +151,8 @@ void main() {
       'old dues: Farida owes 5000 for September, Manjunath cleared August',
       () async {
         await seedMockup();
-        final home = ok(await watchHome().first);
-        final dues = {for (final r in home.rows) r.name: r.oldDues};
+        final rows = await uncategorizedRows();
+        final dues = {for (final r in rows) r.name: r.oldDues};
 
         expect(dues['Farida Begum'], 5000);
         expect(dues['Manjunath S'], 0);
@@ -149,8 +175,8 @@ void main() {
       await seedTenant(h, id: 'b', name: 'bala', start: '2026-10', rent: 1000);
       await seedTenant(h, id: 'a', name: 'Arun', start: '2026-10', rent: 1000);
 
-      final home = ok(await watchHome().first);
-      expect(home.rows.map((r) => r.name), ['Arun', 'bala']);
+      final rows = await uncategorizedRows();
+      expect(rows.map((r) => r.name), ['Arun', 'bala']);
     });
 
     test('re-emits after a payment', () async {
@@ -171,8 +197,9 @@ void main() {
       ok(await h.tenants.deleteTenant('farida', '2026-10'));
 
       final home = ok(await watchHome().first);
-      expect(home.rows.map((r) => r.name), isNot(contains('Farida Begum')));
-      expect(home.rows, hasLength(3));
+      final rows = await uncategorizedRows();
+      expect(rows.map((r) => r.name), isNot(contains('Farida Begum')));
+      expect(rows, hasLength(3));
       expect(home.toReceive, 15500); // Farida's 9000 is gone from the total
     });
 
@@ -182,13 +209,13 @@ void main() {
         await seedTenant(h, id: 't', start: '2026-10', rent: 5000, dueDay: 20);
         await payTo(h, 't', '2026-10', 1000, '2026-10-05');
         expect(
-          ok(await watchHome().first).rows.single.status,
+          (await uncategorizedRows()).single.status,
           MonthStatus.partial,
         );
 
         h.clock.setToday('2026-10-21');
         expect(
-          ok(await watchHome().first).rows.single.status,
+          (await uncategorizedRows()).single.status,
           MonthStatus.partialOverdue,
         );
       },
@@ -201,14 +228,232 @@ void main() {
         h.clock.setToday('2026-11-02'); // November's record is not created yet
 
         final home = ok(await watchHome().first);
-        expect(home.rows.single.status, MonthStatus.pending);
+        final row = (await uncategorizedRows()).single;
+        expect(row.status, MonthStatus.pending);
         expect(home.toReceive, 0);
         // September and October are both unpaid and now in the past.
-        expect(home.rows.single.oldDues, 10000);
+        expect(row.oldDues, 10000);
       },
     );
   });
 
+
+  group('WatchHomeUsecase groups', () {
+    /// The mockup tenants, with Farida and Ramesh moved into "Block A".
+    Future<void> seedBlockA() async {
+      await seedMockup();
+      await seedGroup(h, id: 'a', name: 'Block A');
+      ok(await h.tenants.setTenantGroup('farida', 'a'));
+      ok(await h.tenants.setTenantGroup('ramesh', 'a'));
+    }
+
+    test('Uncategorized is hidden while empty; other groups are listed', () async {
+      await seedGroup(h, id: 'a', name: 'Block A');
+
+      final home = ok(await watchHome().first);
+      expect(home.groups.map((g) => g.name), ['Block A']);
+      expect(home.groups.single.tenantCount, 0);
+      expect(home.groups.single.worstStatus, isNull);
+    });
+
+    test('Uncategorized is listed once it has a tenant', () async {
+      await seedTenant(h, id: 't', start: '2026-10', rent: 1000);
+
+      final home = ok(await watchHome().first);
+      expect(home.groups.single.groupUuid, uncategorizedGroupUuid);
+      expect(home.groups.single.isUncategorized, isTrue);
+      expect(home.groups.single.tenantCount, 1);
+    });
+
+    test('a card rolls up the tenants of its group', () async {
+      await seedBlockA();
+
+      final home = ok(await watchHome().first);
+      final blockA = home.groups.firstWhere((g) => g.groupUuid == 'a');
+      expect(blockA.tenantCount, 2);
+      expect(blockA.worstStatus, MonthStatus.overdue); // Farida
+      expect(blockA.worstHasOldDues, isTrue);
+      expect(blockA.oldDues, 5000); // Farida's September
+      expect(blockA.toReceive, 17000); // 9000 + 8000
+
+      final other = home.groups.firstWhere((g) => g.isUncategorized);
+      expect(other.tenantCount, 2); // Manjunath, Anita
+      expect(other.worstStatus, MonthStatus.partialOverdue); // Manjunath
+      expect(other.oldDues, 0);
+      expect(other.toReceive, 7500); // 3500 + 4000
+    });
+
+    test('the totals on top still cover every tenant', () async {
+      await seedBlockA();
+
+      final home = ok(await watchHome().first);
+      expect(home.received, 5000);
+      expect(home.toReceive, 24500);
+    });
+
+    test(
+      'most urgent group first, empty groups last, ties by name ignoring case',
+      () async {
+        await seedBlockA();
+        await seedGroup(h, id: 'z', name: 'zeta');
+        await seedGroup(h, id: 'e', name: 'Alpha');
+
+        final home = ok(await watchHome().first);
+        expect(home.groups.map((g) => g.name), [
+          'Block A', // overdue, with old dues
+          'Uncategorized', // partial overdue
+          'Alpha', // empty
+          'zeta', // empty
+        ]);
+      },
+    );
+
+    test('a deleted group leaves Home', () async {
+      await seedGroup(h, id: 'a', name: 'Block A');
+      ok(await h.groups.deleteGroup('a', '2026-10'));
+
+      expect(ok(await watchHome().first).groups, isEmpty);
+    });
+
+    test('re-emits when a tenant is moved to another group', () async {
+      await seedGroup(h, id: 'a', name: 'Block A');
+      await seedTenant(h, id: 't', start: '2026-10', rent: 1000);
+      final seen = <List<String>>[];
+      final sub = watchHome().listen(
+        (r) => seen.add([
+          for (final g in ok(r).groups) '${g.name}:${g.tenantCount}',
+        ]),
+      );
+      await pumpEventQueue();
+
+      ok(await h.tenants.setTenantGroup('t', 'a'));
+      await pumpEventQueue();
+
+      // The group with a tenant comes first; the empty one is last.
+      expect(seen.first, ['Uncategorized:1', 'Block A:0']);
+      expect(seen.last, ['Block A:1']);
+      await sub.cancel();
+    });
+  });
+
+  group('WatchGroupUsecase', () {
+    test('shows only the tenants of that group, most urgent first', () async {
+      await seedMockup();
+      await seedGroup(h, id: 'a', name: 'Block A');
+      ok(await h.tenants.setTenantGroup('farida', 'a'));
+      ok(await h.tenants.setTenantGroup('ramesh', 'a'));
+
+      final blockA = ok(await watchGroup('a').first);
+      expect(blockA.name, 'Block A');
+      expect(blockA.isUncategorized, isFalse);
+      expect(blockA.currentMonth, '2026-10');
+      expect(blockA.rows.map((r) => r.name), ['Farida Begum', 'Ramesh Kumar']);
+      expect(blockA.received, 0);
+      expect(blockA.toReceive, 17000);
+
+      final other = ok(await watchGroup(uncategorizedGroupUuid).first);
+      expect(other.isUncategorized, isTrue);
+      expect(other.rows.map((r) => r.name), ['Manjunath S', 'Anita Rao']);
+      expect(other.received, 5000);
+      expect(other.toReceive, 7500);
+    });
+
+    test('an empty group has no rows and zero totals', () async {
+      await seedGroup(h, id: 'a', name: 'Block A');
+
+      final group = ok(await watchGroup('a').first);
+      expect(group.rows, isEmpty);
+      expect(group.received, 0);
+      expect(group.toReceive, 0);
+    });
+
+    test('an unknown group is an error', () async {
+      expect(errorOf(await watchGroup('nope').first), 'group_not_found');
+    });
+
+    test('a deleted group is an error', () async {
+      await seedGroup(h, id: 'a', name: 'Block A');
+      ok(await h.groups.deleteGroup('a', '2026-10'));
+
+      expect(errorOf(await watchGroup('a').first), 'group_not_found');
+    });
+
+    test('re-emits with the new name after a rename', () async {
+      await seedGroup(h, id: 'a', name: 'Block A');
+      final names = <String>[];
+      final sub = watchGroup('a').listen((r) => names.add(ok(r).name));
+      await pumpEventQueue();
+
+      ok(await h.groups.renameGroup('a', 'Block Z'));
+      await pumpEventQueue();
+
+      expect(names, ['Block A', 'Block Z']);
+      await sub.cancel();
+    });
+
+    test('an archived tenant is not listed', () async {
+      await seedTenant(h, id: 't', start: '2026-10', rent: 1000);
+      ok(await h.tenants.deleteTenant('t', '2026-10'));
+
+      expect(
+        ok(await watchGroup(uncategorizedGroupUuid).first).rows,
+        isEmpty,
+      );
+    });
+  });
+
+  group('WatchGroupsUsecase', () {
+    test('lists Uncategorized and new groups, oldest first', () async {
+      await seedGroup(h, id: 'a', name: 'Block A');
+
+      final options = ok(await watchGroups().first);
+      expect(options.map((g) => g.groupUuid), [uncategorizedGroupUuid, 'a']);
+      expect(options.first.isUncategorized, isTrue);
+      expect(options.last.name, 'Block A');
+    });
+
+    test('a deleted group is not offered', () async {
+      await seedGroup(h, id: 'a', name: 'Block A');
+      ok(await h.groups.deleteGroup('a', '2026-10'));
+
+      final options = ok(await watchGroups().first);
+      expect(options.map((g) => g.groupUuid), [uncategorizedGroupUuid]);
+    });
+  });
+
+  group('WatchTenantDetailUsecase group', () {
+    test('shows the tenant group and follows a move and a rename', () async {
+      await seedTenant(h, id: 't', start: '2026-10', rent: 1000);
+      await seedGroup(h, id: 'a', name: 'Block A');
+      final seen = <String>[];
+      final sub = watchDetail(
+        't',
+      ).listen((r) => seen.add('${ok(r).groupUuid}:${ok(r).groupName}'));
+      await pumpEventQueue();
+
+      ok(await h.tenants.setTenantGroup('t', 'a'));
+      await pumpEventQueue();
+      ok(await h.groups.renameGroup('a', 'Block Z'));
+      await pumpEventQueue();
+
+      expect(seen.first, '$uncategorizedGroupUuid:Uncategorized');
+      expect(seen, contains('a:Block A'));
+      expect(seen.last, 'a:Block Z');
+      await sub.cancel();
+    });
+
+    test('an archived tenant still shows its deleted group', () async {
+      await seedGroup(h, id: 'a', name: 'Block A');
+      await seedTenant(h, id: 't', start: '2026-10', rent: 1000, group: 'a');
+      ok(await h.tenants.deleteTenant('t', '2026-10'));
+      ok(await h.groups.deleteGroup('a', '2026-10'));
+
+      final d = ok(await watchDetail('t').first);
+      expect(d.readOnly, isTrue);
+      expect(d.groupUuid, 'a');
+      expect(d.groupName, 'Block A');
+    });
+  });
   group('WatchTenantDetailUsecase', () {
     setUp(() => seedMockup());
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:tenant_tracker/core/constants.dart';
 import 'package:tenant_tracker/core/di/app_dependencies.dart';
 import 'package:tenant_tracker/core/utils/display_format.dart';
 import 'package:tenant_tracker/core/utils/view_state.dart';
@@ -14,12 +15,17 @@ import 'package:tenant_tracker/features/tenant_detail/tenant_detail_view_model.d
 import 'package:tenant_tracker/l10n/app_localizations.dart';
 
 class AddTenantView extends StatefulWidget {
-  const AddTenantView({super.key});
+  /// The group to preselect (the group the user came from); Uncategorized
+  /// when null.
+  final String? groupUuid;
 
-  static Future<void> open(BuildContext context) => Navigator.push(
-    context,
-    MaterialPageRoute(builder: (_) => const AddTenantView()),
-  );
+  const AddTenantView({super.key, this.groupUuid});
+
+  static Future<void> open(BuildContext context, {String? groupUuid}) =>
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => AddTenantView(groupUuid: groupUuid)),
+      );
 
   @override
   State<AddTenantView> createState() => _AddTenantViewState();
@@ -37,6 +43,8 @@ class _AddTenantViewState extends State<AddTenantView> {
     ctrl = AddTenantViewModel(
       loadForm: deps.loadAddTenantForm,
       addTenant: deps.addTenant,
+      watchGroups: deps.watchGroups,
+      initialGroupUuid: widget.groupUuid ?? uncategorizedGroupUuid,
     );
     ctrl.saveState.addListener(_onSaveStateChanged);
   }
@@ -92,6 +100,30 @@ class _AddTenantViewState extends State<AddTenantView> {
                   textCapitalization: TextCapitalization.words,
                 ),
                 ErrorLine(state: state, codes: const {'name_required'}),
+                FormLabel(label: l.fGroup, hint: l.fGroupHint),
+                ObxMulti(
+                  listenables: [ctrl.groups, ctrl.groupUuid],
+                  builder: () => DropdownButtonFormField<String>(
+                    key: ValueKey('groupField-${ctrl.groupUuid.value}'),
+                    initialValue: ctrl.groupUuid.value,
+                    items: [
+                      for (final g in ctrl.groups.value)
+                        DropdownMenuItem(
+                          value: g.groupUuid,
+                          child: Text(
+                            groupDisplayName(l, g.groupUuid, g.name),
+                          ),
+                        ),
+                    ],
+                    onChanged: busy
+                        ? null
+                        : (v) => ctrl.groupUuid.value = v ?? ctrl.groupUuid.value,
+                  ),
+                ),
+                ErrorLine(
+                  state: state,
+                  codes: const {'group_not_found', 'group_deleted'},
+                ),
                 FormLabel(label: l.fRent, hint: l.fRentHint),
                 TextField(
                   key: const Key('rentField'),
@@ -168,5 +200,7 @@ class _AddTenantViewState extends State<AddTenantView> {
     'due_day_invalid',
     'start_month_invalid',
     'start_month_in_future',
+    'group_not_found',
+    'group_deleted',
   };
 }

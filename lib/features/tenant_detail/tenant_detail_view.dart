@@ -11,6 +11,7 @@ import 'package:tenant_tracker/core/widgets/form_parts.dart';
 import 'package:tenant_tracker/core/widgets/obx_value.dart';
 import 'package:tenant_tracker/core/widgets/status_chip.dart';
 import 'package:tenant_tracker/core/widgets/tip_banner.dart';
+import 'package:tenant_tracker/domain/use_cases/ui/watch_groups/watch_groups_return_model.dart';
 import 'package:tenant_tracker/domain/use_cases/ui/watch_tenant_detail/watch_tenant_detail_return_model.dart';
 import 'package:tenant_tracker/features/change_rent/change_rent_view.dart';
 import 'package:tenant_tracker/features/change_rent/change_rent_view_model.dart';
@@ -48,6 +49,8 @@ class _TenantDetailViewState extends State<TenantDetailView>
       watchTenantDetail: deps.watchTenantDetail,
       deleteTenant: deps.deleteTenant,
       renameTenant: deps.renameTenant,
+      moveTenantToGroup: deps.moveTenantToGroup,
+      watchGroups: deps.watchGroups,
       undoPayment: deps.undoPayment,
     );
     ctrl.deleteState.addListener(_onDeleteStateChanged);
@@ -135,6 +138,32 @@ class _TenantDetailViewState extends State<TenantDetailView>
       );
   }
 
+  Future<void> _openMove(WatchTenantDetailReturnModel data) async {
+    final moved = await showDialog<GroupOption>(
+      context: context,
+      builder: (_) => _MoveGroupDialog(
+        tenantName: data.name,
+        currentGroupUuid: data.groupUuid,
+        loadGroups: ctrl.loadGroups,
+        onMove: ctrl.moveToGroup,
+      ),
+    );
+    if (moved == null || !mounted) return;
+    final l = AppLocalizations.of(context);
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            l.movedTo(
+              data.name,
+              groupDisplayName(l, moved.groupUuid, moved.name),
+            ),
+          ),
+        ),
+      );
+  }
+
   Future<void> _openEditName(String currentName) async {
     final newName = await showDialog<String>(
       context: context,
@@ -212,6 +241,7 @@ class _TenantDetailViewState extends State<TenantDetailView>
                 onPay: _openPay,
                 onRent: _openRent,
                 onEditName: () => _openEditName(data.name),
+                onMove: () => _openMove(data),
                 onDelete: () => _askDelete(data),
               ),
             ),
@@ -229,6 +259,7 @@ class _DetailBody extends StatelessWidget {
   final Future<void> Function(String? rentRecordUuid) onPay;
   final VoidCallback onRent;
   final VoidCallback onEditName;
+  final VoidCallback onMove;
   final VoidCallback onDelete;
 
   const _DetailBody({
@@ -238,6 +269,7 @@ class _DetailBody extends StatelessWidget {
     required this.onPay,
     required this.onRent,
     required this.onEditName,
+    required this.onMove,
     required this.onDelete,
   });
 
@@ -292,6 +324,11 @@ class _DetailBody extends StatelessWidget {
           l.rentPerMonth(formatMoney(data.currentRent)),
           style: const TextStyle(fontSize: 16, color: Color(0xFF5B6675)),
         ),
+        Text(
+          l.inGroup(groupDisplayName(l, data.groupUuid, data.groupName)),
+          key: const Key('tenantGroupLine'),
+          style: const TextStyle(fontSize: 16, color: Color(0xFF5B6675)),
+        ),
         if (top != null) _TopMonthCard(month: top),
         if (noPendingDue)
           SectionCard(
@@ -337,6 +374,12 @@ class _DetailBody extends StatelessWidget {
             kind: BigButtonKind.secondary,
             onPressed: onRent,
           ),
+          BigButton(
+            key: const Key('moveGroupButton'),
+            label: l.btnMoveGroup,
+            kind: BigButtonKind.secondary,
+            onPressed: busy ? null : onMove,
+          ),
         ],
         const SizedBox(height: 22),
         Text(
@@ -378,6 +421,126 @@ class _DetailBody extends StatelessWidget {
           ),
           ErrorLine(state: deleteState),
         ],
+      ],
+    );
+  }
+}
+
+/// Lists the groups; tapping one moves the tenant there. Pops with the chosen
+/// group, or null when cancelled. A failed move is shown inside the dialog.
+class _MoveGroupDialog extends StatefulWidget {
+  final String tenantName;
+  final String currentGroupUuid;
+  final Future<List<GroupOption>?> Function() loadGroups;
+  final Future<Failure?> Function(String groupUuid) onMove;
+
+  const _MoveGroupDialog({
+    required this.tenantName,
+    required this.currentGroupUuid,
+    required this.loadGroups,
+    required this.onMove,
+  });
+
+  @override
+  State<_MoveGroupDialog> createState() => _MoveGroupDialogState();
+}
+
+class _MoveGroupDialogState extends State<_MoveGroupDialog> {
+  List<GroupOption>? _groups;
+  bool _loaded = false;
+  Failure? _failure;
+  bool _moving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.loadGroups().then((groups) {
+      if (!mounted) return;
+      setState(() {
+        _groups = groups;
+        _loaded = true;
+      });
+    });
+  }
+
+  Future<void> _move(GroupOption group) async {
+    if (_moving) return; // blocking rule: ignore re-entry
+    if (group.groupUuid == widget.currentGroupUuid) {
+      Navigator.pop(context);
+      return;
+    }
+    setState(() => _moving = true);
+    final failure = await widget.onMove(group.groupUuid);
+    if (!mounted) return;
+    if (failure == null) {
+      Navigator.pop(context, group);
+    } else {
+      setState(() {
+        _moving = false;
+        _failure = failure;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final groups = _groups;
+    return AlertDialog(
+      title: Text(l.moveTitle(widget.tenantName)),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l.moveBody, style: const TextStyle(fontSize: 18)),
+            const SizedBox(height: 8),
+            if (!_loaded)
+              const Center(child: CircularProgressIndicator())
+            else if (groups == null)
+              Text(l.errGeneric)
+            else
+              RadioGroup<String>(
+                groupValue: widget.currentGroupUuid,
+                onChanged: (uuid) {
+                  if (_moving || uuid == null) return;
+                  _move(groups.firstWhere((g) => g.groupUuid == uuid));
+                },
+                child: Column(
+                  children: [
+                    for (final g in groups)
+                      RadioListTile<String>(
+                        key: Key('moveGroup-${g.groupUuid}'),
+                        value: g.groupUuid,
+                        enabled: !_moving,
+                        title: Text(
+                          groupDisplayName(l, g.groupUuid, g.name),
+                          style: const TextStyle(
+                            fontSize: 19,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            if (_failure != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  failureMessage(l, _failure!),
+                  style: const TextStyle(color: Color(0xFFB3261E)),
+                ),
+              ),
+          ],
+        ),
+      ),
+      actions: [
+        BigButton(
+          label: l.cancel,
+          kind: BigButtonKind.secondary,
+          onPressed: _moving ? null : () => Navigator.pop(context),
+        ),
       ],
     );
   }

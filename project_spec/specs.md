@@ -50,6 +50,20 @@ If paid > required, the month shows **Completed** (or Late Completed / Backlog C
 5. If several changes are made in the same month, the last one wins.
 6. If next month's record already exists, it is updated to the new rent.
 
+## Groups
+
+Tenants are organised into **Groups** so a long list stays easy to scan.
+
+1. Every tenant is in exactly one group. The Add Tenant form has a Group field, preselected to the group the user came from (otherwise Uncategorized).
+2. **Home shows groups, not tenants.** A group card shows its name, number of tenants, the most urgent status among its tenants, and the money still to receive this month. Groups are sorted by urgency, empty groups last. The "This month" totals at the top still cover every tenant.
+3. Tapping a group opens its tenant list (sorted by urgency, as Home was before groups). Tapping a tenant opens Tenant Detail as before.
+4. **Uncategorized** is built in. Tenants that existed before groups were introduced are placed there automatically when the app is updated. It cannot be renamed or deleted, and Home lists it only while it has tenants.
+5. A user can add a group, rename a group, move a tenant to another group (from Tenant Detail), and delete a group.
+6. A group can be deleted only when it has no active tenants. Deleting keeps the record (like deleting a tenant).
+7. Group names must not be empty and must be unique (ignoring case) among active groups.
+8. Moving a tenant changes only its group. Rent, months and payments are not affected.
+9. An archived tenant keeps its group. The Archived list in Settings is not grouped.
+
 ## Open Questions
 
 - Is the first month prorated when a tenant joins mid-month?

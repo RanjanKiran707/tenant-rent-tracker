@@ -25,6 +25,9 @@ abstract interface class TenantRepositoryInterface {
   /// Changes only the tenant's name. Nothing else about the tenant changes.
   Future<Result<void>> renameTenant(String uuid, String name);
 
+  /// Moves the tenant to another group. Changes only `groupUuid`.
+  Future<Result<void>> setTenantGroup(String uuid, String groupUuid);
+
   /// Soft delete: sets `deletedMonth` (`YYYY-MM`). All rows are kept.
   Future<Result<void>> deleteTenant(String uuid, String deletedMonth);
 }

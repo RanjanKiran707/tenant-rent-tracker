@@ -1,6 +1,7 @@
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tenant_tracker/core/constants.dart';
 import 'package:tenant_tracker/core/errors/failure.dart';
 import 'package:tenant_tracker/core/errors/result.dart';
 import 'package:tenant_tracker/data/database/app_database.dart';
@@ -12,6 +13,8 @@ import 'package:tenant_tracker/data/rent_record/rent_record_repository.dart';
 import 'package:tenant_tracker/data/settings/settings_repository.dart';
 import 'package:tenant_tracker/data/tenant/tenant_model.dart';
 import 'package:tenant_tracker/data/tenant/tenant_repository.dart';
+import 'package:tenant_tracker/data/tenant_group/tenant_group_model.dart';
+import 'package:tenant_tracker/data/tenant_group/tenant_group_repository.dart';
 
 T ok<T>(Result<T> r) => switch (r) {
   Ok(:final value) => value,
@@ -29,6 +32,7 @@ TenantModel tenant(String uuid, {String start = '2026-01', DateTime? at}) =>
 
 void main() {
   late AppDatabase db;
+  late TenantGroupRepository groups;
   late TenantRepository tenants;
   late RentHistoryRepository history;
   late RentRecordRepository records;
@@ -36,6 +40,7 @@ void main() {
 
   setUp(() {
     db = AppDatabase.forTesting(NativeDatabase.memory());
+    groups = TenantGroupRepository(db);
     tenants = TenantRepository(db);
     history = RentHistoryRepository(db);
     records = RentRecordRepository(db);
@@ -397,6 +402,220 @@ void main() {
         await payments.addPayment(pay('p2', 'nope', 100, '2026-01-05')),
         isA<Err<void>>(),
       );
+    });
+  });
+
+  group('TenantGroupRepository', () {
+    TenantGroupModel group(String uuid, {String? name, DateTime? at}) =>
+        TenantGroupModel(
+          uuid: uuid,
+          name: name ?? 'Group $uuid',
+          createdOn: at ?? DateTime.utc(2026, 1, 2),
+        );
+
+    test('a new database already has the Uncategorized group', () async {
+      final saved = ok(await groups.getGroup(uncategorizedGroupUuid))!;
+
+      expect(saved.name, 'Uncategorized');
+      expect(saved.isUncategorized, isTrue);
+      expect(saved.isDeleted, isFalse);
+    });
+
+    test('addGroup saves it and getGroup reads it back', () async {
+      ok(await groups.addGroup(group('g1', name: 'Block A')));
+
+      final saved = ok(await groups.getGroup('g1'))!;
+      expect(saved.name, 'Block A');
+      expect(saved.deletedMonth, isNull);
+      expect(saved.isUncategorized, isFalse);
+    });
+
+    test('getGroup returns null for an unknown uuid', () async {
+      expect(ok(await groups.getGroup('nope')), isNull);
+    });
+
+    test('active groups are oldest first, deleted ones are left out', () async {
+      ok(await groups.addGroup(group('g2', at: DateTime.utc(2026, 3, 1))));
+      ok(await groups.addGroup(group('g1', at: DateTime.utc(2026, 2, 1))));
+      ok(await groups.addGroup(group('g3', at: DateTime.utc(2026, 4, 1))));
+      ok(await groups.deleteGroup('g3', '2026-05'));
+
+      expect(ok(await groups.getActiveGroups()).map((g) => g.uuid), [
+        uncategorizedGroupUuid,
+        'g1',
+        'g2',
+      ]);
+      expect(ok(await groups.watchActiveGroups().first).map((g) => g.uuid), [
+        uncategorizedGroupUuid,
+        'g1',
+        'g2',
+      ]);
+    });
+
+    test('watchAllGroups includes deleted groups', () async {
+      ok(await groups.addGroup(group('g1')));
+      ok(await groups.deleteGroup('g1', '2026-05'));
+
+      final all = ok(await groups.watchAllGroups().first);
+      expect(all.map((g) => g.uuid), [uncategorizedGroupUuid, 'g1']);
+      expect(all.last.isDeleted, isTrue);
+    });
+
+    test('renameGroup changes only the name', () async {
+      ok(await groups.addGroup(group('g1', name: 'Block A')));
+
+      ok(await groups.renameGroup('g1', 'Block B'));
+
+      final saved = ok(await groups.getGroup('g1'))!;
+      expect(saved.name, 'Block B');
+      expect(saved.deletedMonth, isNull);
+    });
+
+    test('deleteGroup keeps the row and sets the month', () async {
+      ok(await groups.addGroup(group('g1')));
+
+      ok(await groups.deleteGroup('g1', '2026-05'));
+
+      final saved = ok(await groups.getGroup('g1'))!;
+      expect(saved.deletedMonth, '2026-05');
+      expect(saved.isDeleted, isTrue);
+    });
+
+    test('the group list follows changes', () async {
+      final seen = <int>[];
+      final sub = groups.watchActiveGroups().listen(
+        (r) => seen.add(ok(r).length),
+      );
+      await pumpEventQueue();
+
+      ok(await groups.addGroup(group('g1')));
+      await pumpEventQueue();
+
+      expect(seen, [1, 2]);
+      await sub.cancel();
+    });
+  });
+
+  group('Tenant groups on the tenant', () {
+    test('a tenant is in Uncategorized unless saved with a group', () async {
+      ok(await tenants.addTenant(tenant('t1'), 5000));
+
+      expect(
+        ok(await tenants.getTenant('t1'))!.groupUuid,
+        uncategorizedGroupUuid,
+      );
+    });
+
+    test('a tenant is saved with its group', () async {
+      ok(
+        await groups.addGroup(
+          TenantGroupModel(
+            uuid: 'g1',
+            name: 'Block A',
+            createdOn: DateTime.utc(2026, 1, 2),
+          ),
+        ),
+      );
+
+      ok(
+        await tenants.addTenant(
+          TenantModel(
+            uuid: 't1',
+            groupUuid: 'g1',
+            name: 'Ravi',
+            createdOn: DateTime.utc(2026, 1, 1),
+            dueDay: 10,
+            startMonth: '2026-01',
+          ),
+          5000,
+        ),
+      );
+
+      expect(ok(await tenants.getTenant('t1'))!.groupUuid, 'g1');
+    });
+
+    test('a tenant in a group that does not exist is rejected', () async {
+      final result = await tenants.addTenant(
+        TenantModel(
+          uuid: 't1',
+          groupUuid: 'nope',
+          name: 'Ravi',
+          createdOn: DateTime.utc(2026, 1, 1),
+          dueDay: 10,
+          startMonth: '2026-01',
+        ),
+        5000,
+      );
+
+      expect(result, isA<Err<void>>()); // foreign key
+      expect(ok(await tenants.getTenant('t1')), isNull);
+    });
+
+    test('setTenantGroup moves the tenant and nothing else', () async {
+      ok(
+        await groups.addGroup(
+          TenantGroupModel(
+            uuid: 'g1',
+            name: 'Block A',
+            createdOn: DateTime.utc(2026, 1, 2),
+          ),
+        ),
+      );
+      ok(await tenants.addTenant(tenant('t1', start: '2026-03'), 5000));
+      final before = ok(await tenants.getTenant('t1'))!;
+
+      ok(await tenants.setTenantGroup('t1', 'g1'));
+
+      final after = ok(await tenants.getTenant('t1'))!;
+      expect(after.groupUuid, 'g1');
+      expect(after.name, before.name);
+      expect(after.dueDay, before.dueDay);
+      expect(after.startMonth, before.startMonth);
+      expect(after.deletedMonth, before.deletedMonth);
+      expect(ok(await history.getHistory('t1')), hasLength(1));
+    });
+
+    test('setTenantGroup to a group that does not exist is rejected', () async {
+      ok(await tenants.addTenant(tenant('t1'), 5000));
+
+      final result = await tenants.setTenantGroup('t1', 'nope');
+
+      expect(result, isA<Err<void>>());
+      expect(
+        ok(await tenants.getTenant('t1'))!.groupUuid,
+        uncategorizedGroupUuid,
+      );
+    });
+
+    test('watchTenant emits again after a move and a delete', () async {
+      ok(
+        await groups.addGroup(
+          TenantGroupModel(
+            uuid: 'g1',
+            name: 'Block A',
+            createdOn: DateTime.utc(2026, 1, 2),
+          ),
+        ),
+      );
+      ok(await tenants.addTenant(tenant('t1'), 5000));
+      final seen = <String>[];
+      final sub = tenants.watchTenant('t1').listen((r) {
+        final t = ok(r)!;
+        seen.add('${t.groupUuid}:${t.deletedMonth}');
+      });
+      await pumpEventQueue();
+
+      ok(await tenants.setTenantGroup('t1', 'g1'));
+      await pumpEventQueue();
+      ok(await tenants.deleteTenant('t1', '2026-05'));
+      await pumpEventQueue();
+
+      expect(seen, [
+        '$uncategorizedGroupUuid:null',
+        'g1:null',
+        'g1:2026-05',
+      ]);
+      await sub.cancel();
     });
   });
 

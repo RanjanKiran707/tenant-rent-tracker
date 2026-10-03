@@ -3,6 +3,326 @@
 part of 'app_database.dart';
 
 // ignore_for_file: type=lint
+class $TenantGroupsTable extends TenantGroups
+    with TableInfo<$TenantGroupsTable, TenantGroupRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $TenantGroupsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _uuidMeta = const VerificationMeta('uuid');
+  @override
+  late final GeneratedColumn<String> uuid = GeneratedColumn<String>(
+    'uuid',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdOnMeta = const VerificationMeta(
+    'createdOn',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdOn = GeneratedColumn<DateTime>(
+    'created_on',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedMonthMeta = const VerificationMeta(
+    'deletedMonth',
+  );
+  @override
+  late final GeneratedColumn<String> deletedMonth = GeneratedColumn<String>(
+    'deleted_month',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [uuid, name, createdOn, deletedMonth];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'tenant_groups';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<TenantGroupRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('uuid')) {
+      context.handle(
+        _uuidMeta,
+        uuid.isAcceptableOrUnknown(data['uuid']!, _uuidMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_uuidMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('created_on')) {
+      context.handle(
+        _createdOnMeta,
+        createdOn.isAcceptableOrUnknown(data['created_on']!, _createdOnMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdOnMeta);
+    }
+    if (data.containsKey('deleted_month')) {
+      context.handle(
+        _deletedMonthMeta,
+        deletedMonth.isAcceptableOrUnknown(
+          data['deleted_month']!,
+          _deletedMonthMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {uuid};
+  @override
+  TenantGroupRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return TenantGroupRow(
+      uuid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uuid'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      createdOn: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_on'],
+      )!,
+      deletedMonth: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}deleted_month'],
+      ),
+    );
+  }
+
+  @override
+  $TenantGroupsTable createAlias(String alias) {
+    return $TenantGroupsTable(attachedDatabase, alias);
+  }
+}
+
+class TenantGroupRow extends DataClass implements Insertable<TenantGroupRow> {
+  final String uuid;
+  final String name;
+  final DateTime createdOn;
+
+  /// null = active, set = deleted (`YYYY-MM`). Archived tenants may still
+  /// point at a deleted group, so rows are never erased.
+  final String? deletedMonth;
+  const TenantGroupRow({
+    required this.uuid,
+    required this.name,
+    required this.createdOn,
+    this.deletedMonth,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['uuid'] = Variable<String>(uuid);
+    map['name'] = Variable<String>(name);
+    map['created_on'] = Variable<DateTime>(createdOn);
+    if (!nullToAbsent || deletedMonth != null) {
+      map['deleted_month'] = Variable<String>(deletedMonth);
+    }
+    return map;
+  }
+
+  TenantGroupsCompanion toCompanion(bool nullToAbsent) {
+    return TenantGroupsCompanion(
+      uuid: Value(uuid),
+      name: Value(name),
+      createdOn: Value(createdOn),
+      deletedMonth: deletedMonth == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedMonth),
+    );
+  }
+
+  factory TenantGroupRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return TenantGroupRow(
+      uuid: serializer.fromJson<String>(json['uuid']),
+      name: serializer.fromJson<String>(json['name']),
+      createdOn: serializer.fromJson<DateTime>(json['createdOn']),
+      deletedMonth: serializer.fromJson<String?>(json['deletedMonth']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'uuid': serializer.toJson<String>(uuid),
+      'name': serializer.toJson<String>(name),
+      'createdOn': serializer.toJson<DateTime>(createdOn),
+      'deletedMonth': serializer.toJson<String?>(deletedMonth),
+    };
+  }
+
+  TenantGroupRow copyWith({
+    String? uuid,
+    String? name,
+    DateTime? createdOn,
+    Value<String?> deletedMonth = const Value.absent(),
+  }) => TenantGroupRow(
+    uuid: uuid ?? this.uuid,
+    name: name ?? this.name,
+    createdOn: createdOn ?? this.createdOn,
+    deletedMonth: deletedMonth.present ? deletedMonth.value : this.deletedMonth,
+  );
+  TenantGroupRow copyWithCompanion(TenantGroupsCompanion data) {
+    return TenantGroupRow(
+      uuid: data.uuid.present ? data.uuid.value : this.uuid,
+      name: data.name.present ? data.name.value : this.name,
+      createdOn: data.createdOn.present ? data.createdOn.value : this.createdOn,
+      deletedMonth: data.deletedMonth.present
+          ? data.deletedMonth.value
+          : this.deletedMonth,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TenantGroupRow(')
+          ..write('uuid: $uuid, ')
+          ..write('name: $name, ')
+          ..write('createdOn: $createdOn, ')
+          ..write('deletedMonth: $deletedMonth')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(uuid, name, createdOn, deletedMonth);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is TenantGroupRow &&
+          other.uuid == this.uuid &&
+          other.name == this.name &&
+          other.createdOn == this.createdOn &&
+          other.deletedMonth == this.deletedMonth);
+}
+
+class TenantGroupsCompanion extends UpdateCompanion<TenantGroupRow> {
+  final Value<String> uuid;
+  final Value<String> name;
+  final Value<DateTime> createdOn;
+  final Value<String?> deletedMonth;
+  final Value<int> rowid;
+  const TenantGroupsCompanion({
+    this.uuid = const Value.absent(),
+    this.name = const Value.absent(),
+    this.createdOn = const Value.absent(),
+    this.deletedMonth = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  TenantGroupsCompanion.insert({
+    required String uuid,
+    required String name,
+    required DateTime createdOn,
+    this.deletedMonth = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : uuid = Value(uuid),
+       name = Value(name),
+       createdOn = Value(createdOn);
+  static Insertable<TenantGroupRow> custom({
+    Expression<String>? uuid,
+    Expression<String>? name,
+    Expression<DateTime>? createdOn,
+    Expression<String>? deletedMonth,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (uuid != null) 'uuid': uuid,
+      if (name != null) 'name': name,
+      if (createdOn != null) 'created_on': createdOn,
+      if (deletedMonth != null) 'deleted_month': deletedMonth,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  TenantGroupsCompanion copyWith({
+    Value<String>? uuid,
+    Value<String>? name,
+    Value<DateTime>? createdOn,
+    Value<String?>? deletedMonth,
+    Value<int>? rowid,
+  }) {
+    return TenantGroupsCompanion(
+      uuid: uuid ?? this.uuid,
+      name: name ?? this.name,
+      createdOn: createdOn ?? this.createdOn,
+      deletedMonth: deletedMonth ?? this.deletedMonth,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (uuid.present) {
+      map['uuid'] = Variable<String>(uuid.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (createdOn.present) {
+      map['created_on'] = Variable<DateTime>(createdOn.value);
+    }
+    if (deletedMonth.present) {
+      map['deleted_month'] = Variable<String>(deletedMonth.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TenantGroupsCompanion(')
+          ..write('uuid: $uuid, ')
+          ..write('name: $name, ')
+          ..write('createdOn: $createdOn, ')
+          ..write('deletedMonth: $deletedMonth, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $TenantsTable extends Tenants with TableInfo<$TenantsTable, TenantRow> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -16,6 +336,21 @@ class $TenantsTable extends Tenants with TableInfo<$TenantsTable, TenantRow> {
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
+  );
+  static const VerificationMeta _groupUuidMeta = const VerificationMeta(
+    'groupUuid',
+  );
+  @override
+  late final GeneratedColumn<String> groupUuid = GeneratedColumn<String>(
+    'group_uuid',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES tenant_groups (uuid)',
+    ),
+    defaultValue: const Constant(uncategorizedGroupUuid),
   );
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
@@ -73,6 +408,7 @@ class $TenantsTable extends Tenants with TableInfo<$TenantsTable, TenantRow> {
   @override
   List<GeneratedColumn> get $columns => [
     uuid,
+    groupUuid,
     name,
     createdOn,
     dueDay,
@@ -98,6 +434,12 @@ class $TenantsTable extends Tenants with TableInfo<$TenantsTable, TenantRow> {
       );
     } else if (isInserting) {
       context.missing(_uuidMeta);
+    }
+    if (data.containsKey('group_uuid')) {
+      context.handle(
+        _groupUuidMeta,
+        groupUuid.isAcceptableOrUnknown(data['group_uuid']!, _groupUuidMeta),
+      );
     }
     if (data.containsKey('name')) {
       context.handle(
@@ -151,6 +493,10 @@ class $TenantsTable extends Tenants with TableInfo<$TenantsTable, TenantRow> {
         DriftSqlType.string,
         data['${effectivePrefix}uuid'],
       )!,
+      groupUuid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}group_uuid'],
+      )!,
       name: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}name'],
@@ -182,6 +528,9 @@ class $TenantsTable extends Tenants with TableInfo<$TenantsTable, TenantRow> {
 
 class TenantRow extends DataClass implements Insertable<TenantRow> {
   final String uuid;
+
+  /// Every tenant is in exactly one group; Uncategorized by default.
+  final String groupUuid;
   final String name;
   final DateTime createdOn;
   final int dueDay;
@@ -191,6 +540,7 @@ class TenantRow extends DataClass implements Insertable<TenantRow> {
   final String? deletedMonth;
   const TenantRow({
     required this.uuid,
+    required this.groupUuid,
     required this.name,
     required this.createdOn,
     required this.dueDay,
@@ -201,6 +551,7 @@ class TenantRow extends DataClass implements Insertable<TenantRow> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['uuid'] = Variable<String>(uuid);
+    map['group_uuid'] = Variable<String>(groupUuid);
     map['name'] = Variable<String>(name);
     map['created_on'] = Variable<DateTime>(createdOn);
     map['due_day'] = Variable<int>(dueDay);
@@ -214,6 +565,7 @@ class TenantRow extends DataClass implements Insertable<TenantRow> {
   TenantsCompanion toCompanion(bool nullToAbsent) {
     return TenantsCompanion(
       uuid: Value(uuid),
+      groupUuid: Value(groupUuid),
       name: Value(name),
       createdOn: Value(createdOn),
       dueDay: Value(dueDay),
@@ -231,6 +583,7 @@ class TenantRow extends DataClass implements Insertable<TenantRow> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return TenantRow(
       uuid: serializer.fromJson<String>(json['uuid']),
+      groupUuid: serializer.fromJson<String>(json['groupUuid']),
       name: serializer.fromJson<String>(json['name']),
       createdOn: serializer.fromJson<DateTime>(json['createdOn']),
       dueDay: serializer.fromJson<int>(json['dueDay']),
@@ -243,6 +596,7 @@ class TenantRow extends DataClass implements Insertable<TenantRow> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'uuid': serializer.toJson<String>(uuid),
+      'groupUuid': serializer.toJson<String>(groupUuid),
       'name': serializer.toJson<String>(name),
       'createdOn': serializer.toJson<DateTime>(createdOn),
       'dueDay': serializer.toJson<int>(dueDay),
@@ -253,6 +607,7 @@ class TenantRow extends DataClass implements Insertable<TenantRow> {
 
   TenantRow copyWith({
     String? uuid,
+    String? groupUuid,
     String? name,
     DateTime? createdOn,
     int? dueDay,
@@ -260,6 +615,7 @@ class TenantRow extends DataClass implements Insertable<TenantRow> {
     Value<String?> deletedMonth = const Value.absent(),
   }) => TenantRow(
     uuid: uuid ?? this.uuid,
+    groupUuid: groupUuid ?? this.groupUuid,
     name: name ?? this.name,
     createdOn: createdOn ?? this.createdOn,
     dueDay: dueDay ?? this.dueDay,
@@ -269,6 +625,7 @@ class TenantRow extends DataClass implements Insertable<TenantRow> {
   TenantRow copyWithCompanion(TenantsCompanion data) {
     return TenantRow(
       uuid: data.uuid.present ? data.uuid.value : this.uuid,
+      groupUuid: data.groupUuid.present ? data.groupUuid.value : this.groupUuid,
       name: data.name.present ? data.name.value : this.name,
       createdOn: data.createdOn.present ? data.createdOn.value : this.createdOn,
       dueDay: data.dueDay.present ? data.dueDay.value : this.dueDay,
@@ -285,6 +642,7 @@ class TenantRow extends DataClass implements Insertable<TenantRow> {
   String toString() {
     return (StringBuffer('TenantRow(')
           ..write('uuid: $uuid, ')
+          ..write('groupUuid: $groupUuid, ')
           ..write('name: $name, ')
           ..write('createdOn: $createdOn, ')
           ..write('dueDay: $dueDay, ')
@@ -295,13 +653,21 @@ class TenantRow extends DataClass implements Insertable<TenantRow> {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(uuid, name, createdOn, dueDay, startMonth, deletedMonth);
+  int get hashCode => Object.hash(
+    uuid,
+    groupUuid,
+    name,
+    createdOn,
+    dueDay,
+    startMonth,
+    deletedMonth,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is TenantRow &&
           other.uuid == this.uuid &&
+          other.groupUuid == this.groupUuid &&
           other.name == this.name &&
           other.createdOn == this.createdOn &&
           other.dueDay == this.dueDay &&
@@ -311,6 +677,7 @@ class TenantRow extends DataClass implements Insertable<TenantRow> {
 
 class TenantsCompanion extends UpdateCompanion<TenantRow> {
   final Value<String> uuid;
+  final Value<String> groupUuid;
   final Value<String> name;
   final Value<DateTime> createdOn;
   final Value<int> dueDay;
@@ -319,6 +686,7 @@ class TenantsCompanion extends UpdateCompanion<TenantRow> {
   final Value<int> rowid;
   const TenantsCompanion({
     this.uuid = const Value.absent(),
+    this.groupUuid = const Value.absent(),
     this.name = const Value.absent(),
     this.createdOn = const Value.absent(),
     this.dueDay = const Value.absent(),
@@ -328,6 +696,7 @@ class TenantsCompanion extends UpdateCompanion<TenantRow> {
   });
   TenantsCompanion.insert({
     required String uuid,
+    this.groupUuid = const Value.absent(),
     required String name,
     required DateTime createdOn,
     this.dueDay = const Value.absent(),
@@ -340,6 +709,7 @@ class TenantsCompanion extends UpdateCompanion<TenantRow> {
        startMonth = Value(startMonth);
   static Insertable<TenantRow> custom({
     Expression<String>? uuid,
+    Expression<String>? groupUuid,
     Expression<String>? name,
     Expression<DateTime>? createdOn,
     Expression<int>? dueDay,
@@ -349,6 +719,7 @@ class TenantsCompanion extends UpdateCompanion<TenantRow> {
   }) {
     return RawValuesInsertable({
       if (uuid != null) 'uuid': uuid,
+      if (groupUuid != null) 'group_uuid': groupUuid,
       if (name != null) 'name': name,
       if (createdOn != null) 'created_on': createdOn,
       if (dueDay != null) 'due_day': dueDay,
@@ -360,6 +731,7 @@ class TenantsCompanion extends UpdateCompanion<TenantRow> {
 
   TenantsCompanion copyWith({
     Value<String>? uuid,
+    Value<String>? groupUuid,
     Value<String>? name,
     Value<DateTime>? createdOn,
     Value<int>? dueDay,
@@ -369,6 +741,7 @@ class TenantsCompanion extends UpdateCompanion<TenantRow> {
   }) {
     return TenantsCompanion(
       uuid: uuid ?? this.uuid,
+      groupUuid: groupUuid ?? this.groupUuid,
       name: name ?? this.name,
       createdOn: createdOn ?? this.createdOn,
       dueDay: dueDay ?? this.dueDay,
@@ -383,6 +756,9 @@ class TenantsCompanion extends UpdateCompanion<TenantRow> {
     final map = <String, Expression>{};
     if (uuid.present) {
       map['uuid'] = Variable<String>(uuid.value);
+    }
+    if (groupUuid.present) {
+      map['group_uuid'] = Variable<String>(groupUuid.value);
     }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
@@ -409,6 +785,7 @@ class TenantsCompanion extends UpdateCompanion<TenantRow> {
   String toString() {
     return (StringBuffer('TenantsCompanion(')
           ..write('uuid: $uuid, ')
+          ..write('groupUuid: $groupUuid, ')
           ..write('name: $name, ')
           ..write('createdOn: $createdOn, ')
           ..write('dueDay: $dueDay, ')
@@ -1461,6 +1838,7 @@ class PaymentsCompanion extends UpdateCompanion<PaymentRow> {
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
+  late final $TenantGroupsTable tenantGroups = $TenantGroupsTable(this);
   late final $TenantsTable tenants = $TenantsTable(this);
   late final $RentHistoriesTable rentHistories = $RentHistoriesTable(this);
   late final $RentRecordsTable rentRecords = $RentRecordsTable(this);
@@ -1470,6 +1848,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
+    tenantGroups,
     tenants,
     rentHistories,
     rentRecords,
@@ -1477,9 +1856,297 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   ];
 }
 
+typedef $$TenantGroupsTableCreateCompanionBuilder =
+    TenantGroupsCompanion Function({
+      required String uuid,
+      required String name,
+      required DateTime createdOn,
+      Value<String?> deletedMonth,
+      Value<int> rowid,
+    });
+typedef $$TenantGroupsTableUpdateCompanionBuilder =
+    TenantGroupsCompanion Function({
+      Value<String> uuid,
+      Value<String> name,
+      Value<DateTime> createdOn,
+      Value<String?> deletedMonth,
+      Value<int> rowid,
+    });
+
+final class $$TenantGroupsTableReferences
+    extends BaseReferences<_$AppDatabase, $TenantGroupsTable, TenantGroupRow> {
+  $$TenantGroupsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$TenantsTable, List<TenantRow>> _tenantsRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.tenants,
+    aliasName: $_aliasNameGenerator(db.tenantGroups.uuid, db.tenants.groupUuid),
+  );
+
+  $$TenantsTableProcessedTableManager get tenantsRefs {
+    final manager = $$TenantsTableTableManager(
+      $_db,
+      $_db.tenants,
+    ).filter((f) => f.groupUuid.uuid.sqlEquals($_itemColumn<String>('uuid')!));
+
+    final cache = $_typedResult.readTableOrNull(_tenantsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$TenantGroupsTableFilterComposer
+    extends Composer<_$AppDatabase, $TenantGroupsTable> {
+  $$TenantGroupsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get uuid => $composableBuilder(
+    column: $table.uuid,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdOn => $composableBuilder(
+    column: $table.createdOn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get deletedMonth => $composableBuilder(
+    column: $table.deletedMonth,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> tenantsRefs(
+    Expression<bool> Function($$TenantsTableFilterComposer f) f,
+  ) {
+    final $$TenantsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.uuid,
+      referencedTable: $db.tenants,
+      getReferencedColumn: (t) => t.groupUuid,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TenantsTableFilterComposer(
+            $db: $db,
+            $table: $db.tenants,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$TenantGroupsTableOrderingComposer
+    extends Composer<_$AppDatabase, $TenantGroupsTable> {
+  $$TenantGroupsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get uuid => $composableBuilder(
+    column: $table.uuid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdOn => $composableBuilder(
+    column: $table.createdOn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get deletedMonth => $composableBuilder(
+    column: $table.deletedMonth,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$TenantGroupsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $TenantGroupsTable> {
+  $$TenantGroupsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get uuid =>
+      $composableBuilder(column: $table.uuid, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdOn =>
+      $composableBuilder(column: $table.createdOn, builder: (column) => column);
+
+  GeneratedColumn<String> get deletedMonth => $composableBuilder(
+    column: $table.deletedMonth,
+    builder: (column) => column,
+  );
+
+  Expression<T> tenantsRefs<T extends Object>(
+    Expression<T> Function($$TenantsTableAnnotationComposer a) f,
+  ) {
+    final $$TenantsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.uuid,
+      referencedTable: $db.tenants,
+      getReferencedColumn: (t) => t.groupUuid,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TenantsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.tenants,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$TenantGroupsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $TenantGroupsTable,
+          TenantGroupRow,
+          $$TenantGroupsTableFilterComposer,
+          $$TenantGroupsTableOrderingComposer,
+          $$TenantGroupsTableAnnotationComposer,
+          $$TenantGroupsTableCreateCompanionBuilder,
+          $$TenantGroupsTableUpdateCompanionBuilder,
+          (TenantGroupRow, $$TenantGroupsTableReferences),
+          TenantGroupRow,
+          PrefetchHooks Function({bool tenantsRefs})
+        > {
+  $$TenantGroupsTableTableManager(_$AppDatabase db, $TenantGroupsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$TenantGroupsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$TenantGroupsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$TenantGroupsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> uuid = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<DateTime> createdOn = const Value.absent(),
+                Value<String?> deletedMonth = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => TenantGroupsCompanion(
+                uuid: uuid,
+                name: name,
+                createdOn: createdOn,
+                deletedMonth: deletedMonth,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String uuid,
+                required String name,
+                required DateTime createdOn,
+                Value<String?> deletedMonth = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => TenantGroupsCompanion.insert(
+                uuid: uuid,
+                name: name,
+                createdOn: createdOn,
+                deletedMonth: deletedMonth,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$TenantGroupsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({tenantsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (tenantsRefs) db.tenants],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (tenantsRefs)
+                    await $_getPrefetchedData<
+                      TenantGroupRow,
+                      $TenantGroupsTable,
+                      TenantRow
+                    >(
+                      currentTable: table,
+                      referencedTable: $$TenantGroupsTableReferences
+                          ._tenantsRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$TenantGroupsTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).tenantsRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where(
+                            (e) => e.groupUuid == item.uuid,
+                          ),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$TenantGroupsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $TenantGroupsTable,
+      TenantGroupRow,
+      $$TenantGroupsTableFilterComposer,
+      $$TenantGroupsTableOrderingComposer,
+      $$TenantGroupsTableAnnotationComposer,
+      $$TenantGroupsTableCreateCompanionBuilder,
+      $$TenantGroupsTableUpdateCompanionBuilder,
+      (TenantGroupRow, $$TenantGroupsTableReferences),
+      TenantGroupRow,
+      PrefetchHooks Function({bool tenantsRefs})
+    >;
 typedef $$TenantsTableCreateCompanionBuilder =
     TenantsCompanion Function({
       required String uuid,
+      Value<String> groupUuid,
       required String name,
       required DateTime createdOn,
       Value<int> dueDay,
@@ -1490,6 +2157,7 @@ typedef $$TenantsTableCreateCompanionBuilder =
 typedef $$TenantsTableUpdateCompanionBuilder =
     TenantsCompanion Function({
       Value<String> uuid,
+      Value<String> groupUuid,
       Value<String> name,
       Value<DateTime> createdOn,
       Value<int> dueDay,
@@ -1501,6 +2169,25 @@ typedef $$TenantsTableUpdateCompanionBuilder =
 final class $$TenantsTableReferences
     extends BaseReferences<_$AppDatabase, $TenantsTable, TenantRow> {
   $$TenantsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $TenantGroupsTable _groupUuidTable(_$AppDatabase db) =>
+      db.tenantGroups.createAlias(
+        $_aliasNameGenerator(db.tenants.groupUuid, db.tenantGroups.uuid),
+      );
+
+  $$TenantGroupsTableProcessedTableManager get groupUuid {
+    final $_column = $_itemColumn<String>('group_uuid')!;
+
+    final manager = $$TenantGroupsTableTableManager(
+      $_db,
+      $_db.tenantGroups,
+    ).filter((f) => f.uuid.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_groupUuidTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
 
   static MultiTypedResultKey<$RentHistoriesTable, List<RentHistoryRow>>
   _rentHistoriesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
@@ -1580,6 +2267,29 @@ class $$TenantsTableFilterComposer
     column: $table.deletedMonth,
     builder: (column) => ColumnFilters(column),
   );
+
+  $$TenantGroupsTableFilterComposer get groupUuid {
+    final $$TenantGroupsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.groupUuid,
+      referencedTable: $db.tenantGroups,
+      getReferencedColumn: (t) => t.uuid,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TenantGroupsTableFilterComposer(
+            $db: $db,
+            $table: $db.tenantGroups,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 
   Expression<bool> rentHistoriesRefs(
     Expression<bool> Function($$RentHistoriesTableFilterComposer f) f,
@@ -1670,6 +2380,29 @@ class $$TenantsTableOrderingComposer
     column: $table.deletedMonth,
     builder: (column) => ColumnOrderings(column),
   );
+
+  $$TenantGroupsTableOrderingComposer get groupUuid {
+    final $$TenantGroupsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.groupUuid,
+      referencedTable: $db.tenantGroups,
+      getReferencedColumn: (t) => t.uuid,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TenantGroupsTableOrderingComposer(
+            $db: $db,
+            $table: $db.tenantGroups,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$TenantsTableAnnotationComposer
@@ -1702,6 +2435,29 @@ class $$TenantsTableAnnotationComposer
     column: $table.deletedMonth,
     builder: (column) => column,
   );
+
+  $$TenantGroupsTableAnnotationComposer get groupUuid {
+    final $$TenantGroupsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.groupUuid,
+      referencedTable: $db.tenantGroups,
+      getReferencedColumn: (t) => t.uuid,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TenantGroupsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.tenantGroups,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 
   Expression<T> rentHistoriesRefs<T extends Object>(
     Expression<T> Function($$RentHistoriesTableAnnotationComposer a) f,
@@ -1767,7 +2523,11 @@ class $$TenantsTableTableManager
           $$TenantsTableUpdateCompanionBuilder,
           (TenantRow, $$TenantsTableReferences),
           TenantRow,
-          PrefetchHooks Function({bool rentHistoriesRefs, bool rentRecordsRefs})
+          PrefetchHooks Function({
+            bool groupUuid,
+            bool rentHistoriesRefs,
+            bool rentRecordsRefs,
+          })
         > {
   $$TenantsTableTableManager(_$AppDatabase db, $TenantsTable table)
     : super(
@@ -1783,6 +2543,7 @@ class $$TenantsTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> uuid = const Value.absent(),
+                Value<String> groupUuid = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<DateTime> createdOn = const Value.absent(),
                 Value<int> dueDay = const Value.absent(),
@@ -1791,6 +2552,7 @@ class $$TenantsTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => TenantsCompanion(
                 uuid: uuid,
+                groupUuid: groupUuid,
                 name: name,
                 createdOn: createdOn,
                 dueDay: dueDay,
@@ -1801,6 +2563,7 @@ class $$TenantsTableTableManager
           createCompanionCallback:
               ({
                 required String uuid,
+                Value<String> groupUuid = const Value.absent(),
                 required String name,
                 required DateTime createdOn,
                 Value<int> dueDay = const Value.absent(),
@@ -1809,6 +2572,7 @@ class $$TenantsTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => TenantsCompanion.insert(
                 uuid: uuid,
+                groupUuid: groupUuid,
                 name: name,
                 createdOn: createdOn,
                 dueDay: dueDay,
@@ -1825,14 +2589,49 @@ class $$TenantsTableTableManager
               )
               .toList(),
           prefetchHooksCallback:
-              ({rentHistoriesRefs = false, rentRecordsRefs = false}) {
+              ({
+                groupUuid = false,
+                rentHistoriesRefs = false,
+                rentRecordsRefs = false,
+              }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
                     if (rentHistoriesRefs) db.rentHistories,
                     if (rentRecordsRefs) db.rentRecords,
                   ],
-                  addJoins: null,
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (groupUuid) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.groupUuid,
+                                    referencedTable: $$TenantsTableReferences
+                                        ._groupUuidTable(db),
+                                    referencedColumn: $$TenantsTableReferences
+                                        ._groupUuidTable(db)
+                                        .uuid,
+                                  )
+                                  as T;
+                        }
+
+                        return state;
+                      },
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (rentHistoriesRefs)
@@ -1897,7 +2696,11 @@ typedef $$TenantsTableProcessedTableManager =
       $$TenantsTableUpdateCompanionBuilder,
       (TenantRow, $$TenantsTableReferences),
       TenantRow,
-      PrefetchHooks Function({bool rentHistoriesRefs, bool rentRecordsRefs})
+      PrefetchHooks Function({
+        bool groupUuid,
+        bool rentHistoriesRefs,
+        bool rentRecordsRefs,
+      })
     >;
 typedef $$RentHistoriesTableCreateCompanionBuilder =
     RentHistoriesCompanion Function({
@@ -2922,6 +3725,8 @@ typedef $$PaymentsTableProcessedTableManager =
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
+  $$TenantGroupsTableTableManager get tenantGroups =>
+      $$TenantGroupsTableTableManager(_db, _db.tenantGroups);
   $$TenantsTableTableManager get tenants =>
       $$TenantsTableTableManager(_db, _db.tenants);
   $$RentHistoriesTableTableManager get rentHistories =>

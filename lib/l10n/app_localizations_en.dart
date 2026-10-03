@@ -138,6 +138,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errTenantDeleted => 'This tenant has been removed.';
 
   @override
+  String get errGroupName => 'Please type a group name.';
+
+  @override
+  String get errGroupNameTaken => 'A group with this name already exists.';
+
+  @override
+  String get errGroupNotFound => 'This group could not be found.';
+
+  @override
+  String get errGroupDeleted => 'This group has been deleted.';
+
+  @override
+  String get errGroupLocked =>
+      'The Uncategorized group cannot be changed or deleted.';
+
+  @override
+  String get errGroupNotEmpty =>
+      'This group still has tenants. Move them to another group first.';
+
+  @override
   String get errLanguage => 'This language is not available.';
 
   @override
@@ -303,6 +323,133 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get uncategorized => 'Uncategorized';
+
+  @override
+  String groupsCount(Object count) {
+    return 'Groups ($count)';
+  }
+
+  @override
+  String get noGroups =>
+      'No groups yet. Add a group, or add a tenant and it will be kept under Uncategorized.';
+
+  @override
+  String groupTenantsCount(Object count) {
+    return '$count tenants';
+  }
+
+  @override
+  String get groupOneTenant => '1 tenant';
+
+  @override
+  String get groupNoTenants => 'No tenants yet';
+
+  @override
+  String groupToReceive(Object amount) {
+    return 'To receive: ₹$amount';
+  }
+
+  @override
+  String get noTenantsInGroup => 'No tenants in this group yet.';
+
+  @override
+  String get defaultGroupNote => 'Tenants without a group are kept here.';
+
+  @override
+  String get addGroupBtn => '+ Add a group';
+
+  @override
+  String get addGroupTitle => 'Add a group';
+
+  @override
+  String get fGroupName => 'Group name';
+
+  @override
+  String get fGroupNameHint => 'For example: Block A or Ground floor.';
+
+  @override
+  String groupAdded(Object name) {
+    return '$name group added';
+  }
+
+  @override
+  String get renameGroupTitle => 'Rename group';
+
+  @override
+  String get btnRenameGroup => 'Rename group';
+
+  @override
+  String groupRenamed(Object name) {
+    return 'Group renamed to $name';
+  }
+
+  @override
+  String get btnDeleteGroup => 'Delete this group';
+
+  @override
+  String delGroupTitle(Object name) {
+    return 'Delete $name?';
+  }
+
+  @override
+  String get delGroupBody => 'This group has no tenants. It will be removed.';
+
+  @override
+  String get delGroupNotEmpty =>
+      'This group still has tenants. Move them to another group first, then delete it.';
+
+  @override
+  String get delGroupYes => 'Yes, delete';
+
+  @override
+  String get delGroupNo => 'No, keep';
+
+  @override
+  String groupDeleted(Object name) {
+    return '$name group deleted';
+  }
+
+  @override
+  String get fGroup => 'Group';
+
+  @override
+  String get fGroupHint => 'Choose where this tenant should be listed.';
+
+  @override
+  String inGroup(Object name) {
+    return 'Group: $name';
+  }
+
+  @override
+  String get btnMoveGroup => 'Move to another group';
+
+  @override
+  String moveTitle(Object name) {
+    return 'Move $name';
+  }
+
+  @override
+  String get moveBody => 'Choose the group for this tenant.';
+
+  @override
+  String movedTo(Object name, Object group) {
+    return '$name moved to $group';
+  }
+
+  @override
+  String get helpGroup =>
+      'These are the tenants in this group. Tap a name for details. You can also rename or delete the group here.';
+
+  @override
+  String get helpAddGroup =>
+      'Type a name for the group and press Save. You can change the name later.';
+
+  @override
+  String get helpRenameGroup =>
+      'Type the new name and press Save. Tenants stay in the group.';
+
+  @override
   String get setTitle => 'Settings';
 
   @override
@@ -366,7 +513,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get helpHome =>
-      'Tap a tenant\'s name to see details or to write down money received. The coloured tags show who has paid.';
+      'Tap a group to see its tenants. The coloured tag on a group shows its most urgent tenant. Open a tenant to write down money received.';
 
   @override
   String get helpAdd =>

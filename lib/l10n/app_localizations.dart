@@ -332,6 +332,42 @@ abstract class AppLocalizations {
   /// **'This tenant has been removed.'**
   String get errTenantDeleted;
 
+  /// No description provided for @errGroupName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please type a group name.'**
+  String get errGroupName;
+
+  /// No description provided for @errGroupNameTaken.
+  ///
+  /// In en, this message translates to:
+  /// **'A group with this name already exists.'**
+  String get errGroupNameTaken;
+
+  /// No description provided for @errGroupNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'This group could not be found.'**
+  String get errGroupNotFound;
+
+  /// No description provided for @errGroupDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'This group has been deleted.'**
+  String get errGroupDeleted;
+
+  /// No description provided for @errGroupLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'The Uncategorized group cannot be changed or deleted.'**
+  String get errGroupLocked;
+
+  /// No description provided for @errGroupNotEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'This group still has tenants. Move them to another group first.'**
+  String get errGroupNotEmpty;
+
   /// No description provided for @errLanguage.
   ///
   /// In en, this message translates to:
@@ -584,6 +620,210 @@ abstract class AppLocalizations {
   /// **'{name} removed'**
   String removed(Object name);
 
+  /// No description provided for @uncategorized.
+  ///
+  /// In en, this message translates to:
+  /// **'Uncategorized'**
+  String get uncategorized;
+
+  /// No description provided for @groupsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Groups ({count})'**
+  String groupsCount(Object count);
+
+  /// No description provided for @noGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'No groups yet. Add a group, or add a tenant and it will be kept under Uncategorized.'**
+  String get noGroups;
+
+  /// No description provided for @groupTenantsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} tenants'**
+  String groupTenantsCount(Object count);
+
+  /// No description provided for @groupOneTenant.
+  ///
+  /// In en, this message translates to:
+  /// **'1 tenant'**
+  String get groupOneTenant;
+
+  /// No description provided for @groupNoTenants.
+  ///
+  /// In en, this message translates to:
+  /// **'No tenants yet'**
+  String get groupNoTenants;
+
+  /// No description provided for @groupToReceive.
+  ///
+  /// In en, this message translates to:
+  /// **'To receive: ₹{amount}'**
+  String groupToReceive(Object amount);
+
+  /// No description provided for @noTenantsInGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'No tenants in this group yet.'**
+  String get noTenantsInGroup;
+
+  /// No description provided for @defaultGroupNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Tenants without a group are kept here.'**
+  String get defaultGroupNote;
+
+  /// No description provided for @addGroupBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'+ Add a group'**
+  String get addGroupBtn;
+
+  /// No description provided for @addGroupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a group'**
+  String get addGroupTitle;
+
+  /// No description provided for @fGroupName.
+  ///
+  /// In en, this message translates to:
+  /// **'Group name'**
+  String get fGroupName;
+
+  /// No description provided for @fGroupNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'For example: Block A or Ground floor.'**
+  String get fGroupNameHint;
+
+  /// No description provided for @groupAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} group added'**
+  String groupAdded(Object name);
+
+  /// No description provided for @renameGroupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename group'**
+  String get renameGroupTitle;
+
+  /// No description provided for @btnRenameGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename group'**
+  String get btnRenameGroup;
+
+  /// No description provided for @groupRenamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Group renamed to {name}'**
+  String groupRenamed(Object name);
+
+  /// No description provided for @btnDeleteGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this group'**
+  String get btnDeleteGroup;
+
+  /// No description provided for @delGroupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {name}?'**
+  String delGroupTitle(Object name);
+
+  /// No description provided for @delGroupBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This group has no tenants. It will be removed.'**
+  String get delGroupBody;
+
+  /// No description provided for @delGroupNotEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'This group still has tenants. Move them to another group first, then delete it.'**
+  String get delGroupNotEmpty;
+
+  /// No description provided for @delGroupYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, delete'**
+  String get delGroupYes;
+
+  /// No description provided for @delGroupNo.
+  ///
+  /// In en, this message translates to:
+  /// **'No, keep'**
+  String get delGroupNo;
+
+  /// No description provided for @groupDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} group deleted'**
+  String groupDeleted(Object name);
+
+  /// No description provided for @fGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Group'**
+  String get fGroup;
+
+  /// No description provided for @fGroupHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose where this tenant should be listed.'**
+  String get fGroupHint;
+
+  /// No description provided for @inGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Group: {name}'**
+  String inGroup(Object name);
+
+  /// No description provided for @btnMoveGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to another group'**
+  String get btnMoveGroup;
+
+  /// No description provided for @moveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Move {name}'**
+  String moveTitle(Object name);
+
+  /// No description provided for @moveBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the group for this tenant.'**
+  String get moveBody;
+
+  /// No description provided for @movedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} moved to {group}'**
+  String movedTo(Object name, Object group);
+
+  /// No description provided for @helpGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'These are the tenants in this group. Tap a name for details. You can also rename or delete the group here.'**
+  String get helpGroup;
+
+  /// No description provided for @helpAddGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Type a name for the group and press Save. You can change the name later.'**
+  String get helpAddGroup;
+
+  /// No description provided for @helpRenameGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Type the new name and press Save. Tenants stay in the group.'**
+  String get helpRenameGroup;
+
   /// No description provided for @setTitle.
   ///
   /// In en, this message translates to:
@@ -701,7 +941,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpHome.
   ///
   /// In en, this message translates to:
-  /// **'Tap a tenant\'s name to see details or to write down money received. The coloured tags show who has paid.'**
+  /// **'Tap a group to see its tenants. The coloured tag on a group shows its most urgent tenant. Open a tenant to write down money received.'**
   String get helpHome;
 
   /// No description provided for @helpAdd.
