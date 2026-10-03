@@ -180,7 +180,7 @@ en: {
   help_settings:"Change the language here. Choose English or ಕನ್ನಡ.",
   help_archive:"Removed tenants are kept here for your records. You can only look.",
   groups:"Groups", grpCount:"{n} tenants", grpOne:"1 tenant", uncategorized:"Uncategorized", grpNoTenants:"No tenants yet",
-  grpToReceive:"To receive: ₹{a}", noGroups:"No groups yet. Add a group, or add a tenant and it will be kept under Uncategorized.",
+  grpToReceive:"To receive: ₹{a}", noGroups:"No groups yet. Add a group, then open it to add your tenants.",
   noTenantsInGroup:"No tenants in this group yet.", defaultGroupNote:"Tenants without a group are kept here.",
   addGroupBtn:"+ Add a group", addGroupTitle:"Add a group",
   f_gname:"Group name", f_gname_h:"For example: Block A or Ground floor.",
@@ -252,7 +252,7 @@ kn: {
   help_settings:"ಇಲ್ಲಿ ಭಾಷೆ ಬದಲಿಸಬಹುದು. English ಅಥವಾ ಕನ್ನಡ ಆಯ್ಕೆಮಾಡಿ.",
   help_archive:"ತೆಗೆದ ಬಾಡಿಗೆದಾರರು ನಿಮ್ಮ ದಾಖಲೆಗಾಗಿ ಇಲ್ಲಿ ಇರುತ್ತಾರೆ. ನೋಡಬಹುದು ಅಷ್ಟೇ.",
   groups:"ಗುಂಪುಗಳು", grpCount:"{n} ಬಾಡಿಗೆದಾರರು", grpOne:"1 ಬಾಡಿಗೆದಾರರು", uncategorized:"ವರ್ಗೀಕರಿಸದವರು", grpNoTenants:"ಇನ್ನೂ ಯಾರೂ ಇಲ್ಲ",
-  grpToReceive:"ಬರಬೇಕಾದದ್ದು: ₹{a}", noGroups:"ಇನ್ನೂ ಗುಂಪುಗಳಿಲ್ಲ. ಗುಂಪು ಸೇರಿಸಿ, ಅಥವಾ ಬಾಡಿಗೆದಾರರನ್ನು ಸೇರಿಸಿದರೆ ಅವರು 'ವರ್ಗೀಕರಿಸದವರು' ನಲ್ಲಿ ಇರುತ್ತಾರೆ.",
+  grpToReceive:"ಬರಬೇಕಾದದ್ದು: ₹{a}", noGroups:"ಇನ್ನೂ ಗುಂಪುಗಳಿಲ್ಲ. ಗುಂಪು ಸೇರಿಸಿ, ನಂತರ ಅದನ್ನು ತೆರೆದು ಬಾಡಿಗೆದಾರರನ್ನು ಸೇರಿಸಿ.",
   noTenantsInGroup:"ಈ ಗುಂಪಿನಲ್ಲಿ ಇನ್ನೂ ಬಾಡಿಗೆದಾರರು ಇಲ್ಲ.", defaultGroupNote:"ಗುಂಪು ಇಲ್ಲದ ಬಾಡಿಗೆದಾರರು ಇಲ್ಲಿ ಇರುತ್ತಾರೆ.",
   addGroupBtn:"+ ಗುಂಪು ಸೇರಿಸಿ", addGroupTitle:"ಗುಂಪು ಸೇರಿಸಿ",
   f_gname:"ಗುಂಪಿನ ಹೆಸರು", f_gname_h:"ಉದಾ: ಬ್ಲಾಕ್ ಎ ಅಥವಾ ನೆಲ ಮಹಡಿ.",
@@ -455,8 +455,7 @@ function screenHome(){
         <div class="sub">${x.rows.length===1 ? t("grpOne") : x.rows.length ? t("grpCount",{n:x.rows.length}) : t("grpNoTenants")}${x.rows.length ? " · " + t("grpToReceive",{a:num(x.due)}) : ""}</div>
         ${x.rows.some(r=>r.old>0) ? `<span class="olddue"> ${t("oldDues",{a:num(x.rows.reduce((s,r)=>s+r.old,0))})}</span>` : ""}
       </button>`).join("") : `<div class="empty">${t("noGroups")}</div>`}
-    <button class="btn" onclick="go('addGroup')">${t("addGroupBtn")}</button>
-    <button class="btn secondary" onclick="go('add')">${t("addTenantBtn")}</button>`;
+    <button class="btn" onclick="go('addGroup')">${t("addGroupBtn")}</button>`;
 }
 
 /* GROUP: the tenants of one group (this is the list Home used to show). */

@@ -122,7 +122,7 @@
   "uncategorized": "Uncategorized",
   "groupsCount": "Groups ({count})",
   "@groupsCount": {"placeholders": {"count": {}}},
-  "noGroups": "No groups yet. Add a group, or add a tenant and it will be kept under Uncategorized.",
+  "noGroups": "No groups yet. Add a group, then open it to add your tenants.",
   "groupTenantsCount": "{count} tenants",
   "@groupTenantsCount": {"placeholders": {"count": {}}},
   "groupOneTenant": "1 tenant",

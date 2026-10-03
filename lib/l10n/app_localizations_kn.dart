@@ -330,7 +330,7 @@ class AppLocalizationsKn extends AppLocalizations {
 
   @override
   String get noGroups =>
-      'ಇನ್ನೂ ಗುಂಪುಗಳಿಲ್ಲ. ಗುಂಪು ಸೇರಿಸಿ, ಅಥವಾ ಬಾಡಿಗೆದಾರರನ್ನು ಸೇರಿಸಿದರೆ ಅವರು \'ವರ್ಗೀಕರಿಸದವರು\' ನಲ್ಲಿ ಇರುತ್ತಾರೆ.';
+      'ಇನ್ನೂ ಗುಂಪುಗಳಿಲ್ಲ. ಗುಂಪು ಸೇರಿಸಿ, ನಂತರ ಅದನ್ನು ತೆರೆದು ಬಾಡಿಗೆದಾರರನ್ನು ಸೇರಿಸಿ.';
 
   @override
   String groupTenantsCount(Object count) {

@@ -635,7 +635,7 @@ abstract class AppLocalizations {
   /// No description provided for @noGroups.
   ///
   /// In en, this message translates to:
-  /// **'No groups yet. Add a group, or add a tenant and it will be kept under Uncategorized.'**
+  /// **'No groups yet. Add a group, then open it to add your tenants.'**
   String get noGroups;
 
   /// No description provided for @groupTenantsCount.

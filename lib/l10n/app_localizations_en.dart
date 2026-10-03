@@ -332,7 +332,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noGroups =>
-      'No groups yet. Add a group, or add a tenant and it will be kept under Uncategorized.';
+      'No groups yet. Add a group, then open it to add your tenants.';
 
   @override
   String groupTenantsCount(Object count) {

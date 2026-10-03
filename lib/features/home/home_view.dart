@@ -10,7 +10,6 @@ import 'package:tenant_tracker/core/widgets/status_chip.dart';
 import 'package:tenant_tracker/core/widgets/tip_banner.dart';
 import 'package:tenant_tracker/core/widgets/total_box.dart';
 import 'package:tenant_tracker/domain/use_cases/ui/watch_home/watch_home_return_model.dart';
-import 'package:tenant_tracker/features/add_tenant/add_tenant_view.dart';
 import 'package:tenant_tracker/features/group/group_name_dialog.dart';
 import 'package:tenant_tracker/features/group/group_view.dart';
 import 'package:tenant_tracker/features/group/group_view_model.dart';
@@ -155,12 +154,6 @@ class _HomeBody extends StatelessWidget {
           key: const Key('addGroupButton'),
           label: l.addGroupBtn,
           onPressed: onAddGroup,
-        ),
-        BigButton(
-          key: const Key('addTenantButton'),
-          label: l.addTenantBtn,
-          kind: BigButtonKind.secondary,
-          onPressed: () => AddTenantView.open(context),
         ),
       ],
     );
