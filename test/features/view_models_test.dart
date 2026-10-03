@@ -312,7 +312,7 @@ void main() {
           vm.state,
           (s) =>
               s is ViewStateLoaded<WatchTenantDetailReturnModel> &&
-              s.data.topMonth!.paid == 0,
+              s.data.topMonth?.paid == 0,
         ),
       );
       expect(data.topMonth!.balance, 6000);

@@ -9,6 +9,10 @@ abstract interface class TenantRepositoryInterface {
   /// Returns null inside `Ok` when no tenant has this uuid.
   Future<Result<TenantModel?>> getTenant(String uuid);
 
+  /// One tenant, active or archived. Emits again when the tenant row changes
+  /// (a rename or a delete); null inside `Ok` when no tenant has this uuid.
+  Stream<Result<TenantModel?>> watchTenant(String uuid);
+
   /// One-shot version of [watchActiveTenants], oldest first.
   Future<Result<List<TenantModel>>> getActiveTenants();
 

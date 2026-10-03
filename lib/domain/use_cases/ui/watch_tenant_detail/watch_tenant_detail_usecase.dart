@@ -20,8 +20,8 @@ import 'package:tenant_tracker/domain/use_cases/ui/watch_tenant_detail/watch_ten
 ///
 /// Presentation only: it never writes. Emits `Err(ValidationFailure(
 /// 'tenant_not_found'))` once if the uuid is unknown. Re-emits when the
-/// tenant's records, payments or rent history change; the tenant itself is
-/// read when the stream starts (deleting a tenant leaves this screen).
+/// tenant itself (a rename or a delete) or its records, payments or rent
+/// history change.
 class WatchTenantDetailUsecase {
   final TenantRepositoryInterface _tenants;
   final RentRecordRepositoryInterface _records;
@@ -52,12 +52,18 @@ class WatchTenantDetailUsecase {
         tenant = value;
     }
 
-    yield* combineLatest3(
+    final others = combineLatest3(
       _records.watchRecordsOfTenant(tenantUuid),
       _payments.watchPaymentsOfTenant(tenantUuid),
       _history.watchHistory(tenantUuid),
-      (records, payments, history) =>
-          _build(tenant, records, payments, history),
+      (records, payments, history) => (records, payments, history),
+    );
+    yield* combineLatest2(
+      _tenants.watchTenant(tenantUuid),
+      others,
+      // Tenants are never erased, so the latest row is only null if the first
+      // read above raced with it; fall back to the tenant read at the start.
+      (latest, o) => _build(latest ?? tenant, o.$1, o.$2, o.$3),
     );
   }
 
@@ -127,9 +133,7 @@ class WatchTenantDetailUsecase {
         : (currentPaidUp ? null : currentRecord);
     final listed = readOnly
         ? visible
-        : visible
-              .where((r) => r.month != current || currentPaidUp)
-              .toList();
+        : visible.where((r) => r.month != current || currentPaidUp).toList();
 
     final oldest = oldestOwingRecord(
       records: visible,

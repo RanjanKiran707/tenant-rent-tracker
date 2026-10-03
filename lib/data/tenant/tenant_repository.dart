@@ -42,6 +42,16 @@ class TenantRepository implements TenantRepositoryInterface {
   }
 
   @override
+  Stream<Result<TenantModel?>> watchTenant(String uuid) {
+    final query = _db.select(_db.tenants)..where((t) => t.uuid.equals(uuid));
+    return guardStream(
+      query.watchSingleOrNull().map(
+        (row) => row == null ? null : _fromRow(row),
+      ),
+    );
+  }
+
+  @override
   Future<Result<List<TenantModel>>> getActiveTenants() {
     return guard(() async {
       final rows =
