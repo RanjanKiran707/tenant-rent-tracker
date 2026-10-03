@@ -84,6 +84,8 @@
   .hist{padding:10px 0;border-bottom:1px solid var(--line)}
   .hist:last-child{border-bottom:0}
   .hist .m{font-weight:700}
+  .payline{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;background:none;border:0;border-radius:8px;padding:4px 0;font:inherit;font-size:16px;color:var(--muted);text-align:left;cursor:pointer}
+  .payline:active{background:#eef3ff}
 
   .choice{display:flex;align-items:center;gap:12px;width:100%;min-height:60px;padding:10px 14px;border:2px solid var(--line);border-radius:16px;background:#fff;font-size:20px;font-weight:700;font-family:inherit;cursor:pointer;margin-top:10px;color:var(--ink)}
   .choice.on{border-color:var(--primary);background:#eef3ff;color:var(--primary)}
@@ -175,7 +177,8 @@ en: {
   help_home:"Tap a tenant's name to see details or to write down money received. The coloured tags show who has paid.",
   help_add:"Fill the three boxes and press Save. You can change the rent later.",
   help_detail:"Here you see every month for this tenant. Press the blue button when money is received.",
-  help_pay:"Type how much money you received and press Save. If you made a mistake, press Undo right after.",
+  help_pay:"Type how much money you received and press Save. If you made a mistake, press Undo right after. To fix it later, tap the payment in the list.",
+  editPay_title:"Edit payment", paymentUpdated:"Payment updated", editPay_tip:"Edit this payment",
   help_rent:"The new rent starts from next month. This month's rent does not change.",
   help_settings:"Change the language here. Choose English or ಕನ್ನಡ.",
   help_archive:"Removed tenants are kept here for your records. You can only look.",
@@ -247,7 +250,8 @@ kn: {
   help_home:"ಬಾಡಿಗೆದಾರರ ಹೆಸರನ್ನು ಒತ್ತಿದರೆ ಅವರ ವಿವರ ಕಾಣುತ್ತದೆ, ಅಲ್ಲಿ ಬಂದ ಹಣ ಬರೆಯಬಹುದು. ಬಣ್ಣದ ಲೇಬಲ್‌ಗಳು ಯಾರು ಕೊಟ್ಟಿದ್ದಾರೆ ಎಂದು ತೋರಿಸುತ್ತವೆ.",
   help_add:"ಮೂರು ಬಾಕ್ಸ್‌ಗಳನ್ನು ತುಂಬಿ 'ಉಳಿಸಿ' ಒತ್ತಿ. ಬಾಡಿಗೆಯನ್ನು ನಂತರ ಬದಲಿಸಬಹುದು.",
   help_detail:"ಇಲ್ಲಿ ಈ ಬಾಡಿಗೆದಾರರ ಪ್ರತಿ ತಿಂಗಳ ವಿವರ ಇದೆ. ಹಣ ಬಂದಾಗ ನೀಲಿ ಬಟನ್ ಒತ್ತಿ.",
-  help_pay:"ಎಷ್ಟು ಹಣ ಬಂದಿದೆ ಎಂದು ಬರೆದು 'ಉಳಿಸಿ' ಒತ್ತಿ. ತಪ್ಪಾದರೆ ತಕ್ಷಣ 'ಹಿಂದಕ್ಕೆ' ಒತ್ತಿ.",
+  help_pay:"ಎಷ್ಟು ಹಣ ಬಂದಿದೆ ಎಂದು ಬರೆದು 'ಉಳಿಸಿ' ಒತ್ತಿ. ತಪ್ಪಾದರೆ ತಕ್ಷಣ 'ಹಿಂದಕ್ಕೆ' ಒತ್ತಿ. ನಂತರ ತಿದ್ದಲು ಪಟ್ಟಿಯಲ್ಲಿರುವ ಪಾವತಿಯನ್ನು ಒತ್ತಿ.",
+  editPay_title:"ಪಾವತಿ ಬದಲಿಸಿ", paymentUpdated:"ಪಾವತಿಯನ್ನು ಬದಲಿಸಲಾಗಿದೆ", editPay_tip:"ಈ ಪಾವತಿಯನ್ನು ಬದಲಿಸಿ",
   help_rent:"ಹೊಸ ಬಾಡಿಗೆ ಮುಂದಿನ ತಿಂಗಳಿಂದ ಶುರುವಾಗುತ್ತದೆ. ಈ ತಿಂಗಳ ಬಾಡಿಗೆ ಬದಲಾಗುವುದಿಲ್ಲ.",
   help_settings:"ಇಲ್ಲಿ ಭಾಷೆ ಬದಲಿಸಬಹುದು. English ಅಥವಾ ಕನ್ನಡ ಆಯ್ಕೆಮಾಡಿ.",
   help_archive:"ತೆಗೆದ ಬಾಡಿಗೆದಾರರು ನಿಮ್ಮ ದಾಖಲೆಗಾಗಿ ಇಲ್ಲಿ ಇರುತ್ತಾರೆ. ನೋಡಬಹುದು ಅಷ್ಟೇ.",
@@ -559,6 +563,24 @@ function saveTenant(){
   toast(t("tenantAdded",{n:name})); go("detail", tn.id);
 }
 
+/* ----- Edit a recorded payment (amount and date only; the month it is for stays) ----- */
+function payLine(tn, m, p, i, readonly){
+  const text = `₹${num(p.amount)} · ${dayMonth(p.date)}`;
+  return readonly ? `<div class="sub">${text}</div>`
+    : `<button class="payline" title="${esc(t("editPay_tip"))}" onclick="askEditPay(${tn.id},'${m.ym}',${i})"><span>${text}</span><span>✎</span></button>`;
+}
+function askEditPay(id, ym, i){
+  const p = monthOf(findTenant(id), ym).payments[i];
+  S.f = {amount:String(p.amount), date:p.date}; S.err = ""; S.dialog = {type:"editPay", id, ym, i}; render();
+}
+function saveEditPay(){
+  const d = S.dialog, a = parseInt(S.f.amount,10);
+  if (!a || a<=0){ S.err = "amount"; render(); return; }
+  const p = monthOf(findTenant(d.id), d.ym).payments[d.i];
+  p.amount = a; p.date = S.f.date || p.date;          // the month and the order on the same day are kept
+  S.dialog = null; S.err = ""; toast(t("paymentUpdated")); render();
+}
+
 function screenDetail(readonly=false){
   const tn = findTenant(S.param); if (!tn) return "";
   if (!readonly) ensureMonths(tn);
@@ -574,6 +596,7 @@ function screenDetail(readonly=false){
       <div class="sub">${t("sd_"+st)}</div>
       <div class="bar"><i style="width:${pct}%;background:var(--st-${st})"></i></div>
       <div class="row"><span>${t("received",{p:num(paid),r:num(cur.required)})}</span></div>
+      ${cur.payments.map((p,i)=>payLine(tn,cur,p,i,readonly)).join("")}
       ${remaining(cur)>0 ? `<div class="name" style="margin-top:6px">${t("balance",{a:num(remaining(cur))})}</div>` : ""}
       ${paid>cur.required ? `<div class="sub">${t("extraNote",{a:num(paid-cur.required)})}</div>` : ""}
       <div class="sub" style="margin-top:6px"> ${t("dueDate",{d:dayMonth(dueDateOf(cur.ym,tn.dueDay))})}</div>
@@ -582,7 +605,7 @@ function screenDetail(readonly=false){
   const histHtml = hist.length ? hist.map(m=>{ const st = stateOf(tn,m);
     return `<div class="hist"><div class="row"><span class="m">${monthName(m.ym)}</span>${chip(st)}</div>
       <div class="sub">${t("received",{p:num(paidAsOf(m,S.today)),r:num(m.required)})}</div>
-      ${m.payments.map(p=>`<div class="sub">₹${num(p.amount)} · ${dayMonth(p.date)}</div>`).join("")}
+      ${m.payments.map((p,i)=>payLine(tn,m,p,i,readonly)).join("")}
       ${!readonly && remaining(m)>0 ? `<div class="sub" style="font-weight:700;color:var(--ink)">${t("balance",{a:num(remaining(m))})}</div><button class="btn secondary small" style="margin-top:6px" onclick="payFor(${tn.id},'${m.ym}')">${t("btn_payMonth")}</button>` : ""}</div>`; }).join("")
     : `<div class="sub" style="margin-top:8px">${t("noHistory")}</div>`;
   return `${readonly ? `<div class="banner"> ${t("arch_removedOn",{m:monthName(tn.removedOn)})}</div>` : tip("help_detail")}
@@ -734,6 +757,17 @@ function dialogHtml(){
       ${owed>0 ? `<div class="info" style="background:#fdeec2;border-color:#f0d27a"> ${t("del_owed",{a:num(owed)})}</div>`:""}
       <button class="btn secondary" onclick="S.dialog=null;render()">${t("del_no")}</button>
       <button class="btn danger" onclick="doDelete(${tn.id})">${t("del_yes")}</button></div></div>`;
+  }
+  if (d.type==="editPay"){
+    return `<div class="overlay" onclick="S.dialog=null;render()"><div class="dialog" onclick="event.stopPropagation()">
+      <h3> ${t("editPay_title")}</h3>
+      <label class="f" for="e_amount">${t("pay_amount")}</label>
+      <input class="in" id="e_amount" type="text" inputmode="numeric" pattern="[0-9]*" value="${esc(S.f.amount)}" oninput="this.value=this.value.replace(/[^0-9]/g,'');S.f.amount=this.value">
+      ${S.err==="amount" ? `<div class="err">${t("err_amount")}</div>`:""}
+      <label class="f" for="e_date">${t("pay_date")}</label>
+      <input class="in" id="e_date" type="date" max="${S.today}" value="${S.f.date}" onchange="S.f.date=this.value||S.today">
+      <button class="btn" onclick="saveEditPay()">${t("save")}</button>
+      <button class="btn secondary" onclick="S.dialog=null;render()">${t("cancel")}</button></div></div>`;
   }
   if (d.type==="deleteGroup"){
     const g = findGroup(d.id), n = g ? tenantsOf(g.id).length : 0;

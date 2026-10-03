@@ -137,6 +137,9 @@ class AppLocalizationsKn extends AppLocalizations {
   String get errTenantDeleted => 'ಈ ಬಾಡಿಗೆದಾರರನ್ನು ತೆಗೆಯಲಾಗಿದೆ.';
 
   @override
+  String get errPaymentNotFound => 'ಈ ಪಾವತಿ ಸಿಗಲಿಲ್ಲ.';
+
+  @override
   String get errGroupName => 'ದಯವಿಟ್ಟು ಗುಂಪಿನ ಹೆಸರು ಬರೆಯಿರಿ.';
 
   @override
@@ -259,6 +262,15 @@ class AppLocalizationsKn extends AppLocalizations {
   String paymentSaved(Object amount) {
     return '₹$amount ಉಳಿಸಲಾಗಿದೆ';
   }
+
+  @override
+  String get editPaymentTitle => 'ಪಾವತಿ ಬದಲಿಸಿ';
+
+  @override
+  String get paymentUpdated => 'ಪಾವತಿಯನ್ನು ಬದಲಿಸಲಾಗಿದೆ';
+
+  @override
+  String get editPaymentTooltip => 'ಈ ಪಾವತಿಯನ್ನು ಬದಲಿಸಿ';
 
   @override
   String get rentTitle => 'ಬಾಡಿಗೆ ಬದಲಿಸಿ';

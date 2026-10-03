@@ -365,6 +365,70 @@ void main() {
       );
     });
 
+    test('getPayment reads one payment, or null when unknown', () async {
+      ok(await payments.addPayment(pay('p1', 'r1', 3000, '2026-01-05')));
+
+      final saved = ok(await payments.getPayment('p1'))!;
+      expect(saved.amount, 3000);
+      expect(saved.paidOn, '2026-01-05');
+      expect(ok(await payments.getPayment('nope')), isNull);
+    });
+
+    test('updatePayment changes only the amount and the date', () async {
+      ok(await payments.addPayment(pay('p1', 'r1', 3000, '2026-01-05')));
+      ok(await payments.addPayment(pay('p2', 'r1', 1000, '2026-01-06')));
+
+      ok(await payments.updatePayment('p1', amount: 3500, paidOn: '2026-01-09'));
+
+      final p1 = ok(await payments.getPayment('p1'))!;
+      expect(p1.amount, 3500);
+      expect(p1.paidOn, '2026-01-09');
+      expect(p1.rentRecordUuid, 'r1');
+      expect(p1.createdOn, DateTime.utc(2026, 1, 1));
+      // The other payment is untouched.
+      expect(ok(await payments.getPayment('p2'))!.amount, 1000);
+    });
+
+    test('updatePayment re-sorts the month by the new date', () async {
+      ok(await payments.addPayment(pay('p1', 'r1', 3000, '2026-01-05')));
+      ok(await payments.addPayment(pay('p2', 'r1', 2000, '2026-01-20')));
+
+      ok(await payments.updatePayment('p1', amount: 3000, paidOn: '2026-01-25'));
+
+      expect(
+        ok(await payments.getPaymentsOfRecord('r1')).map((p) => p.uuid),
+        ['p2', 'p1'],
+      );
+    });
+
+    test('updatePayment refuses an amount of zero (check constraint)', () async {
+      ok(await payments.addPayment(pay('p1', 'r1', 3000, '2026-01-05')));
+
+      final result = await payments.updatePayment(
+        'p1',
+        amount: 0,
+        paidOn: '2026-01-05',
+      );
+
+      expect(result, isA<Err<void>>());
+      expect(ok(await payments.getPayment('p1'))!.amount, 3000);
+    });
+
+    test('the payment list follows an update', () async {
+      ok(await payments.addPayment(pay('p1', 'r1', 3000, '2026-01-05')));
+      final seen = <int>[];
+      final sub = payments.watchPaymentsOfTenant('t1').listen(
+        (r) => seen.add(ok(r).fold(0, (sum, p) => sum + p.amount)),
+      );
+      await pumpEventQueue();
+
+      ok(await payments.updatePayment('p1', amount: 4000, paidOn: '2026-01-05'));
+      await pumpEventQueue();
+
+      expect(seen, [3000, 4000]);
+      await sub.cancel();
+    });
+
     test('payments of a record come back in paidOn order', () async {
       ok(await payments.addPayment(pay('p2', 'r1', 2000, '2026-01-20')));
       ok(await payments.addPayment(pay('p1', 'r1', 3000, '2026-01-05')));

@@ -12,6 +12,7 @@ import 'package:tenant_tracker/domain/use_cases/business/add_tenant/add_tenant_u
 import 'package:tenant_tracker/domain/use_cases/business/change_rent/change_rent_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/business/delete_group/delete_group_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/business/delete_tenant/delete_tenant_usecase.dart';
+import 'package:tenant_tracker/domain/use_cases/business/edit_payment/edit_payment_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/business/ensure_rent_records/ensure_rent_records_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/business/move_tenant_to_group/move_tenant_to_group_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/business/record_payment/record_payment_argument_model.dart';
@@ -20,6 +21,7 @@ import 'package:tenant_tracker/domain/use_cases/business/rename_group/rename_gro
 import 'package:tenant_tracker/domain/use_cases/business/rename_tenant/rename_tenant_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/business/settings/settings_usecases.dart';
 import 'package:tenant_tracker/domain/use_cases/business/undo_payment/undo_payment_usecase.dart';
+import 'package:tenant_tracker/domain/use_cases/ui/month_status/month_status.dart';
 
 import '../harness.dart';
 
@@ -754,6 +756,115 @@ void main() {
         );
       },
     );
+  });
+
+  group('EditPaymentUsecase', () {
+    late EditPaymentUsecase editPayment;
+    late String recordUuid;
+    late String paymentUuid;
+
+    // Ramesh rents from January, 5000 a month, due on the 10th. Today is
+    // 2026-03-15. He paid January in full on the 5th.
+    setUp(() async {
+      editPayment = EditPaymentUsecase(h.payments, h.clock);
+      final id = ok(await add(start: '2026-01', rent: 5000, dueDay: 10));
+      recordUuid = ok(await h.records.getRecords(id)).first.uuid;
+      paymentUuid = ok(
+        await recordPayment(
+          RecordPaymentArgumentModel(
+            rentRecordUuid: recordUuid,
+            amount: 5000,
+            paidOn: '2026-01-05',
+          ),
+        ),
+      );
+    });
+
+    test('changes the amount and the date, nothing else', () async {
+      final before = ok(await h.payments.getPayment(paymentUuid))!;
+
+      ok(await editPayment(paymentUuid, amount: 4000, paidOn: '2026-01-08'));
+
+      final after = ok(await h.payments.getPayment(paymentUuid))!;
+      expect(after.amount, 4000);
+      expect(after.paidOn, '2026-01-08');
+      expect(after.rentRecordUuid, before.rentRecordUuid);
+      expect(after.createdOn, before.createdOn);
+      expect(ok(await h.payments.getPaymentsOfRecord(recordUuid)), hasLength(1));
+    });
+
+    test('the month status follows the edit', () async {
+      Future<MonthStatus> statusNow() async => computeMonthStatus(
+        month: '2026-01',
+        requiredAmount: 5000,
+        dueDay: 10,
+        payments: ok(await h.payments.getPaymentsOfRecord(recordUuid)),
+        today: '2026-03-15',
+      );
+      // Fully paid on the 5th, before the due day: Completed.
+      expect(await statusNow(), MonthStatus.completed);
+
+      // Moved past the due day, still within the month: Late Completed.
+      ok(await editPayment(paymentUuid, amount: 5000, paidOn: '2026-01-20'));
+      expect(await statusNow(), MonthStatus.lateCompleted);
+
+      // Moved past the month end: Backlog Cleared.
+      ok(await editPayment(paymentUuid, amount: 5000, paidOn: '2026-02-03'));
+      expect(await statusNow(), MonthStatus.backlogCleared);
+
+      // Lowered: the month is no longer paid. Month ended: Backlog.
+      ok(await editPayment(paymentUuid, amount: 3000, paidOn: '2026-01-05'));
+      expect(await statusNow(), MonthStatus.backlog);
+    });
+
+    test('a zero or negative amount is rejected and nothing changes', () async {
+      expect(
+        errorOf(await editPayment(paymentUuid, amount: 0, paidOn: '2026-01-05')),
+        'amount_invalid',
+      );
+      expect(
+        errorOf(await editPayment(paymentUuid, amount: -5, paidOn: '2026-01-05')),
+        'amount_invalid',
+      );
+      expect(ok(await h.payments.getPayment(paymentUuid))!.amount, 5000);
+    });
+
+    test('an invalid date is rejected', () async {
+      expect(
+        errorOf(await editPayment(paymentUuid, amount: 1000, paidOn: '2026-02-30')),
+        'date_invalid',
+      );
+      expect(
+        errorOf(await editPayment(paymentUuid, amount: 1000, paidOn: 'soon')),
+        'date_invalid',
+      );
+      expect(ok(await h.payments.getPayment(paymentUuid))!.paidOn, '2026-01-05');
+    });
+
+    test('a date after today is rejected, today itself is allowed', () async {
+      expect(
+        errorOf(await editPayment(paymentUuid, amount: 1000, paidOn: '2026-03-16')),
+        'date_in_future',
+      );
+      ok(await editPayment(paymentUuid, amount: 1000, paidOn: '2026-03-15'));
+      expect(ok(await h.payments.getPayment(paymentUuid))!.paidOn, '2026-03-15');
+    });
+
+    test('an unknown payment is rejected', () async {
+      expect(
+        errorOf(await editPayment('nope', amount: 1000, paidOn: '2026-01-05')),
+        'payment_not_found',
+      );
+    });
+
+    test('an undone payment can no longer be edited', () async {
+      ok(await undoPayment(paymentUuid));
+
+      expect(
+        errorOf(await editPayment(paymentUuid, amount: 1000, paidOn: '2026-01-05')),
+        'payment_not_found',
+      );
+    });
   });
   group('settings use cases', () {
     late SettingsRepository settings;

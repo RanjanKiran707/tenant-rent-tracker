@@ -332,6 +332,12 @@ abstract class AppLocalizations {
   /// **'This tenant has been removed.'**
   String get errTenantDeleted;
 
+  /// No description provided for @errPaymentNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'This payment could not be found.'**
+  String get errPaymentNotFound;
+
   /// No description provided for @errGroupName.
   ///
   /// In en, this message translates to:
@@ -535,6 +541,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'₹{amount} saved'**
   String paymentSaved(Object amount);
+
+  /// No description provided for @editPaymentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit payment'**
+  String get editPaymentTitle;
+
+  /// No description provided for @paymentUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment updated'**
+  String get paymentUpdated;
+
+  /// No description provided for @editPaymentTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit this payment'**
+  String get editPaymentTooltip;
 
   /// No description provided for @rentTitle.
   ///
