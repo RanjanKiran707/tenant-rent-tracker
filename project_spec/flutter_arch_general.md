@@ -427,7 +427,7 @@ A plain pass-through (one repository call, no logic, one feature) may still have
 | Action with result | `Future<Result<XReturnModel>>` |
 | Live data | `Stream<Result<XReturnModel>>` |
 
-### 6.3.1 Business use cases and UI use cases (optional split)
+### 6.3.1 Business use cases and UI use cases
 
 When an app has many use cases, split `domain/use_cases/` into two folders:
 
