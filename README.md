@@ -4,9 +4,9 @@ A Flutter app for rental property owners to track monthly rent. Add tenants, rec
 
 ## Demo
 
-<video src="https://github.com/RanjanKiran707/tenant_tracker/raw/main/docs/demo.mp4" controls width="320"></video>
+<img src="docs/demo.gif" alt="Rent Book demo" width="300">
 
-[Watch the demo video](docs/demo.mp4): the Welcome guide, adding a group and a tenant, and recording a part and a full payment. The scripts that record it are in [scripts/demo](scripts/demo/README.md).
+[Watch the full-quality video](docs/demo.mp4): the Welcome guide, adding a group and a tenant, and recording a part and a full payment. The scripts that record it are in [scripts/demo](scripts/demo/README.md).
 
 ## Features
 
