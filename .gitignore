@@ -50,3 +50,6 @@ app.*.map.json
 # Dart tooling and IDE files
 .dart_tool/
 *.iml
+
+# Local-only architecture notes (not published)
+project_spec/flutter_arch_general.md
