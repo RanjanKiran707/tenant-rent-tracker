@@ -44,6 +44,6 @@ Groups arrive. With many tenants, Home now shows **groups** instead of one long 
 
 # Rent Book v1.0.0 (build 1)
 
-First release of Rent Book, a simple rent tracker for landlords. Android only.
+First release of Rent Book, a simple rent tracker for rental property owners. Android only.
 
 - **Tenants**, **monthly status**, **payments** (partial and overpayment), **rent changes** from next month, **archive**, English and Kannada, larger text and big buttons, fully offline.

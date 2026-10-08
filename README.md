@@ -1,6 +1,6 @@
 # Tenant Tracker (Rent Book)
 
-A Flutter app for landlords to track monthly rent. Add tenants, record payments, and see at a glance who has paid, who is late and how much is still to collect. Android only. All data stays on the device.
+A Flutter app for rental property owners to track monthly rent. Add tenants, record payments, and see at a glance who has paid, who is late and how much is still to collect. Android only. All data stays on the device.
 
 ## Demo
 
