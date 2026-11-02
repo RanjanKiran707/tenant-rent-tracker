@@ -53,3 +53,6 @@ app.*.map.json
 
 # Local-only architecture notes (not published)
 project_spec/flutter_arch_general.md
+
+# Firebase cache
+.firebase/
