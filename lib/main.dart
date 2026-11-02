@@ -5,8 +5,8 @@ import 'package:tenant_tracker/core/di/app_dependencies.dart';
 import 'package:tenant_tracker/core/utils/view_state.dart';
 import 'package:tenant_tracker/core/widgets/form_parts.dart';
 import 'package:tenant_tracker/core/widgets/obx_value.dart';
+import 'package:tenant_tracker/core/widgets/web_frame_wrapper.dart';
 import 'package:tenant_tracker/data/settings/app_settings.dart';
-import 'package:tenant_tracker/features/app/app_scope.dart';
 import 'package:tenant_tracker/features/app/app_view_model.dart';
 import 'package:tenant_tracker/features/main_shell/main_shell_view.dart';
 import 'package:tenant_tracker/features/welcome/welcome_view.dart';
@@ -32,13 +32,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    final deps = AppDependencies.instance;
-    app = AppViewModel(
-      loadSettings: deps.loadSettings,
-      setLanguage: deps.setLanguage,
-      setShowTips: deps.setShowTips,
-      markWelcomeSeen: deps.markWelcomeSeen,
-    );
+    app = AppDependencies.instance.appViewModel;
     app.load();
   }
 
@@ -63,7 +57,7 @@ class _MyAppState extends State<MyApp> {
           GlobalCupertinoLocalizations.delegate,
         ],
         supportedLocales: AppLocalizations.supportedLocales,
-        // Above the Navigator, so every pushed screen can reach the settings.
+        // Above the Navigator.
         builder: (context, child) => MediaQuery(
           data: MediaQuery.of(
             context,
@@ -72,7 +66,7 @@ class _MyAppState extends State<MyApp> {
           child: GestureDetector(
             behavior: HitTestBehavior.translucent,
             onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-            child: AppScope(app: app, child: child!),
+            child: WebFrameWrapper(child: child!),
           ),
         ),
         home: _Root(app: app),

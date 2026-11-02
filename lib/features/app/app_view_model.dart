@@ -5,7 +5,8 @@ import 'package:tenant_tracker/data/settings/app_settings.dart';
 import 'package:tenant_tracker/domain/use_cases/business/settings/settings_usecases.dart';
 
 /// App-wide settings: language, tips and the welcome flag. Screens read
-/// [state] through `AppScope` and change settings through the methods here.
+/// [state] through `AppDependencies.instance.appViewModel` and change
+/// settings through the methods here.
 class AppViewModel {
   final LoadSettingsUsecase _loadSettings;
   final SetLanguageUsecase _setLanguage;

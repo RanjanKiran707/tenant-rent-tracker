@@ -10,7 +10,6 @@ import 'package:tenant_tracker/core/widgets/form_parts.dart';
 import 'package:tenant_tracker/core/widgets/obx_value.dart';
 import 'package:tenant_tracker/core/widgets/tip_banner.dart';
 import 'package:tenant_tracker/data/settings/app_settings.dart';
-import 'package:tenant_tracker/features/app/app_scope.dart';
 import 'package:tenant_tracker/features/archived/archived_view.dart';
 import 'package:tenant_tracker/features/welcome/welcome_view.dart';
 import 'package:tenant_tracker/l10n/app_localizations.dart';
@@ -23,7 +22,7 @@ class SettingsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final app = AppScope.of(context);
+    final app = AppDependencies.instance.appViewModel;
     return Scaffold(
       appBar: AppBar(
         title: Text(l.setTitle),

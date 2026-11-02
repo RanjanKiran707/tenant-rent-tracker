@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:tenant_tracker/core/di/app_dependencies.dart';
 import 'package:tenant_tracker/core/utils/view_state.dart';
 import 'package:tenant_tracker/core/widgets/obx_value.dart';
 import 'package:tenant_tracker/data/settings/app_settings.dart';
-import 'package:tenant_tracker/features/app/app_scope.dart';
 
 /// The yellow hint at the top of a screen. Hidden when tips are switched off.
 class TipBanner extends StatelessWidget {
@@ -13,7 +13,7 @@ class TipBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ObxValue<ViewState<AppSettings>>(
-      listenable: AppScope.of(context).state,
+      listenable: AppDependencies.instance.appViewModel.state,
       builder: (state) {
         final show = switch (state) {
           ViewStateLoaded(data: final s) => s.showTips,

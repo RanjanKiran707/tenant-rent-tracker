@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:tenant_tracker/core/di/app_dependencies.dart';
 import 'package:tenant_tracker/core/widgets/big_button.dart';
 import 'package:tenant_tracker/core/widgets/obx_value.dart';
-import 'package:tenant_tracker/features/app/app_scope.dart';
 import 'package:tenant_tracker/features/welcome/welcome_view_model.dart';
 import 'package:tenant_tracker/l10n/app_localizations.dart';
 
@@ -38,7 +38,7 @@ class _WelcomeViewState extends State<WelcomeView> {
         automaticallyImplyLeading: false,
         actions: [
           TextButton(
-            onPressed: AppScope.of(context).toggleLanguage,
+            onPressed: AppDependencies.instance.appViewModel.toggleLanguage,
             child: Text(
               l.langToggle,
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),

@@ -10,7 +10,16 @@ part 'app_database.g.dart';
 )
 class AppDatabase extends _$AppDatabase {
   /// Opens the real on-device database.
-  AppDatabase() : super(driftDatabase(name: 'tenant_tracker'));
+  AppDatabase()
+      : super(
+          driftDatabase(
+            name: 'tenant_tracker',
+            web: DriftWebOptions(
+              sqlite3Wasm: Uri.parse('sqlite3.wasm'),
+              driftWorker: Uri.parse('drift_worker.js'),
+            ),
+          ),
+        );
 
   /// For tests: pass an in-memory executor.
   AppDatabase.forTesting(super.executor);

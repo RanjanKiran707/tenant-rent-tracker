@@ -29,6 +29,7 @@ import 'package:tenant_tracker/domain/use_cases/ui/watch_group/watch_group_useca
 import 'package:tenant_tracker/domain/use_cases/ui/watch_groups/watch_groups_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/ui/watch_home/watch_home_usecase.dart';
 import 'package:tenant_tracker/domain/use_cases/ui/watch_tenant_detail/watch_tenant_detail_usecase.dart';
+import 'package:tenant_tracker/features/app/app_view_model.dart';
 
 /// Everything global is built once, at startup, in one place.
 /// Nothing else creates repositories or use cases. Views and ViewModels get
@@ -36,6 +37,9 @@ import 'package:tenant_tracker/domain/use_cases/ui/watch_tenant_detail/watch_ten
 class AppDependencies {
   // Set once in main() before runApp. Tests can replace it.
   static late AppDependencies instance;
+
+  /// The app-wide view model managing settings, locale, and tips.
+  final AppViewModel appViewModel;
 
   // Business use cases: they write and validate.
   final AddTenantUsecase addTenant;
@@ -71,6 +75,7 @@ class AppDependencies {
   final LoadAddTenantFormUsecase loadAddTenantForm;
 
   AppDependencies._({
+    required this.appViewModel,
     required this.addTenant,
     required this.ensureRentRecords,
     required this.recordPayment,
@@ -137,7 +142,20 @@ class AppDependencies {
       appClock,
     );
 
+    final loadSettings = LoadSettingsUsecase(settings);
+    final setLanguage = SetLanguageUsecase(settings);
+    final setShowTips = SetShowTipsUsecase(settings);
+    final markWelcomeSeen = MarkWelcomeSeenUsecase(settings);
+
+    final appViewModel = AppViewModel(
+      loadSettings: loadSettings,
+      setLanguage: setLanguage,
+      setShowTips: setShowTips,
+      markWelcomeSeen: markWelcomeSeen,
+    );
+
     return AppDependencies._(
+      appViewModel: appViewModel,
       addTenant: AddTenantUsecase(tenants, groups, ensureRentRecords, appClock),
       ensureRentRecords: ensureRentRecords,
       recordPayment: RecordPaymentUsecase(payments, appClock),
@@ -150,10 +168,10 @@ class AppDependencies {
       renameGroup: RenameGroupUsecase(groups),
       deleteGroup: DeleteGroupUsecase(groups, tenants, appClock),
       moveTenantToGroup: MoveTenantToGroupUsecase(tenants, groups),
-      loadSettings: LoadSettingsUsecase(settings),
-      setLanguage: SetLanguageUsecase(settings),
-      setShowTips: SetShowTipsUsecase(settings),
-      markWelcomeSeen: MarkWelcomeSeenUsecase(settings),
+      loadSettings: loadSettings,
+      setLanguage: setLanguage,
+      setShowTips: setShowTips,
+      markWelcomeSeen: markWelcomeSeen,
       setSimulatedDate: SetSimulatedDateUsecase(settings, appClock),
       clock: appClock,
       watchHome: WatchHomeUsecase(groups, tenants, records, payments, appClock),
