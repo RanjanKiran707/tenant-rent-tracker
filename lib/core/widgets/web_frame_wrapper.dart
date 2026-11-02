@@ -1,10 +1,14 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 /// Wraps the application on web in an authentic mobile phone mockup,
 /// ensuring the interface always maintains mobile ergonomics.
 ///
-/// On wide displays (>= 1040px), a desktop showcase panel is shown alongside
-/// the phone mockup. On smaller displays, the phone mockup is centered.
+/// On mobile devices or narrow viewports (< 768px), the native mobile
+/// app UI is rendered directly at full width/height.
+/// On desktop displays:
+/// - Wide (>= 1040px): A desktop showcase panel is shown alongside the phone mockup.
+/// - Medium (768px - 1039px): The phone mockup is centered.
 class WebFrameWrapper extends StatelessWidget {
   final Widget child;
 
@@ -12,8 +16,21 @@ class WebFrameWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!kIsWeb) return child;
+
     return LayoutBuilder(
       builder: (context, constraints) {
+        // When viewed on a mobile device (Android/iOS browser) or mobile-sized screen,
+        // render the app directly without the surrounding mockup frame.
+        final bool isMobileDevice =
+            defaultTargetPlatform == TargetPlatform.android ||
+            defaultTargetPlatform == TargetPlatform.iOS;
+        final bool isMobileScreen = constraints.maxWidth < 768;
+
+        if (isMobileDevice || isMobileScreen) {
+          return child;
+        }
+
         // Calculate responsive phone frame dimensions to fit comfortably.
         final double phoneHeight =
             (constraints.maxHeight - 76).clamp(560.0, 860.0);
