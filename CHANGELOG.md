@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.1.0+3
+- Web support with responsive mobile container for desktop browsers and native edge-to-edge view on mobile screens.
+- Dependency injection migration for cross-platform data source and storage abstraction.
+- Firebase Hosting setup and deployment support.
+- Documentation and demo video updates.
+
 ## 2.0.0+2
 - Tenant groups, with the built-in Uncategorized group. Database schema 2; existing tenants are moved into Uncategorized on upgrade.
 - Edit a recorded payment (amount and date).

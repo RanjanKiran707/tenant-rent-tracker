@@ -1,3 +1,17 @@
+# Rent Book v2.1.0 (build 3)
+
+Web support, responsive layout, and Firebase Hosting support.
+
+## What's new
+
+- **Web Support**: Rent Book can now run on modern web browsers.
+  - Desktop browsers show a realistic responsive mobile phone mockup frame with dark backdrop.
+  - Mobile browsers and smaller screens render directly edge-to-edge as a native mobile app.
+- **Dependency Injection**: Architecture updated to support cross-platform repositories and services cleanly.
+- **Firebase Hosting**: Hosting configuration added for deployment.
+
+---
+
 # Rent Book v2.0.0 (build 2)
 
 Groups arrive. With many tenants, Home now shows **groups** instead of one long list, and a recorded payment can be corrected. Android only.
