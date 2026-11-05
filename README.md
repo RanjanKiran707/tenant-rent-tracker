@@ -3,7 +3,7 @@
 [![Flutter](https://img.shields.io/badge/Flutter-%2302569B.svg?style=for-the-badge&logo=Flutter&logoColor=white)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/Dart-%230175C2.svg?style=for-the-badge&logo=dart&logoColor=white)](https://dart.dev)
 [![Database](https://img.shields.io/badge/SQLite-Drift-blue?style=for-the-badge&logo=sqlite&logoColor=white)](https://drift.simonbinder.eu/)
-[![Tests](https://img.shields.io/badge/Tests-280%20Passing-brightgreen?style=for-the-badge&logo=checkmarx&logoColor=white)](test/)
+[![Tests](https://img.shields.io/badge/Tests-283%20Passing-brightgreen?style=for-the-badge&logo=checkmarx&logoColor=white)](test/)
 [![Localization](https://img.shields.io/badge/Languages-English%20%7C%20Kannada-orange?style=for-the-badge)](lib/l10n/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
@@ -36,9 +36,9 @@ https://github.com/user-attachments/assets/e23bc835-2caa-4c48-ae5b-e18634380105
 
 ---
 
-## 🏛️ Engineering & Test Rigor (280 Automated Tests)
+## 🏛️ Engineering & Test Rigor (283 Automated Tests)
 
-The business logic of `tenant-rent-tracker` is backed by **280 automated tests** ensuring financial accuracy and edge-case resilience:
+The business logic of `tenant-rent-tracker` is backed by **283 automated tests** ensuring financial accuracy and edge-case resilience:
 
 - **29 Core Utility Tests:** [`test/core/month_utils_test.dart`](test/core/month_utils_test.dart) validates leap years, 28/29/30/31-day month boundaries, century leap calculations, and rollover dates.
 - **49 Data & SQLite Tests:** Verifies Drift migrations, transactional payment consistency, and reactive database stream queries.
@@ -78,7 +78,7 @@ dart run build_runner build
 # Run application
 flutter run
 
-# Execute all 280 automated tests
+# Execute all 283 automated tests
 flutter test
 ```
 
