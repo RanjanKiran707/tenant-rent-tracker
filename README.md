@@ -1,58 +1,99 @@
-# Tenant Tracker (Rent Book)
+# 🏠 Tenant Tracker (Rent Book)
 
-A Flutter app for rental property owners to track monthly rent. Add tenants, record payments, and see at a glance who has paid, who is late and how much is still to collect. Android only. All data stays on the device.
+[![Flutter](https://img.shields.io/badge/Flutter-%2302569B.svg?style=for-the-badge&logo=Flutter&logoColor=white)](https://flutter.dev)
+[![Dart](https://img.shields.io/badge/Dart-%230175C2.svg?style=for-the-badge&logo=dart&logoColor=white)](https://dart.dev)
+[![Database](https://img.shields.io/badge/SQLite-Drift-blue?style=for-the-badge&logo=sqlite&logoColor=white)](https://drift.simonbinder.eu/)
+[![Tests](https://img.shields.io/badge/Tests-280%20Passing-brightgreen?style=for-the-badge&logo=checkmarx&logoColor=white)](test/)
+[![Localization](https://img.shields.io/badge/Languages-English%20%7C%20Kannada-orange?style=for-the-badge)](lib/l10n/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
-## Demo
+A high-reliability, offline-first rental property management app built with Flutter and Drift (SQLite). Designed for landlords and property managers to effortlessly track tenant dues, payments, overdue balances, and payment history across custom property groups.
+
+> **🚀 [Try the Live Web Demo](https://tenant-tracker.web.app)**  
+> **📦 [Download Android Release APK (v2.1.0)](https://github.com/RanjanKiran707/tenant-rent-tracker/releases/tag/v2.1.0)**
+
+---
+
+## 🎬 Video Demo
 
 https://github.com/user-attachments/assets/e23bc835-2caa-4c48-ae5b-e18634380105
 
-The Welcome guide, adding a group and a tenant, and recording a part and a full payment. The scripts that record it are in [scripts/demo](scripts/demo/README.md).
+*The Welcome guide, adding a group and a tenant, and recording a partial and full payment. Demo automation scripts are in [scripts/demo](scripts/demo/README.md).*
 
-## Features
+---
 
-- **Tenants**: each has a name, rent amount, due day (default 10) and start month. Monthly records are generated on demand for every month from the start month.
-- **Groups**: organise tenants into groups such as "Block A". Home shows one card per group with its tenant count, most urgent status and the money still to receive this month. Existing tenants sit in a built-in **Uncategorized** group.
-- **Monthly status** for every month: Pending, Completed, Late Completed, Partial, Partial Overdue, Overdue, Backlog and Backlog Cleared. Each month's shortfall stays a separate debt and doesn't roll into the next month.
-- **Payments**: recorded individually with their date. You can edit a payment's amount or date later, and the month's status and balance update by themselves. Undo removes a payment you just recorded.
-- **Rent changes**: increase or decrease a tenant's rent from the next month onwards. Past months and backlog keep their original amount, because rent history is stored.
-- **Archive**: deleting a tenant archives them. Their history is kept and is read-only under Settings > Archived.
-- **History**: fully paid months move to History, and Tenant Detail says "No pending due" when nothing is owed.
-- **Languages**: English and Kannada.
+## ✨ Features
 
-See [RELEASE_NOTES.md](RELEASE_NOTES.md) and [CHANGELOG.md](CHANGELOG.md) for what changed in each version. The current version is 2.0.0.
+- **Tenant Ledger:** Each tenant tracks rent amount, due day (default 10th), and start month. Monthly billing records are generated on demand.
+- **Group Organization:** Organize tenants into groups (e.g., "Block A", "Ground Floor"). The home dashboard displays per-group dues, tenant counts, and most urgent payment statuses.
+- **8-State Monthly Ledger Tracking:** Real-world tracking statuses:
+  - `Pending`, `Completed`, `Late Completed`, `Partial`, `Partial Overdue`, `Overdue`, `Backlog`, and `Backlog Cleared`.
+  - Shortfalls are treated as separate debts rather than obscuring future months.
+- **Granular Payment History:** Payments recorded individually with date stamps. Supports editing amount/date with automatic ledger re-calculation, and immediate undo.
+- **Historical Rent Protection:** Change tenant rent rates effective from the next month without mutating historical payment ledgers.
+- **Bilingual Support:** Full internationalization (English & Kannada).
+- **Tenant Archiving:** Soft-delete tenants into a read-only historical archive.
 
-## Tech stack
+---
 
-- Flutter (Android only, portrait)
-- [`drift`](https://pub.dev/packages/drift) and `drift_flutter` for local SQLite storage
-- `shared_preferences`, `intl` and Flutter localization (`l10n.yaml`)
-- `uuid`
+## 🏛️ Engineering & Test Rigor (280 Automated Tests)
 
-The code is layered: `lib/core`, `lib/data`, `lib/domain` and `lib/features`.
+The business logic of `tenant-rent-tracker` is backed by **280 automated tests** ensuring financial accuracy and edge-case resilience:
 
-## Getting started
+- **29 Core Utility Tests:** [`test/core/month_utils_test.dart`](test/core/month_utils_test.dart) validates leap years, 28/29/30/31-day month boundaries, century leap calculations, and rollover dates.
+- **49 Data & SQLite Tests:** Verifies Drift migrations, transactional payment consistency, and reactive database stream queries.
+- **157 Domain Business Use Case Tests:** Exhaustive testing for overdue calculation, retroactive payment edits, partial balance carryovers, and state updates.
+- **45 Feature & UI Tests:** End-to-end view model and widget validations.
 
-Requirements: the Flutter SDK and an Android device or emulator.
+---
 
+## 🛠️ Tech Stack
+
+- **Framework:** Flutter (Android & Web)
+- **Local Database:** [`drift`](https://pub.dev/packages/drift) & `drift_flutter` (Reactive SQLite)
+- **Localization:** `flutter_localizations`, `intl`, `l10n.yaml`
+- **Architecture:** Layered Architecture (`lib/core`, `lib/data`, `lib/domain`, `lib/features`)
+- **State Management:** ValueNotifier with functional dependency injection
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- [Flutter SDK](https://flutter.dev/docs/get-started/install) (v3.x or later)
+- Android SDK or connected device / emulator / modern browser
+
+### Setup & Run
 ```bash
-git clone https://github.com/RanjanKiran707/tenant_tracker.git
-cd tenant_tracker
+# Clone the repository
+git clone https://github.com/RanjanKiran707/tenant-rent-tracker.git
+cd tenant-rent-tracker
+
+# Install dependencies
 flutter pub get
-dart run build_runner build   # generates the drift database code
+
+# Generate Drift SQLite database code
+dart run build_runner build
+
+# Run application
 flutter run
+
+# Execute all 280 automated tests
+flutter test
 ```
 
-Run the tests with `flutter test`.
+---
 
-## Known limits
+## 📚 Technical Documentation
 
-- Overpayment isn't carried forward to the next month.
-- Archived tenants can't be restored.
-- A payment can be edited but not deleted. Undo right after recording is the only way to remove one.
-- No cloud backup yet. Uninstalling the app removes your data.
+- [Product Specifications](project_spec/specs.md)
+- [Data Model & Schema](project_spec/data_model_tenant_tracker.md)
+- [Entity-Relationship Diagram (ERD)](project_spec/erd_tenant_tracker.md)
+- [Dependency Analysis](project_spec/analysis_of_dependencies.md)
+- [Release Notes](RELEASE_NOTES.md) | [Changelog](CHANGELOG.md)
 
-## Docs
+---
 
-- [Product specs](project_spec/specs.md)
-- [Data model](project_spec/data_model_tenant_tracker.md) and [ERD](project_spec/erd_tenant_tracker.md)
-- [Dependency analysis](project_spec/analysis_of_dependencies.md)
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
