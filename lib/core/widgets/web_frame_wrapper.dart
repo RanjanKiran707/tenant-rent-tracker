@@ -1,17 +1,20 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:tenant_tracker/core/utils/url_launcher_helper.dart';
 
-const String apkReleaseUrl =
+/// Direct download URL for the Android APK asset from GitHub releases.
+const String apkDownloadUrl =
+    'https://github.com/RanjanKiran707/tenant-rent-tracker/releases/download/v2.1.0/rent-book-v2.1.0.apk';
+
+/// GitHub release page detailing release notes and assets.
+const String apkReleasePageUrl =
     'https://github.com/RanjanKiran707/tenant-rent-tracker/releases/tag/v2.1.0';
 
-Future<void> launchApkDownload() async {
-  final Uri uri = Uri.parse(apkReleaseUrl);
-  await launchUrl(
-    uri,
-    mode: LaunchMode.externalApplication,
-    webOnlyWindowName: '_blank',
-  );
+/// Kept for backwards compatibility. Points to the direct APK download.
+const String apkReleaseUrl = apkDownloadUrl;
+
+Future<void> launchApkDownload({String? url}) async {
+  await safeLaunchUrl(url ?? apkDownloadUrl);
 }
 
 /// Wraps the application on web in an authentic mobile phone mockup,
