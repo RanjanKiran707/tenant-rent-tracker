@@ -7,7 +7,7 @@
 [![Localization](https://img.shields.io/badge/Languages-English%20%7C%20Kannada-orange?style=for-the-badge)](lib/l10n/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
-A high-reliability, offline-first rental property management app built with Flutter and Drift (SQLite). Designed for landlords and property managers to effortlessly track tenant dues, payments, overdue balances, and payment history across custom property groups.
+A high-reliability, offline rental property management app built with Flutter and Drift (SQLite). Designed for landlords and property managers to effortlessly track tenant dues, payments, overdue balances, and payment history across custom property groups.
 
 > **🚀 [Try the Live Web Demo](https://tenant-tracker.web.app)**  
 > **📦 [Download Android Release APK (v2.1.0)](https://github.com/RanjanKiran707/tenant-rent-tracker/releases/tag/v2.1.0)**
